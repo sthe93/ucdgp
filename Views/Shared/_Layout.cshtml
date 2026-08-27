@@ -251,23 +251,36 @@
 					return;
 				}
 
+				function hideBanner() {
+					banner.classList.add('d-none');
+				}
+
 				fetch('/FundingCalls/GetSystemClosure', {
 					method: 'GET',
 					credentials: 'same-origin'
 				})
 					.then(function (response) {
 						if (!response.ok) {
-							return null;
+							throw new Error('GetSystemClosure returned HTTP ' + response.status);
 						}
 						return response.json();
 					})
-					.then(function (data) {
-						if (data && data.isClosureActive === true) {
+					.then(function (response) {
+						console.log('GetSystemClosure response:', response);
+						var data = response && response.data;
+						console.log('System closure data:', data);
+						console.log('System closure active:', data && data.isClosureActive);
+
+						if (response && response.status === 'success' && data && data.isClosureActive === true) {
 							banner.classList.remove('d-none');
+							return;
 						}
+
+						hideBanner();
 					})
-					.catch(function () {
-						// no-op
+					.catch(function (error) {
+						hideBanner();
+						console.error('Could not load system closure status for the UCDP banner:', error);
 					});
 			})();
 		</script>

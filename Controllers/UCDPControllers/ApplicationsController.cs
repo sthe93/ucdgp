@@ -39,6 +39,21 @@ namespace ResearchSuite.Controllers.UCDPControllers
         private string ApplicationId => HttpContext.Request.Query["ApplicationId"].ToString().ToLower();
         private readonly ILogger<ApplicationsController> _logger;
 
+        private async Task<bool> IsSystemClosureActiveAsync()
+        {
+            try
+            {
+                return (await _ucdpService.GetSystemClosure())?.IsClosureActive == true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not determine the UCDP system closure status.");
+                // Do not make an upstream lookup failure look like a closure. The UCDG API
+                // remains the authoritative enforcement point for direct API callers.
+                return false;
+            }
+        }
+
 
         public IActionResult Index()
         {
@@ -91,6 +106,12 @@ namespace ResearchSuite.Controllers.UCDPControllers
             // NEW APPLICATION / RESUME BY FUNDING CALL
             if (!fundingCallId.HasValue || fundingCallId.Value <= 0)
                 return BadRequest("Funding call or application is required.");
+
+            if (await IsSystemClosureActiveAsync())
+            {
+                TempData["ErrorMessage"] = "System closure is currently active. New applications cannot be submitted at this time.";
+                return RedirectToAction("Index", "UCDP");
+            }
 
             ViewBag.Mode = "edit";
             ViewBag.IsReadOnly = false;
@@ -1221,6 +1242,15 @@ namespace ResearchSuite.Controllers.UCDPControllers
                     {
                         status = "Not Saved",
                         message = "Current user session could not be found."
+                    });
+                }
+
+                if (details.Id <= 0 && await IsSystemClosureActiveAsync())
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new
+                    {
+                        status = "Not Saved",
+                        message = "System closure is currently active. New applications cannot be submitted at this time."
                     });
                 }
 
