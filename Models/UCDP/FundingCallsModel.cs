@@ -40,6 +40,7 @@ namespace ResearchSuite.Models.UCDP
         public PreviousFundingViewModel LastPreviousFunding { get; set; }
         public List<PreviousFundingViewModel> OutstandingPreviousFunding { get; set; } = new();
         public bool HasOutstandingProgressReport { get; set; }
+        public bool IsSystemClosureActive { get; set; }
         public int OutstandingPreviousReportFundingCallId { get; set; }
         public int OutstandingPreviousReportApplicationId { get; set; }
     }
