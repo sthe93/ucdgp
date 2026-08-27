@@ -1,0 +1,316 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ResearchSuite.Models.Oross.NewSubmissionViewModel
+
+@{
+	var basePath = HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+	var attrs = new Dictionary<string, object> { { "class", "form-check-input" }, { "required", "required" } };
+	if (Model.IsEditMode)
+	{
+		attrs["disabled"] = "disabled";
+	}
+
+}
+<input type="hidden" id="IsEditMode" name="IsEditMode" value="@(Model.IsEditMode.ToString().ToLower())" />
+@if (Model.IsEditMode && !string.IsNullOrEmpty(Model.Giud))
+{
+	<input type="hidden" name="Giud" value="@Model.Giud" />
+	<input type="hidden" name="ResearchId" value="@Model.ResearchId" />
+}
+<div class="alert alert-info small-text" role="alert">
+	<i class="bi bi-info-circle-fill"></i> For the user guideline please contact your Faculty Coordinator.
+</div>
+<ul class="nav nav-tabs mb-3" id="journalTab" role="tablist">
+	<li class="nav-item" role="presentation">
+		<button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">Publication details</button>
+	</li>
+
+	<li class="nav-item" role="presentation" data-type-only="journal article">
+		<button class="nav-link" id="fees-tab" data-bs-toggle="tab" data-bs-target="#fees" type="button" role="tab" aria-controls="fees" aria-selected="false">Fees & declarations</button>
+	</li>
+	<li class="nav-item" role="presentation">
+		<button class="nav-link" id="authors-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="authors" aria-selected="false">Documents</button>
+	</li>
+</ul>
+
+@* Tab content *@
+<div class="tab-content" id="journalTabContent">
+	<div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+		<div class="row g-3">
+			<div class="col-md-12">
+				@Html.LabelFor(m => m.PublicationName, new { @class = "form-label", @id = "publicationNameLabel" }) <span class="text-danger">*</span>
+				<button type="button" id="researchTooltipBtn" class="btn btn-link p-0 m-0 border-0 shadow-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Loading...">
+					<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+				</button>
+				@Html.TextBoxFor(m => m.PublicationName, new { @class = "form-control", @id = "PublicationName" })
+				@Html.ValidationMessageFor(m => m.PublicationName, "", new { @class = "text-danger" })
+			</div>
+			<!-- Year of Publication -->
+			<div class="col-md-6">
+				@Html.LabelFor(m => m.PublicationYear, new { @class = "form-label" }) <span class="text-danger">*</span>
+				@Html.DropDownListFor(m => m.PublicationYear, Model.PublicationYearOptions, new { @class = "form-select", @id = "PublicationYear" })
+				@Html.ValidationMessageFor(m => m.PublicationYear, "", new { @class = "text-danger" })
+			</div>
+			@if (!Model.IsEditMode)
+			{
+				<div class="col-md-6" data-type-only="conference paper">
+					@Html.LabelFor(m => m.IsbnIssn, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.IsbnIssn, new
+					{
+						@class = "form-control",
+								@placeholder = "e.g. 978-616-93830-2-4",
+								@pattern = @"^\d{3}-\d{3}-\d{5}-\d{1}-\d{1}$",
+								@title = "Only digits and hyphens allowed in ISBN/ISSN format like 978-616-93830-2-4"
+								})
+				@Html.ValidationMessageFor(m => m.IsbnIssn, "", new { @class = "text-danger" })
+			</div>
+
+
+						}
+
+			<div class="col-md-12" data-type-only="conference paper">
+				@Html.LabelFor(m => m.ConferenceName, new { @class = "form-label" }) <span class="text-danger">*</span>
+				@Html.TextBoxFor(m => m.ConferenceName, new { @class = "form-control" })
+				@Html.ValidationMessageFor(m => m.ConferenceName, "", new { @class = "text-danger" })
+			</div>
+
+
+
+			<!-- Faculty -->
+			<div class="col-md-6">
+				@Html.LabelFor(m => m.Faculty, new { @class = "form-label" }) <span class="text-danger">*</span>
+				@Html.DropDownListFor(m => m.Faculty, Model.FacultyOptions, new { @class = "form-select" })
+				@Html.ValidationMessageFor(m => m.Faculty, "", new { @class = "text-danger" })
+			</div>
+			<!-- Department -->
+			<div class="col-md-6">
+				@Html.LabelFor(m => m.Department, new { @class = "form-label" }) <span class="text-danger">*</span>
+				@Html.TextBoxFor(m => m.Department, new { @class = "form-control", @id = "Department" })
+				@Html.ValidationMessageFor(m => m.Department, "", new { @class = "text-danger" })
+			</div>
+
+			<!-- SDG -->
+			<div class="col-md-6 mt-3">
+				@Html.LabelFor(m => m.SDG, new { @class = "form-label" }) <span class="text-danger">*</span>
+				@Html.DropDownListFor(m => m.SDG, Model.SDGOptions, new { @class = "form-select" })
+				@Html.ValidationMessageFor(m => m.SDG, "", new { @class = "text-danger" })
+			</div>
+			<!-- Additional URL -->
+			<div class="col-md-6 mt-3" data-type-only="journal article">
+				@Html.LabelFor(m => m.AdditionalURL, new { @class = "form-label" })
+				@Html.TextBoxFor(m => m.AdditionalURL, new { @class = "form-control", @placeholder = "https://example.com" })
+				@Html.ValidationMessageFor(m => m.AdditionalURL)
+			</div>
+			<div class="col-md-6">
+				@Html.LabelFor(m => m.FunderName, "Public funder name (can be own institution) that contributed funding", new { @class = "form-label" })
+				<span class="text-danger">*</span>
+				@Html.TextBoxFor(m => m.FunderName, new { @class = "form-control", @placeholder = "Enter the name of the funder (e.g., NRF, UJ)" })
+				@Html.ValidationMessageFor(m => m.FunderName, "", new { @class = "text-danger" })
+			</div>
+
+			<!-- Volume -->
+			<div class="col-md-6 mt-3" data-type-only="journal article">
+				@Html.LabelFor(m => m.Volume, new { @class = "form-label" })<span class="text-danger">*</span>
+				@Html.TextBoxFor(m => m.Volume, new { @class = "form-control" })
+				@Html.ValidationMessageFor(m => m.Volume)
+			</div>
+
+			<!-- Issue -->
+			<div class="col-md-6 mt-3" data-type-only="journal article">
+				@Html.LabelFor(m => m.Issue, new { @class = "form-label" })
+				@Html.TextBoxFor(m => m.Issue, new { @class = "form-control" })
+				@Html.ValidationMessageFor(m => m.Issue)
+			</div>
+			<!-- Open Access -->
+			<div class="col-md-3" data-type-only="journal article">
+				<div class="mb-4 mt-3">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.OpenAccessModel)
+				</div>
+			</div>
+			<div class="col-md-3  toggle-expand">
+				<div class="mb-4 mt-3">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.Is4IRPublicationModel)
+				</div>
+			</div>
+			<!-- SoTL Publication -->
+			<div class="col-md-3 toggle-expand">
+				<div class="mb-4 mt-3">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.IsSoTLPublicationModel)
+				</div>
+			</div>
+
+			<!-- DHET Indexed -->
+			<div class="col-md-3" data-type-only="journal article">
+				<div class="mb-4 mt-3">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.DHETIndexedModel)
+				</div>
+			</div>
+
+			<div class="col-md-12" data-type-exclude="book">
+				<div class="mb-4">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.SpecialCategoryRequiredModel)
+				</div>
+			</div>
+		</div>
+		<div class="d-flex justify-content-between mt-4">
+			<a href="@basePath/Oross/Index" class="btn btn-outline-secondary">Back</a>
+			<button type="button" class="btn btn-primary btn-next" data-next="#fees">Next</button>
+		</div>
+	</div>
+
+
+	<div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab">
+		<div class="row g-4 align-items-start">
+			<!-- Public Funder Name -->
+			<div class="col-md-12">
+				<div class="mb-4 mt-3">
+					@await Html.PartialAsync("_SwitchWithTooltip", Model.PublicationFeesRequiredModel)
+				</div>
+			</div>
+		</div>
+
+		<!-- Conditional Fee Info Section -->
+		<div id="feeDetailsSection" class="mt-4 d-none  p-3 rounded bg-light-subtle">
+			<h6 class="mb-3">Publication fee details</h6>
+			<div class="row g-3">
+				<div class="col-md-12">
+					@Html.LabelFor(m => m.FeeDescription, "Fee description", new { @class = "form-label" })
+					@Html.TextAreaFor(m => m.FeeDescription, new { @class = "form-control", @rows = "3", @placeholder = "Describe the publication fee breakdown...", @id = "FeeDescription" })
+					@Html.ValidationMessageFor(m => m.FeeDescription, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.PublisherCurrency, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.DropDownListFor(m => m.PublisherCurrency, Model.PublisherCurrencyOptions, new { @class = "form-select", @id = "PublisherCurrency" })
+					@Html.ValidationMessageFor(m => m.PublisherCurrency, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.TotalCost, new { @class = "form-label" })<span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.TotalCost, new { @class = "form-control", @placeholder = "e.g. 1200.00", @step = "0.01", @id = "TotalCost", @type = "number", @inputmode = "decimal", @min = "0.01" })
+					@Html.ValidationMessageFor(m => m.TotalCost, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.ContributionPublisherCurrency, new { @class = "form-label" })<span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.ContributionPublisherCurrency, new { @class = "form-control", @placeholder = "e.g. 1200.00", @step = "0.01", @id = "ContributionPublisherCurrency", @type = "number", @inputmode = "decimal", @min = "0.01" })
+					@Html.ValidationMessageFor(m => m.ContributionPublisherCurrency, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.ContributionZAR, new { @class = "form-label" })
+					<span class="text-danger">*</span>
+					<button type="button" class="btn btn-link p-0 m-0 border-0 shadow-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Please write the amount contributed by the institution towards the total publication fee in South African Rand at the time of payment.">
+						<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+					</button>
+					@Html.TextBoxFor(m => m.ContributionZAR, new { @class = "form-control", @placeholder = "e.g. 22000.00", @step = "0.01", @id = "ContributionZAR", @type = "number", @inputmode = "decimal", @min = "0.01" })
+					@Html.ValidationMessageFor(m => m.ContributionZAR, "", new { @class = "text-danger" })
+				</div>
+				<div class="alert alert-info py-2 small mb-3">
+					Enter all amounts using a decimal point only (e.g. 1200.50). Do not use commas or spaces.
+				</div>
+			</div>
+		</div>
+
+		<!-- Conditional No Fees Section -->
+		<div id="noFeesSection" class="mt-4">
+			<div class="alert alert-warning bg-dark border-start border-warning ps-3">
+				<i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+				<strong>Please confirm:</strong> No publication fees were paid for this submission.
+			</div>
+			<div class="form-check mb-3">
+				@* @Html.CheckBoxFor(m => m.NoFeeConfirmation, new { @class = "form-check-input", @required = "required", disabled = Model.IsEditMode ? "disabled" : null }) *@
+				@Html.CheckBoxFor(m => m.NoFeeConfirmation, attrs)
+				@Html.LabelFor(m => m.NoFeeConfirmation, "I hereby confirm that the information provided herein is accurate and that no publication fees were paid.", new { @class = "form-check-label" })
+				@Html.ValidationMessageFor(m => m.NoFeeConfirmation, "", new { @class = "text-danger" })
+				@if (Model.IsEditMode)
+				{
+					@Html.HiddenFor(m => m.NoFeeConfirmation)
+				}
+			</div>
+			@if (!Model.IsEditMode)
+			{
+				<label class="form-label">Reason(s) for non-payment <span class="text-danger">*</span></label>
+				<div class="position-relative" id="NoFeeReasonsWrapper">
+					<select class="form-select" id="NoFeeReasons" name="NoFeeReasons" asp-for="NoFeeReasons" asp-items="Model.NoFeeReasonsOptions" multiple>
+					</select>
+				</div>
+			}
+
+
+		</div>
+		<div class="d-flex justify-content-between mt-4">
+			<button type="button" class="btn btn-outline-secondary btn-back" data-prev="#general">Back</button>
+			<button type="button" class="btn btn-primary btn-next" data-next="#documents">Next</button>
+		</div>
+	</div>
+	<div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+		<div class="p-3">
+			<div class="alert alert-info small-text" role="alert">
+				<i class="bi bi-info-circle-fill"></i> Please combine multiple files in one PDF where necessary.
+			</div>
+				<!-- Journal Article -->
+				<div data-type-only="journal article" data-dhet-indexed="false" data-special-type="false">
+					@await Html.PartialAsync("_DocumentUpload", Model.PublishedPaperUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ManuscriptUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.SupportingDocUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.TocToUpload)
+					<div id="dhetLetterUpload" class="mb-3 d-none">
+						@await Html.PartialAsync("_DocumentUpload", Model.DhetLetterUpload)
+					</div>
+					<div id="fqcDeclarationUpload-journal" class="mb-3 d-none">
+						@await Html.PartialAsync("_DocumentUpload", Model.FqcDeclarationUpload)
+					</div>
+
+				</div>
+
+				<!-- Book -->
+				<div data-type-only="book">
+					@await Html.PartialAsync("_DocumentUpload", Model.PublishedBookUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.PeerReviewLetterUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.PeerReviewCommentsUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ScholarlyMotivationUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.LateMotivationUpload)
+				</div>
+
+				<!-- Book Chapter -->
+				<div data-type-only="book chapter" data-special-type="false">
+					@await Html.PartialAsync("_DocumentUpload", Model.PublishedChapterUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.PeerReviewLetterChapterUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.PeerReviewCommentsChapterUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ScholarlyMotivationChapterUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.LateMotivationChapterUpload)
+					<div id="fqcDeclarationUpload-chapter" class="mb-3 d-none">
+						@await Html.PartialAsync("_DocumentUpload", Model.FqcDeclarationUploadChapter)
+					</div>
+
+				</div>
+
+				<!-- Conference Paper -->
+				<div data-type-only="conference paper" data-special-type="false">
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferencePublishedPaperUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferenceManuscriptUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferenceTocUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferencePeerReviewUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferencePeerCommentsUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.CommitteeMembersUpload)
+					@await Html.PartialAsync("_DocumentUpload", Model.ConferenceSupportingDocUpload)
+					<div id="fqcDeclarationUpload-conference" class="mb-3 d-none">
+						@await Html.PartialAsync("_DocumentUpload", Model.FqcDeclarationUploadConference)
+					</div>
+				</div>
+
+
+			<div class="d-flex justify-content-between mt-4">
+				<button type="button" class="btn btn-outline-secondary btn-back" data-prev="#fees">Back</button>
+
+				<div class="d-flex gap-1">
+					<a href="@basePath/Oross/Index" class="btn btn-outline-secondary">Cancel</a>
+					<button id="submitBtn" type="button" class="btn btn-primary fw-bold px-4">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+

@@ -1,0 +1,122 @@
+﻿body {
+    font-family: "Ubuntu", Arial, sans-serif;
+    font-size: 12px;
+    color: #222;
+    background: #fff;
+}
+
+.pdf-page {
+    width: 100%;
+}
+
+.pdf-section {
+    border: 1px solid #ddd;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+}
+
+.pdf-heading {
+    background: #FF6400;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 14px;
+}
+
+.pdf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding: 10px;
+}
+
+.pdf-field {
+    margin-bottom: 8px;
+}
+.pdf-field.full {
+        grid-column: 1 / -1;
+        padding: 10px;
+}
+.pdf-field label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #111;
+}
+.pdf-field div {
+    display: block;
+    width: 100%;
+    min-height: 34px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.pdf-list {
+    margin: 10px;
+    padding-left: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+.pdf-options {
+    border: 1px solid #ccc;
+    background-color: #eee;
+    border-radius: 4px;
+    padding: 8px 12px;
+    line-height: 1.8;
+    color: #222;
+    min-height: 34px;
+}
+
+.pdf-options div {
+    margin-bottom: 2px;
+}
+.pdf-subtext-light {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 6px;
+}
+.pdf-textarea {
+    min-height: 90px !important;
+    white-space: pre-wrap;
+    width: 100%;
+    padding: 10px 12px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+.pdf-field > div:not(.pdf-options):not(.pdf-textarea) {
+    min-height: 34px;
+    padding: 8px 12px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+th {
+    background: #f2f2f2;
+    font-weight: bold;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    vertical-align: top;
+    word-break: break-word;
+}
+
+p {
+    margin: 10px;
+}

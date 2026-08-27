@@ -1,0 +1,73 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@{
+	ViewData["Title"] = "Test Page";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<br />
+<br />
+<h1>Testing page</h1>
+
+<input type="hidden" value="2197" id="FundingCallDetailsId" name="FundingCallDetailsId" />
+<input type="hidden" value="1067" id="UserId" name="UserId" />
+<input type="hidden" value="5626" id="Id" name="Id" />
+
+
+<section class="py-4 px-3">
+	<div class="card mb-4">
+		<div class="card-header">
+			<strong>Select Projects</strong>
+		</div>
+		<div class="card-body">
+			<div id="projectsCheckboxList" class="row g-2"></div>
+		</div>
+	</div>
+	<div class="form-section mb-4">
+		<ul class="nav nav-tabs mb-3" id="selectedProjectsTabs" role="tablist"></ul>
+
+		<div class="tab-content" id="selectedProjectsTabContent">
+			<div class="tab-pane fade" id="project1TabPane" role="tabpanel">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepImprovingStaffResearch.cshtml", Model)
+			</div>
+
+			<div class="tab-pane fade" id="project2TabPane" role="tabpanel">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepResearchCareer.cshtml", Model)
+			</div>
+
+			<div class="tab-pane fade" id="project5TabPane" role="tabpanel">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepMobility.cshtml", Model)
+			</div>
+		</div>
+	</div>
+</section>
+<input type="text" value="2127" id="FundingCallDetailsId" name="FundingCallDetailsId">
+<input type="text" value="7" id="UserId" name="UserId">
+<input type="text" value="3250" id="Id" name="Id">
+<div class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewDocumentModalLabel">Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="documentViewer"></iframe>
+            </div>
+            <div class="modal-footer">
+                <div id="footerDiv" style="padding-right:50px; padding-bottom:20px" class="row">
+                </div>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepResearchCareer.cshtml", Model)
+
+@section Scripts {
+    <script src="~/js/ucdp/application/viewdocument.js"></script>
+	<script src="~/js/ucdp/apply/selectedProjects.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/stepResearchCareer.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/document-staging.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/stepProject1.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/project5.js?v=@DateTime.Now.Ticks"></script>
+}

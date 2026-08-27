@@ -1,0 +1,510 @@
+﻿@using ResearchSuite.Helpers.Ucdp
+@using ResearchSuite.Models.UCDP.Enums
+@using ResearchSuite.Models.Ucdp
+@using ResearchSuite.Helpers
+@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@{
+	var user = Context.User;
+	var userRoles = UserHelper.GetRolesForApp(user, "ucdg");
+
+	bool IsApplicant() =>
+		userRoles.Any(r =>
+		r.Equals("applicant", StringComparison.OrdinalIgnoreCase));
+
+	bool IsFundAdministrator() =>
+	   (userRoles.Any(r =>
+	   r.Equals("fund administrator", StringComparison.OrdinalIgnoreCase))) || UserHelper.IsTempFundAdministrator(user, Model.TemporaryApproverViewModel);
+
+	bool IsSIADirector() =>
+		(userRoles.Any(r =>
+		r.Equals("sia director", StringComparison.OrdinalIgnoreCase))) || UserHelper.IsTempSiaDirector(user, Model.TemporaryApproverViewModel);
+
+	bool IsHOD() =>
+		(Model.CurrentApproverStaffNumber == UserHelper.GetStaffNumber(user) &&
+		Model.ApplicationStatusId == (int)ApplicationStatusEnum.PendingApprovalByHOD) || UserHelper.IsTempHOD(user, Model.TemporaryApproverViewModel);
+
+	bool IsViceDean() =>
+		(Model.CurrentApproverStaffNumber == UserHelper.GetStaffNumber(user) &&
+		Model.ApplicationStatusId == (int)ApplicationStatusEnum.PendingApprovalbyViceDean) || UserHelper.IsTempViceDean(user, Model.TemporaryApproverViewModel);
+
+
+	bool IsFinancialBusinessPartner() =>
+		userRoles.Any(r =>
+		r.Equals("financial business partner", StringComparison.OrdinalIgnoreCase));
+
+	// Determine the current mode and user role from the model or context
+	var IsEditable = IsApplicant() && UserHelper.IsMyApplication(User, Model) &&
+	(Model.ApplicationStatusId == 1 || Model.ApplicationStatusId == 10 || Model.ApplicationStatusId == 0);
+	var isApprovalMode =
+		 IsHOD() || IsViceDean() || IsFundAdministrator() || IsSIADirector() || IsFinancialBusinessPartner();
+
+	// Determine if final approval amounts should be shown and if they are editable
+	var showFAAmount = IsFundAdministrator() || IsSIADirector();
+	var showSIAAmount = IsSIADirector();
+
+	var showFAComment = IsFundAdministrator() || IsSIADirector();
+	var showSIAComment = IsSIADirector();
+
+	var canEditFAAmount = IsFundAdministrator() && Model.ApplicationStatusId == 31;
+	var canEditSIAAmount = IsSIADirector() && Model.ApplicationStatusId == 32;
+
+	var canEditFAComment = IsFundAdministrator() && Model.ApplicationStatusId == 31;
+	var canEditSIAComment = IsSIADirector() && Model.ApplicationStatusId == 32;
+
+	// Applicant
+	// if (IsApplicant())
+	// {
+	//     int[] validStatuses = { 8, 9, 28 };
+	//     showFAAmount = showFAComment = validStatuses.Contains(Model.ApplicationStatusId) || Model.ApplicationStatusId == 7;
+	//     showSIAAmount = showSIAComment = validStatuses.Contains(Model.ApplicationStatusId);
+	// }
+
+	var showSubmitButton = IsApplicant() && Model.ApplicationStatusId == 1; // Example: Applicant in draft can submit
+	var showSaveButtons = IsEditable; // Applicant in edit mode
+
+	var lockApplicantAmounts = IsApplicant() && !string.IsNullOrWhiteSpace(Model.FundAdminComment) && SafeToDecimal(Model.FundAdminApprovedAmount) > 0;
+
+}
+
+@functions {
+	public string FormatNumberForDisplay(string amount)
+	{
+		var decimalAmount = SafeToDecimal(amount);
+		return decimalAmount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
+	}
+
+	public static decimal SafeToDecimal(string input)
+	{
+
+		return decimal.TryParse(input,
+								System.Globalization.NumberStyles.Any,
+								System.Globalization.CultureInfo.InvariantCulture,
+								out var result)
+			   ? result
+			   : 0m;
+	}
+}
+
+
+
+<!-- Supporting Information -->
+<input type="hidden" value="@Model.Id" id="Id" name="Id">
+<input type="hidden" value="@Model.ReferenceId" id="ReferenceId" name="ReferenceId">
+<input type="hidden" value="@Model.CurrentApproverStaffNumber" id="CurrentApproverStaffNumber" name="CurrentApproverStaffNumber">
+<input type="hidden" value="@Model.ApplicationStatusId" id="ApplicationStatusId" name="ApplicationStatusId">
+<input type="hidden" value="@Model.FundingCallDetails.Id" id="FundingCallsId" name="FundingCallsId">
+<input type="hidden" value="@IsFundAdministrator()" id="IsFundAdministrator" name="IsFundAdministrator">
+<input type="hidden" value="@IsSIADirector()" id="IsSIADirector" name="IsSIADirector">
+<input type="hidden" value="@Model.FundingBudgetAvailable" id="FundingBudgetAvailable" name="FundingBudgetAvailable">
+<input type="hidden" value="@IsHOD().ToString()" id="IsTemporaryHODApprover" name="IsTemporaryHODApprover">
+<input type="hidden" value="@IsViceDean().ToString()" id="IsTemporaryViceDeanApprover" name="IsTemporaryViceDeanApprover">
+<input type="hidden" value="@IsFundAdministrator().ToString()" id="IsTemporaryFundAdminApprover" name="IsTemporaryFundAdminApprover">
+<input type="hidden" value="@IsSIADirector().ToString()" id="IsTemporarySiaDirectorApprover" name="IsTemporarySiaDirectorApprover">
+<div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;
+margin:15px 0px 15px 0px">
+	Supporting Information
+</div>
+
+<div id="FinancialImplicationsForm" class="panel-body">
+	<div class="row mb-3">
+		<div class="row mb-3">
+			<div class="col-12">
+				<label class="form-label">Motivation for financial support<span class="text-danger">*</span></label>
+				<textarea @(IsEditable ? "" : "disabled") id="FinancialMotivation" name="FinancialMotivation" class="form-control" rows="4">@Model.FinancialMotivation</textarea>
+			</div>
+		</div>
+
+		<div class="row mb-3">
+			<div class="col-12">
+				<label class="form-label">Progress of applicant in terms of the support applying for: Current progress of applicant towards goal (e.g. completion of dissertation, or article) Planned activities for the period that relief is requested <span class="text-danger">*</span></label>
+				<textarea @(IsEditable ? "" : "disabled") id="ApplicantProgress" name="ApplicantProgress" class="form-control" rows="4">@Model.ApplicantProgress</textarea>
+			</div>
+		</div>
+
+		<div class="row mb-3">
+			<div class="col-12">
+				<label class="form-label">State the measurable output(s) impact to be achieved by applicant(s): (Example Article in an accredited Journal) <span class="text-danger">*</span></label>
+				<textarea @(IsEditable ? "" : "disabled") id="OutputMeasure" name="OutputMeasure" class="form-control" rows="4">@Model?.OutputMeasure</textarea>
+			</div>
+		</div>
+	</div>
+
+	<!-- Financial Implication -->
+	<div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;
+margin:15px 0px 15px 0px">
+		Financial Implication
+	</div>
+
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<p>
+					The principle of co-funding applies: You are expected to explore other sources of funding (research funds; departmental funds; faculty funds; external sources) and to detail what funding is available from other sources.
+					– UCDP is unlikely to fund projects/activities in full.
+				</p>
+			</div>
+
+			<div class="col-md-6">
+				<table id="financialImplication" class="table table-borderless table-condensed table-hover" style="width:100%">
+					<tr class="noBorder">
+						<td style="width:60%">Other Funding:</td>
+						<td>R</td>
+						<td style="width:40%">
+							<input @(IsEditable && !lockApplicantAmounts ? "" : "disabled")
+								   type="text"
+								   placeholder="0.00"
+								   id="OtherFunding"
+								   name="OtherFunding"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.OtherFunding)" />
+						</td>
+					</tr>
+
+					<tr class="noBorder">
+						<td>Faculty Contribution:</td>
+						<td>R</td>
+						<td>
+							<input @(IsEditable && !lockApplicantAmounts ? "" : "disabled")
+								   type="text"
+								   placeholder="0.00"
+								   id="FacultyContibution"
+								   name="FacultyContibution"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.FacultyContibution)" />
+						</td>
+					</tr>
+
+					<tr class="noBorder">
+						<td>Departmental Contribution:</td>
+						<td>R</td>
+						<td>
+							<input @(IsEditable && !lockApplicantAmounts ? "" : "disabled")
+								   type="text"
+								   placeholder="0.00"
+								   id="DepartmentContribution"
+								   name="DepartmentContribution"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.DepartmentContribution)" />
+						</td>
+					</tr>
+
+					<tr class="noBorder">
+						<td>Research Contribution:</td>
+						<td>R</td>
+						<td>
+							<input @(IsEditable && !lockApplicantAmounts ? "" : "disabled")
+								   type="text"
+								   placeholder="0.00"
+								   id="ResearchFundsContribution"
+								   name="ResearchFundsContribution"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.ResearchFundsContribution)" />
+						</td>
+					</tr>
+
+					<tr class="noBorder">
+						<td>
+							UCDG/DHET funds requested: <span class="text-danger">*</span>
+							<button type="button" class="btn btn-link p-0 m-0 border-0 shadow-none" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="This is the final requested amounts the SIA director will approve" data-bs-original-title="This is the final requested amounts the SIA director will approve">
+								<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+							</button>
+						</td>
+						<td>R</td>
+						<td>
+							<input @(IsEditable && !lockApplicantAmounts ? "" : "disabled")
+								   type="text"
+								   placeholder="0.00"
+								   id="DHETFundsRequested"
+								   name="DHETFundsRequested"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.DHETFundsRequested)" />
+						</td>
+					</tr>
+
+					<tr class="noBorder">
+						<td>
+							<b>Total Cost Of Application:</b>
+							<button type="button" class="btn btn-link p-0 m-0 border-0 shadow-none" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Including all contributions" data-bs-original-title="Including all contributions">
+								<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+							</button>
+						</td>
+						<td>R</td>
+						<td>
+							<input disabled="disabled" type="text"
+								   placeholder="0.00"
+								   id="TotalCost"
+								   name="TotalCost"
+								   class="form-control"
+								   value="@FormatNumberForDisplay(Model?.TotalCost)" />
+						</td>
+					</tr>
+					<!-- Fund Admin Approved Amount -->
+					@if (showFAAmount)
+					{
+						<tr class="noBorder">
+							<td><b>Final amount: Fund Admin:</b></td>
+							<td>R</td>
+							<td>
+								<input type="text"
+									   id="FundAdminApprovedAmount"
+									   name="FundAdminApprovedAmount"
+									   placeholder="0.00"
+									   class="form-control"
+									   value="@FormatNumberForDisplay(Model?.FundAdminApprovedAmount)"
+									   @(canEditFAAmount ? "" : "disabled") />
+							</td>
+						</tr>
+					}
+					@if (IsFundAdministrator())
+					{
+						<tr class="noBorder">
+							<td><b>Available Balance</b></td>
+							<td>R</td>
+							<td><b><span class="budget">@FormatNumberForDisplay(Model.FundingBudgetAvailable.ToString())</span></b></td>
+						</tr>
+					}
+
+					@if (showSIAAmount)
+					{
+						<tr class="noBorder">
+							<td>
+								<b>Final Amount: SIA Director :</b>
+								<button type="button"
+										id="copyFundAdminToApproved"
+										class="btn btn-sm btn-outline-secondary ms-2 align-middle"
+										data-bs-toggle="tooltip"
+										data-bs-placement="top"
+										title="Copy fund admin amount to Approved amount"
+										aria-label="Copy fund admin amount"
+										@(canEditSIAAmount ? "" : "disabled")>
+									<i class="bi bi-clipboard2-check-fill text-orange"></i>
+								</button>
+							</td>
+							<td>R</td>
+							<td>
+								<input type="text"
+									   id="ApprovedAmount"
+									   name="ApprovedAmount"
+									   placeholder="0"
+									   class="form-control"
+									   value="@FormatNumberForDisplay(Model?.ApprovedAmount)"
+									   disabled="disabled" />
+							</td>
+						</tr>
+					}
+
+					<!-- Approved By (For FBP view) -->
+					@if (IsFinancialBusinessPartner())
+					{
+						<tr class="noBorder">
+							<td><b>APPROVED BY</b></td>
+							<td></td>
+							<td>
+								<input disabled="disabled"
+									   type="text"
+									   id="approvedBy"
+									   class="form-control"
+									   value="@Model.LastModifierUsername" />
+							</td>
+						</tr>
+					}
+				</table>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col-12">
+				<label class="form-label">Source of any other funding (please state source/s)</label>
+				<textarea @(IsEditable ? "" : "disabled") id="OtherFundingSource" name="OtherFundingSource" class="form-control" rows="3">@Model.OtherFundingSource</textarea>
+			</div>
+		</div>
+
+		<hr />
+
+		@if (showFAComment)
+		{
+			<div class="row mt-3">
+				<div class="col-12">
+					<label class="form-label">Fund Admin Comment</label>
+					<textarea @(canEditFAComment ? "" : "disabled") id="FundAdminComment" name="FundAdminComment" class="form-control" rows="3">@Model.FundAdminComment</textarea>
+				</div>
+			</div>
+		}
+
+		@if (showSIAComment)
+		{
+			<div class="row mt-3">
+				<div class="col-12">
+					<label class="form-label">SIA Director Comment</label>
+					<textarea @(canEditSIAComment ? "" : "disabled") id="SIAComment" name="SIAComment" class="form-control" rows="3">@Model.SIAComment</textarea>
+				</div>
+			</div>
+		}
+
+	</div>
+
+	<!-- Travel Quotes Confirmation -->
+	<div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;
+margin:15px 0px 15px 0px">
+		Travel Quotes Confirmation
+	</div>
+
+	<div class="panel-body">
+		<div class="row mb-2">
+			<div class="col-12">
+				<p>
+					When applying for funding that involves travel, confirm that you have obtained three quotes from UJ-approved travel agents separately for flights and for accommodation.
+				</p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<ul class="nav nav-tabs mb-3" id="travelQuotesTabs" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="flights-tab" data-bs-toggle="tab" data-bs-target="#flights" type="button" role="tab" aria-controls="flights" aria-selected="true">
+							Flights
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="accommodation" aria-selected="false">
+							Accommodation
+						</button>
+					</li>
+				</ul>
+
+				<div class="tab-content border p-3 pt-2" style="border-top:0;">
+					<!-- Flights tab -->
+					<div class="tab-pane fade show active" id="flights" role="tabpanel" aria-labelledby="flights-tab">
+						<div class="small text-muted mb-2">Upload up to three PDF quotes for flights (Max 5 MB each).</div>
+
+						<div class="d-flex align-items-center mb-2">
+							<input @(IsEditable ? "" : "disabled") type="file" id="travelFlightsFile" accept="application/pdf" class="form-control form-control-sm" />
+							<button @(IsEditable ? "" : "disabled") type="button" id="btnAddTravelFlights" class="btn btn-info btn-sm ms-2">Add Document(s)</button>
+						</div>
+
+						<ul id="travelFlightsFilesList" class="list-unstyled mb-2">
+							@if (Model.UploadedDocs != null && Model.UploadedDocs.Any())
+							{
+								var fileExists = false;
+								foreach (var doc in Model.UploadedDocs)
+								{
+									if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.FlightQuote.GetDescription())
+									{
+										fileExists = true;
+										<li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+											<span>@doc.Filename</span>
+											<span>
+												<button type="button"
+														class="btn btn-outline-primary btn-sm view-file"
+														data-document-id="@doc.Id"
+														data-filename="@doc.Filename"
+														data-docurl="@Url.Action("ViewDocument", "Applications", new { documentId = doc.Id })">
+													<i class="bi bi-eye"></i> View
+												</button>
+												<button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.Id" data-filename="@doc.Filename" @(IsEditable ? "" : "disabled")>
+													<i class="bi bi-trash"></i> Delete
+												</button>
+											</span>
+										</li>
+									}
+								}
+								if (!fileExists)
+								{
+									<li class="py-2 text-muted">No documents attached.</li>
+								}
+							}
+							else
+							{
+								<li class="py-2 text-muted">No documents attached.</li>
+							}
+						</ul>
+
+						@await Html.PartialAsync("_SwitchWithTooltip", Model.FlightsChooseCheapestModel)
+
+						<div id="FlightsCheapestExplanationWrapper" style="display:none">
+							<label class="form-label">If not choosing the cheapest, briefly explain why</label>
+							<textarea @(IsEditable ? "" : "disabled") id="FlightsCheapestExplanation" name="FlightsCheapestExplanation" class="form-control" rows="3">@Model.FlightsCheapestExplanation</textarea>
+						</div>
+					</div>
+
+					<!-- Accommodation tab -->
+					<div class="tab-pane fade" id="accommodation" role="tabpanel" aria-labelledby="accommodation-tab">
+						<div class="small text-muted mb-2">Upload up to three PDF quotes for accommodation (Max 5 MB each).</div>
+
+						<div class="d-flex align-items-center mb-2">
+							<input @(IsEditable ? "" : "disabled") type="file" id="travelAccomFile" accept="application/pdf" class="form-control form-control-sm" />
+							<button @(IsEditable ? "" : "disabled") type="button" id="btnAddTravelAccom" class="btn btn-info btn-sm ms-2">Add Document(s)</button>
+						</div>
+
+						<ul id="travelAccomFilesList" class="list-unstyled mb-2">
+							@if (Model.UploadedDocs != null && Model.UploadedDocs.Any())
+							{
+								var fileExists = false;
+								foreach (var doc in Model.UploadedDocs)
+								{
+									if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.AccomodationQuote.GetDescription())
+									{
+										fileExists = true;
+										<li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+											<span>@doc.Filename</span>
+											<span>
+												<button type="button"
+														class="btn btn-outline-primary btn-sm view-file"
+														data-document-id="@doc.Id"
+														data-filename="@doc.Filename"
+														data-docurl="@Url.Action("ViewDocument", "Applications", new { documentId = doc.Id })">
+													<i class="bi bi-eye"></i> View
+												</button>
+												<button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.Id" data-filename="@doc.Filename" @(IsEditable ? "" : "disabled")>
+													<i class="bi bi-trash"></i> Delete
+												</button>
+											</span>
+										</li>
+									}
+								}
+								if (!fileExists)
+								{
+									<li class="py-2 text-muted">No documents attached.</li>
+								}
+							}
+							else
+							{
+								<li class="py-2 text-muted">No documents attached.</li>
+							}
+
+						</ul>
+
+						@await Html.PartialAsync("_SwitchWithTooltip", Model.AccomChooseCheapestModel)
+
+						<div id="AccomCheapestExplanationWrapper" style="display:none">
+							<label class="form-label">If not choosing the cheapest, briefly explain why</label>
+							<textarea @(IsEditable ? "" : "disabled") id="AccomCheapestExplanation" name="AccomCheapestExplanation" class="form-control" rows="3">@Model.AccomCheapestExplanation</textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 d-flex justify-content-between mt-4">
+		<button type="button" class="btn btn-dark" id="btnBackFinance"><i class="bi bi-chevron-left me-1"></i> Back</button>
+		<div>
+			<a id="btnClose" class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+			@if ((IsHOD() && Model.ApplicationStatusId == 29) || (IsViceDean() && Model.ApplicationStatusId == 30) || (IsFundAdministrator() && Model.ApplicationStatusId == 31) || (IsSIADirector() && Model.ApplicationStatusId == 32))
+			{
+				<button id="btnApprove" type="button" class="btn btn-primary" style="background-color: #046904 !important" data-dismiss="modal">Approve</button>
+				<button id="btnDecline" type="button" class="btn btn-primary" style="background-color: #6b0808 !important" data-dismiss="modal">Decline</button>
+				<button id="btnReturnForInformation" type="button" class="btn btn-primary" style="background-color: #2c0740 !important; width:220px" data-dismiss="modal">Return for information</button>
+			}
+			else if (IsApplicant())
+			{
+				<button @(IsEditable ? "" : "disabled") type="button" class="btn btn-success" id="submitApplication"><i class="bi bi-floppy me-1"></i> Submit <i class="bi bi-chevron-right me-1"></i></button>
+			}
+
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="~/js/ucdp/application/_financial-implication.js"></script>
+}

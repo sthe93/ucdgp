@@ -1,0 +1,42 @@
+﻿@using ResearchSuite.Models.Oross
+@model dynamic
+<style nonce="@Context.Items["CSPNonce"]">
+    #viewDocModalDiag {
+        width: 70%;
+    }
+</style>
+
+<div class="modal fade" id="viewDocModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="saveUserModalLabel">
+    <div id="viewDocModalDiag" class="modal-dialog" role="document">
+        <form id="frmAddModule" onsubmit="return false">
+            <div class="modal-content">
+
+                <div id="saveFeedbackModalBody" class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div id="docBodyPreview" class="col-md-12">
+                                <embed id="pdfViewerPrintDoc" name="pdfViewerPrintDo" type="application/pdf" style="width:100%; height:550px" src="#" />
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <input type="Hidden" id="CurrViewDocGuid">
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary hidden-xs" id="btnClose2" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary hidden-xs" id="btnVarifyDocuments">Verify</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@*     $(document.body).on('click', '#btnClose2', function ()
+       $("#GetViewId").val("");
+    }); *@
+@section Scripts {
+    <script src="~/Scripts/Oross/_ViewResearchDoc.js">
+    </script>
+} 

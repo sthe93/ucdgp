@@ -1,0 +1,167 @@
+﻿@{
+    ViewData["Title"] = "UpdateFundingCall";
+    Layout = null; ;
+}
+@model ResearchSuite.Models.UCDP.FundingCallsModel
+
+
+
+
+<div class="modal-header">
+    <h4 class="modal-title">Update Funding Call</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+    <form id="editfundingCalls" method="post" autocomplete="off">
+        <input type="hidden" id="FundingCallStatusId" class="form-control" asp-for="FundingCallStatus.FundingCallStatusId" hidden="hidden" />
+        <input type="hidden" id="CreatedDate" class="form-control" asp-for="CreatedDate" hidden="hidden" />
+        <input type="hidden" id="FundingCallStatus" class="form-control" asp-for="FundingCallStatus" hidden="hidden" />
+        <br />
+        <div class="form-group">
+            <label for="FundingCallName">Call Name:<span style="color:red">*</span></label>
+            <input type="hidden" class="form-control" asp-for="Id" hidden="hidden" />
+            <input asp-for="FundingCallName" required class="form-control"
+                   type="text"
+                   id="FundingCallName"
+                   name="FundingCallName" maxlength="50" />
+        </div>
+        <div style="color:red" id="callname_count"></div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Project Cycle</label>
+                    <select disabled class="form-control" id="cycle" name="cycle" asp-items="@ViewBag.ProjectCycleList">
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="FundingBudget">Funding Budget: <span style="color:red">*</span></label>
+                    <input asp-for="FundingBudget" required class="form-control"
+                           id="FundingBudget"
+                           name="FundingBudget"
+                           type="text"
+                           onkeyup="CallTotalCost()"
+                           onkeydown="keyDown(event)"
+                           onkeypress="return isnumber(this);" />
+                </div>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="source-create">Projects:<span style="color:red">*</span></label>
+                    <select class="mdb-select colorful-select form-control dropdown-primary md-form" multiple="multiple" id="ProjectName" name="ProjectName[]" required asp-items="@ViewBag.ProjectList">
+                    </select>
+                </div>
+
+            </div>
+        </div>
+        
+
+        <div class="form-group">
+         @*    <div class="row">
+                <div class="col-md-6">
+                    <label for="OpeningDate">Opening Date:<span style="color:red">*</span></label>
+                    <input required asp-for="OpeningDate" id="OpeningDate"
+                           name="OpeningDate"
+                           type="text"
+                           placeholder="Opening Date"
+                           class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label for="ClosingDate">Closing Date:<span style="color:red">*</span></label>
+                    <input required asp-for="ClosingDate" #ClosingDate
+                           id="ClosingDate"
+                           name="ClosingDate"
+                           type="text"
+                           placeholder="Closing Date"
+                           class="form-control hasDatepicker"
+                           [minDate]="closingMinDate" />
+                </div>
+            </div> *@
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="OpeningDate">
+                        Opening Date:<span style="color:red">*</span>
+                    </label>
+                    <input required
+                           asp-for="OpeningDate"
+                           id="OpeningDate"
+                           name="OpeningDate"
+                           type="text"
+                           placeholder="Opening Date"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <label for="ClosingDate">
+                        Closing Date:<span style="color:red">*</span>
+                    </label>
+                    <input required
+                           asp-for="ClosingDate"
+                           id="ClosingDate"
+                           name="ClosingDate"
+                           type="text"
+                           placeholder="Closing Date"
+                           class="form-control" />
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="form-group">
+            <label for="ShortDescription">Short Description:<span style="color:red">*</span></label>
+            <textarea required asp-for="ShortDescription" id="ShortDescription"
+                      style="resize: none"
+                      formControlName="description"
+                      maxlength="250"
+                      class="form-control"
+                      cols="2"
+                      rows="4"></textarea>
+        </div>
+        <div style="color:red" id="textarea_count"></div>
+    </form>
+
+
+    <div class="modal-footer">
+        <button type="button"
+                class="btn btn-primary"
+                style="background-color: #FF6400"
+                data-bs-dismiss="modal">
+            Cancel
+        </button>
+        <button type="button" id="btnUpdate" class="btn btn-primary" style="background-color: #FF6400; width:100px"><i class="fa fa-save"></i> Update</button>
+    </div>
+</div>
+
+
+
+
+<input type="hidden" id="hdEndYear" value="@ViewBag.EndYear" />
+<input type="hidden" id="hdStartYear" value="@ViewBag.StartYear" />
+
+
+<style>
+    .required::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+        font-size: 20px
+    }
+
+    .error {
+        color: red;
+    }
+</style>
+
+
+
+
+
+

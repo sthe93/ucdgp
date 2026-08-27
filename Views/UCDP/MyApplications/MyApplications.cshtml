@@ -1,0 +1,168 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "My Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var basePath = HttpContextAccessor.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+}
+
+@model ResearchSuite.Models.UCDP.ReadApplicationResourceViewModel;
+
+<br />
+<section class="py-4">    
+	<div class="form-section mb-4">
+		<form id="filterForm" class="row g-3 mb-5 align-items-end">
+			<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+				<h2 class="text-orange mb-0">My Applications</h2>
+			</div>		
+		</form>
+        <div class="table-responsive" id="dashboardTableWrapper">
+            @*      <input type="text" id="myNewSearch" placeholder="Search by reference number, funding call name, submitted by, status.." title="Type anything">
+        <br /> *@
+            <table id="tblApplicationsGrid" class="table table-striped table-bordered table-hover w-100 mb-0" cellspacing="0" >
+                <thead>
+                    <tr>
+                        <th scope="col" style="width:50px;vertical-align: top;">#</th>
+                        <th scope="col" style="width:150px;vertical-align: top;">Reference Number</th>
+                        <th scope="col" style="width:150px;vertical-align: top;">Funding Call Name</th>
+                        <th scope="col" style="width: 150px;vertical-align: top;" scope="col">Project</th>
+                        <th scope="col" style="width: 150px;vertical-align: top;">DHET Requested Amount</th>
+                        <th onclick="sortTable(6)" scope="col" style="width: 150px;vertical-align: top;">DHET Approved Amount</th>
+                        <th scope="col" style="width:150px;vertical-align: top;">Submitted Date</th>
+                        <th scope="col" style="width:210px;vertical-align: top;">Number of Documents</th>
+                        <th scope="col" style="width:150px;vertical-align: top;">Status</th>
+                        <th scope="col" style="width: 855px;vertical-align: top;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tblApplicationsBody">
+                    
+                    
+                </tbody>
+
+            </table>
+        </div>
+	</div>
+	
+</section>
+<div id="loader">
+</div>
+<span id="createPdfUrl" data-url="@Url.Action("CreatePdfDocument", "MyApplications", new { area = "Ucdp" })" hidden></span>
+
+<div class="modal fade" id="openAttachedDocumentListModal" tabindex="-1" aria-labelledby="openAttachedDocumentListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="openAttachedDocumentListModalLabel"><i class="fa fa-briefcase" aria-hidden="true"></i> Application Documents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="panel panel-default">
+                    <div id="feedbackDashboardHeader" class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-6 pull-left">
+                                <h3 id="searchedItem" class="panel-title"></h3>
+                            </div>
+                            <div class="col-md-6 pull-right">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dashboardTableWrapper" class="panel-body">
+                        <input type="text" id="myDocSearch" placeholder="Search by reference number, funding call name, submitted by, status.." title="Type anything">
+                        <br />
+                        <table id="tblApplicationsDocumentsGrid" class="table table-striped table-bordered table-hover" cellspacing="0" style="width: 1120px;">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Document Name</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblApplicationsDocumentsBody">
+                                <tr><td style="text-align:center" colspan="12"><i class="fa fa-2x fa-circle-o-notch fa-spin fa-fw"></i></td></tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewDocumentModalLabel">Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="documentViewer"></iframe>             
+            </div>
+            <div class="modal-footer">
+                <div id="footerDiv" style="padding-right:50px; padding-bottom:20px" class="row">
+                </div>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="openCommentListModal" tabindex="-1" aria-labelledby="openCommentListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="openCommentListModalLabel">Application Comments</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <br />
+                <div class="panel panel-default">
+                    <div id="feedbackDashboardHeader" class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-6 pull-left">
+                                <h3 id="searchedItem" class="panel-title"></h3>
+                            </div>
+                            <div class="col-md-6 pull-right">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dashboardTableWrapper" class="panel-body">
+                        <input style="width: 60%; height:45px; " type="text" id="myCommentsSearch" placeholder="Search by reference number, funding call name, comment by " title="Type anything">
+                        <br />
+                        <br />
+                        <table id="tblCommentsGrid" class="table table-striped table-bordered table-hover" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Reference Number</th>
+                                    <th scope="col">FundingCall Name</th>
+                                    <th scope="col">Comment By</th>
+                                    <th scope="col">Comment</th>
+                                    @*<th scope="col">Action</th>*@
+                                </tr>
+                            </thead>
+                            <tbody id="tblCommentsBody">
+                                <tr><td style="text-align:center" colspan="12"><i class="fa fa-2x fa-circle-o-notch fa-spin fa-fw"></i></td></tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="footerDiv" style="padding-right:50px; padding-bottom:20px" class="row">
+                </div>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ucdp/myApplications.js?v=v=@DateTime.Now.Ticks"></script>
+    <script src="~/js/ucdp/application/viewdocument.js"></script>
+    <script src="~/js/ucdp/application/awardletter.js"></script>
+}

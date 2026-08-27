@@ -1,0 +1,32 @@
+﻿@model ResearchSuite.Models.UCDP.Shared.StepWizardButtonsViewModel
+
+<div class="row mt-4">
+    <div class="col-md-12 d-flex flex-wrap align-items-center gap-2">
+
+        <button type="button" id="@Model.CloseButtonId" class="btn btn-outline-secondary wizard-btn">
+            <i class="fa fa-close me-1"></i> Close
+        </button>
+
+        @if (Model.ShowBackButton)
+        {
+            <button type="button" id="@Model.BackButtonId" class="btn btn-secondary border wizard-btn @Model.BackButtonClass">
+                <i class="fa fa-arrow-left me-1"></i> Back
+            </button>
+        }
+
+        <button type="button" id="@Model.NextButtonId" class="btn btn-primary wizard-btn ms-md-auto @Model.NextButtonClass">
+            @if (Model.IsViewMode)
+            {
+                <i class="fa fa-arrow-right me-1"></i>
+                <span>Next</span>
+            }
+            else
+            {
+                <i class="fa fa-save me-1"></i>
+                <span>@Model.NextButtonText</span>
+                <i class="fa fa-arrow-right ms-1"></i>
+            }
+        </button>
+
+    </div>
+</div>

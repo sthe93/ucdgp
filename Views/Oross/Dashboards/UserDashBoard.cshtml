@@ -1,0 +1,9 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+	ViewData["Title"] = "User Dashboard";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	// Get base path or empty string if not set
+	var basePath = HttpContextAccessor.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+}

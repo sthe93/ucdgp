@@ -1,0 +1,292 @@
+﻿<div class="panel panel-primary setup-content" id="SupervisionDevelopmentTab">
+    <div class="panel-heading" style="background-color: #FF6400">
+        <h3 class="panel-title"> Supervision Development</h3>
+    </div>
+    <div class="panel-body">
+        <div id="btnStep6Next" class="row">
+
+            <div class="col-md-12">
+                <button class="btn btn-primary nextBtnSupervision pull-right" type="button" style="background-color: #66CD00; width:190px"><i class="fa fa-save"></i> Save and Continue <i class="fa fa-arrow-right"></i></button>
+                <button id="btnCloseSupervision" class="btn btn-primary" type="button" style="background-color: #7777; border-color: #7777; width:190px;"><i class="fa fa-close"></i> Close </button>
+                <button class="btn btn-primary backBtnSupervision pull-right" type="button" style="background-color: #000000; border-color: #000000; width:190px; margin-right:75px"><i class="fa fa-arrow-left"></i> Back </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+                
+
+    <script type="text/html" id="SupervisionDevelopment">
+        <form id="SupervisionDevelopmentForm" class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <p class="control-label">UJ supervision courses hosted by the Post Graduate School - For participation contact <strong><a href="mailto:rcducdp@uj.ac.za">rcducdp@uj.ac.za</a></strong></p>
+                </div>
+            </div>
+        </form>
+    </script>
+
+    <script type="text/html" id="MobilityProgrammes">
+        <form id="MobilityProgrammesForm" class="row">
+            <div class="col-md-12">
+                <br />
+                <div class="form-group">
+
+                    <label style="font-size:x-large">This project does not accommodate presentation at international and national conferences</label>
+
+                </div>
+                <br />
+            </div>
+
+            <div class="col-md-12">
+                <br />
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item active">
+                        <a class="nav-link active" style="font-size:medium" data-toggle="tab" href=#MobilityProgrammesProofOfInvitation>Proof of Invitation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#MobilityProgrammesAccommodation>Accommodation</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#MobilityProgrammesFlights>Flights</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#MobilityProgrammesOtherCosts>Other Costs</a>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#MobilityProgrammesTotalCostBreakdown>Total Cost Breakdown*</a>
+                    </li>
+
+
+
+                </ul>
+                <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                    <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Please Attach All Requested Documents to submit your application</h3>
+                </div>
+                <div class="tab-content">
+                    <br />
+
+                    <div id="MobilityProgrammesProofOfInvitation" class="container tab-pane active">
+                        <br />
+                        <p style="width:990px">
+                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.<strong>One</strong> document must be added.
+                            Only PDF uploads are allowed (Max 5 MB).
+                            <span style="color:red">*</span>
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <input required type="file" class="form-control" id="MobilityProgrammesDoc" name="MobilityProgrammesDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="button" onclick="UploadMobilityProgrammesDoc()" id="MobilityProgrammesBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div id="progressbar-5">
+                                    <div class="progress-label">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-6" style="width:990px">
+                                <table class="table" id="ListofMobilityProgrammesDocumentsFiles">
+                                    <tr>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="MobilityProgrammesAccommodation" class="container tab-pane">
+                        <br />
+                        <p style="width:990px">
+                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. A maximum of <strong> Three</strong> documents can be added.
+                            Only PDF uploads are allowed (Max 5 MB).
+
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <input required type="file" class="form-control" id="MobilityProgrammesAccommodationDoc" name="MobilityProgrammesAccommodationDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="button" onclick="UploadMobilityProgrammesAccommodationDoc()" id="MobilityProgrammesAccommodationBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div id="progressbar-5">
+                                    <div class="progress-label">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-6" style="width:990px">
+                                <table class="table" id="ListofMobilityProgrammesAccommodationDocumentsFiles">
+                                    <tr>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="MobilityProgrammesFlights" class="container tab-pane">
+                        <br />
+                        <p style="width:990px">
+                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. A maximum of <strong> Three</strong> documents can be added.
+                            Only PDF uploads are allowed (Max 5 MB).
+
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <input required type="file" class="form-control" id="MobilityProgrammesFlightDoc" name="MobilityProgrammesFlightDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="button" onclick="UploadMobilityProgrammesFlightDoc()" id="MobilityProgrammesFlightBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div id="progressbar-5">
+                                    <div class="progress-label">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-6" style="width:990px">
+                                <table class="table" id="ListofMobilityProgrammesFlightDocumentsFiles">
+                                    <tr>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="MobilityProgrammesOtherCosts" class="container tab-pane">
+                        <br />
+                        <p style="width:990px">
+                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. A maximum of <strong> One</strong> document can be added.
+                            Only PDF uploads are allowed (Max 5 MB).
+
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <input required type="file" class="form-control" id="MobilityProgrammesOtherCostDoc" name="MobilityProgrammesOtherCostDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="button" onclick="UploadMobilityOtherCostsDoc()" id="MobilityProgrammesOtherCostBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div id="progressbar-5">
+                                    <div class="progress-label">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-6" style="width:990px">
+                                <table class="table" id="ListofMobilityProgrammesOtherCostDocumentsFiles">
+                                    <tr>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div id="MobilityProgrammesTotalCostBreakdown" class="container tab-pane">
+                        <br />
+                        <p style="width:990px">
+                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.<strong>One</strong> document can be added.
+                            Only PDF upload is allowed (Max 5 MB).
+
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <input required type="file" class="form-control" id="MobilityProgrammesTotalBreakdownDoc" name="MobilityProgrammesTotalBreakdownDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="button" onclick="UploadMobilityProgrammesTotalCostBrakedown()" id="MobilityProgrammesTotalBreakdownBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                            </div>
+
+                        </div>
+                        @*    <div class="row">
+                            <div class="col-sm-4">
+                                <div id="progressbar-5">
+                                    <div class="progress-label">
+                                    </div>
+                                </div>
+                            </div>
+                        </div> *@
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-6" style="width:990px">
+                                <table class="table" id="ListofMobilityProgrammesTotalBreakdownDocumentsFiles">
+                                    <tr>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+            </div>
+            <br />
+        </div>
+        <br />
+    </form>
+</script>

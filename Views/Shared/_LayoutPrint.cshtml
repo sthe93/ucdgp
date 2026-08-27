@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - University Capacity Development Grant</title>
+
+    <link href="~/lib/fonts/ubuntu/300.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/300-italic.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/400.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/400-italic.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/500.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/500-italic.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/700.css" rel="stylesheet" />
+    <link href="~/lib/fonts/ubuntu/700-italic.css" rel="stylesheet" />
+
+    <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/application-pdf.css" rel="stylesheet" asp-append-version="true" />
+</head>
+<body>
+    <main class="pdf-wrapper">
+        @RenderBody()
+    </main>
+</body>
+</html>

@@ -1,0 +1,75 @@
+﻿@using ResearchSuite.Helpers.Ucdp
+@model List<ResearchSuite.Models.UCDP.FundingCallsModel>
+
+<table id="fundingCallsTable" class="table table-hover align-middle table-apps-dashboard w-100">
+	<thead class="table-light">
+		<tr>
+			<th class="col-index">#</th>
+			<th class="col-funding">Funding Call Name</th>
+			<th class="col-date">Created Date</th>
+			<th class="col-date">Opening Date</th>
+			<th class="col-date">Closing Date</th>
+			<th class="col-status">Status</th>
+			<th class="col-actions text-end">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (Model?.Any() == true)
+		{
+			var count = 0;
+
+			foreach (var item in Model)
+			{
+				count++;
+				var status = item.FundingCallStatus?.Status ?? "";
+				var canEdit = status.Trim().Equals(FundingCallStatusEnum.New.GetDescription(), StringComparison.OrdinalIgnoreCase);
+				var statusKey = status.Trim().ToLower();
+
+				var statusClass = statusKey switch
+				{
+					"expired" => "badge-expired",
+					"in progress" => "badge-in-progress",
+					"new" => "badge-new",
+					"closed" => "badge-closed",
+					_ => "badge-default"
+				};
+				<tr>
+					<td class="col-index">@count</td>
+
+					<td class="col-funding">
+						<span class="funding-call-name">@item.FundingCallName</span>
+					</td>
+
+					<td class="col-date" data-order="@item.CreatedDate.ToString("yyyy-MM-dd")">
+						@item.CreatedDate.ToString("dd/MM/yyyy")
+					</td>
+
+					<td class="col-date" data-order="@item.OpeningDate.ToString("yyyy-MM-dd")">
+						@item.OpeningDate.ToString("dd/MM/yyyy")
+					</td>
+
+					<td class="col-date" data-order="@item.ClosingDate.ToString("yyyy-MM-dd")">
+						@item.ClosingDate.ToString("dd/MM/yyyy")
+					</td>
+
+					<td class="col-status">
+						<span class="badge funding-status-badge @statusClass">@status</span>
+					</td>
+
+					<td class="col-actions text-end">
+						<div class="funding-call-actions">
+							<button type="button" class="btn btn-sm btn-outline-orange open-funding-call" data-id="@item.Id"> <i class="fa fa-folder-open"></i> Open </button>
+
+							@*   <button type="button"
+                                    class="btn btn-sm @(canEdit ? "btn-outline-orange" : "btn-outline-secondary") edit-link"
+                                    data-id="@item.Id"
+                                    disabled="@(!canEdit)">
+                                <i class="fa fa-pencil-square-o"></i> Edit
+                            </button> *@
+						</div>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>

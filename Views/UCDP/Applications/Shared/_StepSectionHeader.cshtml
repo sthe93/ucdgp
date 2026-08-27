@@ -1,0 +1,12 @@
+﻿@model ResearchSuite.Models.UCDP.Shared.StepSectionHeaderViewModel
+
+
+<div class="border-orange-line mb-4">
+    <div>
+        <h3 class="text-orange mb-0">@Model.Title</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+        {
+            <div class="text-muted small mt-1">@Model.Subtitle</div>
+        }
+    </div>
+</div>

@@ -1,0 +1,210 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@model ResearchSuite.Models.UCDP.FundingCallsViewModel
+
+@{
+	ViewData["Title"] = "Funding Calls";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="py-4">
+	<div class="form-section">
+
+		<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+			<div>
+				<h2 class="text-orange mb-0">Manage funding calls</h2>
+			</div>
+
+			<button type="button" id="btnNewFundingCall" class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#myModal">
+				<i class="fa fa-plus-circle"></i> Add new funding call
+			</button>
+		</div>
+
+		<div class="d-flex justify-content-end mb-3">
+			<button type="button" id="btnSystemClosure" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#systemClosureModal">
+				<i class="fa fa-clock"></i> System closure
+			</button>
+		</div>
+
+		<div class="card border-0 shadow-sm mb-3 dashboard-filter-card">
+			<div class="card-body p-3">
+				<div class="row g-3 align-items-end">
+
+					<div class="col-lg-3">
+						<label class="form-label small mb-1 text-white">Funding call name</label>
+						<input type="text" id="searchcallname" class="form-control" placeholder="Search by funding call name" value="@Model.SearchCallName" />
+					</div>
+
+					<div class="col-lg-2">
+						<label class="form-label small mb-1 text-white">Status</label>
+
+						<select id="Status" class="form-select">
+							<option value="">All</option>
+
+							@foreach (var status in Model.Statuses)
+							{
+								<option value="@status.FundingCallStatusId"
+										selected="@(Model.Status == status.FundingCallStatusId)">
+									@status.Status
+								</option>
+							}
+						</select>
+					</div>
+
+					<div class="col-lg-2">
+						<label class="form-label small mb-1 text-white">Opening date</label>
+
+						<input id="OpeningDateFilter" class="form-control filter-datepicker" placeholder="Opening date" value="@Model.OpeningDateFilter?.ToString("dd MMM yyyy")" />
+					</div>
+
+					<div class="col-lg-2">
+						<label class="form-label small mb-1 text-white">Closing date</label>
+						<input id="ClosingDateFilter" class="form-control filter-datepicker" placeholder="Closing date" value="@Model.ClosingDateFilter?.ToString("dd MMM yyyy")" />
+					</div>
+
+					<div class="col-lg-1 col-md-6 d-grid">
+						<button class="btn btn-primary filter-btn funding-call-filter" type="button" id="btnSearchFundingCall">
+							<i class="bi bi-search me-1"></i> Search
+						</button>
+					</div>
+
+					<div class="col-lg-1 col-md-6 d-grid">
+						<button class="btn btn-outline-secondary filter-btn funding-call-filter" type="button" id="btnClearFundingCallFilters">
+							<i class="bi bi-arrow-counterclockwise me-1"></i> Clear
+						</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="table-responsive" id="fundingCallTable">
+			<partial name="~/Views/Ucdp/FundingCalls/_FundingCallTable.cshtml" model="Model.FundingCalls" />
+		</div>
+
+	</div>
+</section>
+
+
+<div class="modal fade" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<div class="d-flex flex-column">
+					<h5 class="modal-title mb-0" id="fundingCallModalTitle">New funding call</h5>
+					<small class="text-white" id="fundingCallModalSubtitle">Create a new funding call.</small>
+				</div>
+
+				<button type="button"
+						class="btn-close"
+						data-bs-dismiss="modal">
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div id="fundingCallModeMessage"
+					 class="alert alert-info small mb-3 d-none">
+				</div>
+				<form id="fundingCalls" method="post" autocomplete="off">
+
+					<div class="mb-3">
+						<label class="required">Call name</label>
+						<input required class="form-control" type="text" id="FundingCallName" name="FundingCallName" maxlength="50" />
+					</div>
+
+					<div class="row g-3 mb-3">
+						<div class="col-md-6">
+							<label>Project cycle</label>
+							<select disabled class="form-control" id="cycle" name="cycle">
+								@foreach (var cycle in Model.ProjectCycles)
+								{
+									<option value="@cycle.Id" selected="@cycle.IsActive">
+										@cycle.Period
+									</option>
+								}
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label class="required">Budget</label>
+							<input required class="form-control" type="text" id="FundingBudget" name="FundingBudget" inputmode="decimal" placeholder="0.00" />
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="required">Projects</label>
+						<select class="form-control select2" id="ProjectName" name="ProjectName" multiple> </select>
+
+						<p id="projectCount" class="small text-muted mt-1"></p>
+					</div>
+
+					<div class="row g-3 mb-3">
+						<div class="col-md-6">
+							<label class="required">Opening date</label>
+							<input required id="OpeningDate" name="OpeningDate" type="text" class="form-control datepicker" />
+						</div>
+
+						<div class="col-md-6">
+							<label class="required">Closing Date</label>
+							<input required id="ClosingDate" name="ClosingDate" type="text" class="form-control datepicker" />
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="required">Short description</label>
+						<textarea required id="ShortDescription" name="ShortDescription" class="form-control" maxlength="250" rows="4"></textarea>
+					</div>
+					<input type="hidden" id="hdFundingCallId" name="hdFundingCallId" />
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-orange" id="btnSave"><i class="fa fa-save"></i> Save</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<input type="hidden" id="hdEndYear" value="@Model.EndYear" />
+<input type="hidden" id="hdStartYear" value="@Model.StartYear" />
+
+<div class="modal fade" id="systemClosureModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div>
+					<h5 class="modal-title mb-0">System closure</h5>
+					<small class="text-muted" id="systemClosureSubtitle">Set or update the date and time the system enters closure mode.</small>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="hdSystemClosureId" />
+
+				<div class="mb-3">
+					<label class="form-label" for="ClosureDate">Closure date</label>
+					<input type="text" class="form-control" id="ClosureDate" placeholder="Select closure date" />
+					<small class="text-muted">The system remains available until 24:00 on this date. Closure mode activates the following day.</small>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="ClosureTime">Closure time</label>
+					<input type="time" class="form-control" id="ClosureTime" value="00:00" />
+				</div>
+
+				<div class="alert alert-warning d-none" id="systemClosureActiveAlert">
+					The system is currently in closure mode.
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-orange" id="btnSaveSystemClosure"><i class="fa fa-save"></i> Save closure</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="~/js/ucdp/funding-calls/funding-calls.js" asp-append-version="true"></script>
+}

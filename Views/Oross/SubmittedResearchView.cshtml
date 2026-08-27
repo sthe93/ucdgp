@@ -1,0 +1,391 @@
+﻿@model ResearchSuite.Models.Oross.NewSubmissionViewModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using ResearchSuite.Helpers
+@using System.Globalization
+@using System.Text.RegularExpressions
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+	ViewBag.Title = "SubmittedResearchView";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var userRole = HttpContextAccessor.HttpContext?.User?.FindFirst("role_oross")?.Value?.ToLowerInvariant();
+	bool canShowRFA = false;
+	if (userRole == "admin")
+	{
+		canShowRFA = true;
+	}
+	else if (userRole == "faculty coordinator")
+	{
+		var facultyIdClaim = User.Claims.FirstOrDefault(c => c.Type == "FacultyId")?.Value;
+		var facultyNameIdClaim = User.Claims.FirstOrDefault(c => c.Type == "Faculty")?.Value;
+
+		var facultyNameClaim = User.Claims.FirstOrDefault(c => c.Type == "Faculty")?.Value;
+
+		if (!string.IsNullOrWhiteSpace(facultyNameClaim) && !string.IsNullOrWhiteSpace(Model.FacultyName))
+		{
+			var normalizedLoggedInFaculty = UserHelper.NormalizeFacultyName(facultyNameClaim);
+			var normalizedResearchFaculty = UserHelper.NormalizeFacultyName(Model.FacultyName);
+
+			if (string.Equals(normalizedLoggedInFaculty, normalizedResearchFaculty, StringComparison.OrdinalIgnoreCase))
+			{
+				canShowRFA = true;
+			}
+		}
+	}
+}
+@functions {
+	private IHtmlContent BoolBadge(bool? val) => val == true
+	? new HtmlString("<span class='badge bg-primary'>Yes</span>")
+	: new HtmlString("<span class='badge bg-secondary'>No</span>");
+}
+
+@functions {
+	private string FormatCurrency(decimal amount, string currencyString)
+	{
+		if (string.IsNullOrWhiteSpace(currencyString))
+			return amount.ToString("0.00", CultureInfo.InvariantCulture);
+
+		var match = Regex.Match(currencyString, @"\[(\w{3})\]");
+		var currencyCode = match.Success ? match.Groups[1].Value : currencyString.Trim();
+
+		return $"{currencyCode} {amount.ToString("0.00", CultureInfo.InvariantCulture)}";
+	}
+
+	private CultureInfo GetCultureByCurrencyCode(string currencyCode)
+	{
+		if (string.IsNullOrWhiteSpace(currencyCode))
+			return CultureInfo.InvariantCulture;
+
+		foreach (var culture in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
+		{
+			try
+			{
+				var region = new RegionInfo(culture.Name);
+				if (region.ISOCurrencySymbol.Equals(currencyCode, StringComparison.OrdinalIgnoreCase))
+					return culture;
+			}
+			catch
+			{
+				// Ignore invalid cultures
+			}
+		}
+
+		return CultureInfo.InvariantCulture; // fallback
+	}
+}
+
+
+
+<div class="container my-5">
+	<div class="form-section">
+		<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+			<h2 class="text-orange mb-4">Research Submission</h2>
+		</div>
+		<div class="card mb-4 shadow-sm">
+			<div class="card-header bg-primary text-white">
+				<h5 class="mb-0">Basic Information</h5>
+			</div>
+			<div class="card-body">
+				<dl class="row">
+
+					<!-- Always visible fields -->
+					<dt class="col-sm-4">Publication Title:</dt>
+					<dd class="col-sm-8">@Model.PublicationName</dd>
+
+					<dt class="col-sm-4">Publication Year:</dt>
+					<dd class="col-sm-8">@Model.PublicationYear</dd>
+
+					<dt class="col-sm-4">Research Type:</dt>
+					<dd class="col-sm-8">@Model.ResearchTypeName</dd>
+
+					<dt class="col-sm-4">Author:</dt>
+					<dd class="col-sm-8">@Model.Author</dd>
+
+					<dt class="col-sm-4">Department:</dt>
+					<dd class="col-sm-8">@Model.Department</dd>
+
+					<dt class="col-sm-4">Faculty:</dt>
+					<dd class="col-sm-8">@Model.FacultyName</dd>
+
+					<dt class="col-sm-4">SoTL Publication:</dt>
+					<dd class="col-sm-8">@BoolBadge(Model.IsSoTLPublicationModel.IsChecked)</dd>
+
+					<dt class="col-sm-4">4IR Publication:</dt>
+					<dd class="col-sm-8">@BoolBadge(Model.Is4IRPublicationModel.IsChecked)</dd>
+
+					<dt class="col-sm-4">Institutional Repository:</dt>
+					<dd class="col-sm-8">@BoolBadge(Model.InstitutionalRepoModel.IsChecked)</dd>
+
+					<dt class="col-sm-4">Name of the Public Funder:</dt>
+					<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.FunderName) ? Html.Raw("<em>N/A</em>") : Model.FunderName)</dd>
+
+					<dt class="col-sm-4">SDG:</dt>
+					<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.SDGName) ? Html.Raw("<em>N/A</em>") : Model.SDGName)</dd>
+
+					<dt class="col-sm-4">Re-Submission Date:</dt>
+					<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.ReSubmissionDate) ? Html.Raw("<em>N/A</em>") : Model.ReSubmissionDate)</dd>
+
+					<dt class="col-sm-4">RFA Date:</dt>
+					<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.LastChangedDateRFA) ? Html.Raw("<em>N/A</em>") : Model.LastChangedDateRFA)</dd>
+
+					<dt class="col-sm-4">Returned by:</dt>
+					<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.RFAName) ? Html.Raw("<em>N/A</em>") : $"{Model.RFAName} {Model.RFASurname}")</dd>
+
+
+					<hr class="my-3 hr-custom" />
+
+					@* Research Type 4: Conference *@
+					@if (Model.ResearchType == 4)
+					{
+						<dt class="col-sm-4">ISBN/ISSN:</dt>
+						<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.IsbnIssn) ? Html.Raw("<em>N/A</em>") : Model.IsbnIssn)</dd>
+
+						<dt class="col-sm-4">Conference Name:</dt>
+						<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.ConferenceName) ? Html.Raw("<em>Not provided</em>") : Model.ConferenceName)</dd>
+					}
+
+					@* Research Type 1: Journal *@
+					@if (Model.ResearchType == 1)
+					{
+						<dt class="col-sm-4">Issue:</dt>
+						<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Issue) ? Html.Raw("<em>N/A</em>") : Model.Issue)</dd>
+
+						<dt class="col-sm-4">Volume:</dt>
+						<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Volume) ? Html.Raw("<em>N/A</em>") : Model.Volume)</dd>
+
+						<dt class="col-sm-4">Open Access:</dt>
+						<dd class="col-sm-8">@BoolBadge(Model.OpenAccessModel.IsChecked)</dd>
+
+						<dt class="col-sm-4">Additional URL:</dt>
+						<dd class="col-sm-8">
+							@if (!string.IsNullOrWhiteSpace(Model.AdditionalURL))
+							{
+								<a href="@Model.AdditionalURL" target="_blank" rel="noopener noreferrer">@Model.AdditionalURL</a>
+							}
+							else
+							{
+								<span class="text-muted"><em>Not provided</em></span>
+							}
+						</dd>
+
+						<dt class="col-sm-4"> Is research DHET-indexed?:</dt>
+						<dd class="col-sm-8">
+							@if (Model.DHETIndexedModel.IsChecked == true)
+							{
+								<span class="badge bg-primary">Yes</span>
+							}
+							else
+							{
+								<span class="badge bg-secondary">No</span>
+							}
+						</dd>
+
+						<dt class="col-sm-4">Publication Fees Applicable:</dt>
+						<dd class="col-sm-8">
+							@if (Model.PublicationFeesRequiredModel.IsChecked == true)
+							{
+								<span class="badge bg-primary">Yes</span>
+							}
+							else
+							{
+								<span class="badge bg-secondary">No</span>
+							}
+						</dd>
+
+						@if (Model.PublicationFeesRequiredModel.IsChecked == false)
+						{
+							<dt class="col-sm-4">Reason for Non-payment of Publication Fees:</dt>
+							<dd class="col-sm-8">
+								@(string.IsNullOrWhiteSpace(Model.PublicationFeesReason) ? Html.Raw("<em>N/A</em>") : Model.PublicationFeesReason)
+							</dd>
+						}
+						else if (Model.PublicationFeesRequiredModel.IsChecked == true)
+						{
+							<dt class="col-sm-4">Publication Fee Description:</dt>
+							<dd class="col-sm-8">
+								@(string.IsNullOrWhiteSpace(Model.FeeDescription) ? Html.Raw("<em>N/A</em>") : Model.FeeDescription)
+							</dd>
+
+							<dt class="col-sm-4">Publisher Currency:</dt>
+							<dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.PublisherCurrency) ? Html.Raw("<em>N/A</em>") : Model.PublisherCurrency)</dd>
+
+							<dt class="col-sm-4">Total Cost of Publishing:</dt>
+							<dd class="col-sm-8">@(FormatCurrency(Model.TotalCost, Model.PublisherCurrency))</dd>
+
+							<dt class="col-sm-4">Amount Contributed by Institution (Publisher Currency):</dt>
+							<dd class="col-sm-8"> @(FormatCurrency(Model.ContributionPublisherCurrency, Model.PublisherCurrency))</dd>
+
+							<dt class="col-sm-4">Amount Contributed by Institution (ZAR):</dt>
+							<dd class="col-sm-8">@("ZAR " + Model.ContributionZAR.ToString("0.00", CultureInfo.InvariantCulture))</dd>
+						}
+					}
+					@if (Model.ResearchType != 2)
+					{
+						<dt class="col-sm-4">Is research one of the following? (All types of review, Data paper, brief report, protocol, short communication:</dt>
+						<dd class="col-sm-8">
+							@if (Model.SpecialCategoryRequiredModel.IsChecked == true)
+							{
+								<span class="badge bg-primary">Yes</span>
+							}
+							else
+							{
+								<span class="badge bg-secondary">No</span>
+							}
+						</dd>
+					}
+				</dl>
+			</div>
+		</div>
+
+
+		<!-- Authors Card -->
+		<div class="card mb-4 shadow-sm">
+			<div class="card-header bg-secondary text-white">
+				<h5 class="mb-0">Authors</h5>
+			</div>
+			<div class="card-body p-0">
+				<table class="table table-striped mb-0">
+					<thead class="table-light">
+						<tr>
+							<th>Name</th>
+							<th>Position</th>
+							<th>Type</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var author in Model.Authors)
+						{
+							<tr>
+								<td>@author.FirstName @author.LastName</td>
+								<td>@author.Position</td>
+								<td>
+									@if (author.Type?.ToLower() == "external")
+									{
+										<span class="badge bg-secondary text-dark"> Affiliated with another institution</span>
+									}
+									else
+									{
+										<span class="badge bg-primary">Internal</span>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Documents Card -->
+		<div class="card mb-4 shadow-sm">
+			<div class="card-header bg-dark text-white">
+				<h5 class="mb-0">Uploaded Documents</h5>
+			</div>
+			<div class="card-body">
+				@if (Model.UploadedDocs != null && Model.UploadedDocs.Any())
+				{
+					<ul class="list-group">
+						@foreach (var doc in Model.UploadedDocs)
+						{
+							<li class="list-group-item d-flex justify-content-between align-items-center">
+								<span>@doc.LabelText</span>
+								@if (!string.IsNullOrEmpty(doc.DocName))
+								{
+									<button type="button"
+											class="btn btn-outline-primary btn-sm btnViewDocument"
+											data-docname="@doc.LabelText"
+											data-guid="@doc.GuidId"
+											data-viewid="@doc.ViewId"
+											data-docurl="@Url.Action("GetDocument", "Oross", new { guid = doc.GuidId, viewId = doc.ViewId })">
+										<i class="bi bi-eye"></i> View
+									</button>
+
+								}
+							</li>
+						}
+					</ul>
+				}
+				else
+				{
+					<p>No documents uploaded.</p>
+				}
+			</div>
+		</div>
+
+		<div class="summary-actions">
+			<button type="button" class="btn btn-secondary hidden-xs" id="btnClose_View">Back</button>
+
+			@if (canShowRFA && Model.LastChangedDateRFA == null)
+			{
+				<button type="button" value="hiddenId" class="btn btn-primary hidden-xs" id="btnRFA">Return for amendment</button>
+			}
+		</div>
+	</div>
+
+	<!-- Basic Information Card -->
+	<input type="hidden" id="hdResearchId" value="@Model.ResearchId" />
+	<input type="hidden" id="hdCreatedBy" value="@Model.CreatedBy" />
+	<input type="hidden" id="hdPublicationTitle" value="@Model.PublicationName" />
+
+</div>
+
+<!-- Document Viewer Modal -->
+<div class="modal fade" id="viewVerifyModal" tabindex="-1" aria-labelledby="viewVerifyModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="viewVerifyModalLabel">View Document</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body position-relative">
+				<!-- Loading Spinner -->
+				<div id="iframeSpinner" class="iframe-spinner d-none">
+					<div class="spinner-border text-primary" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+
+				<iframe id="documentViewer"></iframe>
+
+				<div id="iframeFallback" class="text-center text-danger py-5 d-none">
+					<h5>Document could not be loaded.</h5>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="viewDocModal_Comment" data-bs-backdrop="static" tabindex="-1" aria-labelledby="saveUserModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="saveUserModalLabel">Return reason</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="frmAddModule_UploadResearch" novalidate>
+					<div class="mb-3">
+						<label for="comment" class="form-label">Enter your return reason:</label>
+						<textarea id="comment" name="Rmessage" maxlength="200" class="form-control" rows="10" placeholder="Enter your return reason here..." required></textarea>
+						<div class="invalid-feedback">
+							Please enter a return reason.
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary" id="btnConfirmRFA">Submit</button>
+				<button type="button" class="btn btn-secondary" id="btnCloseViewRFA" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts {
+	<script src="~/js/oross/_viewresearchdoc.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/oross/_submittedresearchview.js?v=@DateTime.Now.Ticks"></script>
+}

@@ -1,0 +1,67 @@
+﻿@{
+	ViewData["Title"] = "Login";
+	Layout = "_Layout";
+}
+
+@model ResearchSuite.Models.LoginViewModel
+
+<div class="login-wrapper">
+	<div class="login-overlay"></div>
+
+	<div class="login-form-container">
+		<div class="bubble-logo"></div>
+
+		<h2 class="text-center login-title">Research Suite Login</h2>
+
+		<form asp-controller="Account" asp-action="Login" method="post" autocomplete="off" novalidate>
+			@Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
+			<div id="cookieNotice" class="alert alert-info mb-3 px-2 py-1 small-cookie">
+				<span>
+					<b>Cookie notice:</b> This system uses <em>essential cookies</em> to maintain your session and keep you signed in.
+					These cookies are required for security and core functionality.
+				</span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Username" class="form-label text-white">Username</label>
+				<input asp-for="Username" class="form-control login-input" />
+				<span asp-validation-for="Username" class="text-danger small"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Password" class="form-label text-white">Password</label>
+				<div class="input-group">
+					<input asp-for="Password" type="password" class="form-control login-input" autocomplete="off" id="passwordInput" />
+					<button type="button" class="btn btn-outline-light" id="togglePasswordBtn" tabindex="-1">
+						<i class="fa fa-eye" id="eyeIcon"></i>
+					</button>
+				</div>
+				<span asp-validation-for="Password" class="text-danger small"></span>
+			</div>
+
+			<button type="submit" class="btn btn-outline-warning w-100 mb-5">Log in</button>
+
+			<div class="alert alert-info mb-3 px-2 py-1 small-cookie" style="display:none;" id="chromeNotification">
+				<span>
+					<i class="fa-solid fa-triangle-exclamation"></i>
+					Please note that this application is not compatible to be used on this browser. Kindly use this application on
+					<strong>Chrome</strong> for optimum and compatible usage.
+				</span>
+			</div>
+
+
+
+			@* <label class="col-form-label" style="padding-left:30px !important;padding-right:20px !important;">
+					<i class="fa-solid fa-triangle-exclamation fa-2x" style="color:#f46424;padding-right:5px;"></i>
+					Please note that this application is not compatible to be used on this browser. Kindly use this application on 
+					<strong>Chrome</strong> for optimum and compatible usage.</label> *@
+		</form>
+		<div id="tempData" data-login-error="@TempData["LoginError"]" class="d-none"></div>
+	</div>
+</div>
+
+
+@section Scripts {
+	@await Html.PartialAsync("_ValidationScriptsPartial")
+	<script src="~/js/login.js" type="text/javascript"></script>
+}

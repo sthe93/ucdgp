@@ -1,0 +1,496 @@
+﻿@using ResearchSuite.Models.UCDP.Shared
+
+<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+	<div>
+		<h3 class="text-orange mb-0">Research career development of emerging and mid-career researchers</h3>
+		<div class="text-muted small">
+			Nature of support required
+		</div>
+	</div>
+</div>
+
+<div class="panel-body">
+
+	<form id="ResearchCareerDevForm" class="row">
+		<div class="col-md-12" id="careerTeachingReliefData" data-careerTeachingRelief-data='@Html.Raw(Json.Serialize(Model.CareerTeachingRelief))'>
+			<div class="form-group">
+				<label style="font-weight:bold">Teaching Relief&nbsp;</label>
+
+				<div class="form-check mb-2">
+					<input type="checkbox" value="Replacement by temporary lecturer" class="form-check-input" id="TeachingReplacementCheckBox" name="TeachingReplacementCheckBox">
+					<label class="form-check-label fw-normal" for="TeachingReplacementCheckBox">
+						Replacement by temporary lecturer
+					</label>
+				</div>
+				<div class="form-check mb-2">
+					<input type="checkbox" value="Teaching assistance from senior tutor OR tutor" class="form-check-input" id="TeachingAssistanceCheckBox" name="TeachingAssistanceCheckBox">
+					<label class="form-check-label fw-normal" for="TeachingAssistanceSeniorORTutorCheck">Teaching assistance from senior tutor OR tutor</label>
+				</div>
+				<div class="form-check mb-2">
+					<input type="checkbox" value="Teaching assistance from tutor" class="form-check-input" id="TeachingCareerAssistanceMarkerCheckBox" name="TeachingCareerAssistanceMarkerCheckBox">
+					<label class="form-check-label fw-normal" for="TeachingCareerAssistanceMarkerCheckBox">Teaching assistance from tutor/senior tutor/marker</label>
+				</div>
+				<div class="form-check mb-2">
+					<input type="checkbox" value="Lecturer" class="form-check-input" id="TeachingLecturerCheckBox" name="TeachingLecturerCheckBox">
+					<label class="form-check-label fw-normal" for="TeachingLecturerCheckBox">Lecturer</label>
+				</div>
+
+			</div>
+			<br />
+		</div>
+
+		<div class="col-md-12" id="careerFinancialSupportData" data-careerFinancialSupport-data='@Html.Raw(Json.Serialize(Model.CareerFinancialSupport))'>
+			<div class="form-group">
+				<label style="font-weight:bold">Financial Support&nbsp;</label>
+
+				<div style="padding-left:40px" class="form-check">
+					<input type="checkbox" value="DHET accredited" class="form-check-input" id="DHETFinancialSupportCheckBox" name="DHETFinancialSupportCheckBox">
+					<label style="font-weight:100">DHET accredited national/international conference presentation.</label>
+				</div>
+				<div style="padding-left:40px" class="form-check">
+					<input type="checkbox" value="Research development workshops" class="form-check-input" id="ResearchFinancialSupportCheckBox" name="ResearchFinancialSupportCheckBox">
+					<label style="font-weight:100">Research development workshops.</label>
+				</div>
+
+			</div>
+			<br />
+		</div>
+
+		<div class="col-md-12">
+
+			<ul class="nav nav-tabs mb-3" role="tablist">
+				<li class="nav-item" role="presentation">
+					<button class="nav-link active" id="workshop-tab"
+							data-bs-toggle="tab" data-bs-target="#WorkshopReg"
+							type="button" role="tab" aria-controls="WorkshopReg" aria-selected="true">
+						Workshop/Conference Registration
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="proofOfInvitation-tab"
+							data-bs-toggle="tab" data-bs-target="#ProofOfInvitation"
+							type="button" role="tab" aria-controls="ProofOfInvitation" aria-selected="false">
+						Proof of Invitation
+					</button>
+				</li>
+				<li class="nav-item" id="ResearchTeachingReliefDocumentsLink" style="display:none" role="presentation">
+					<button class="nav-link" id="researchTeachingRelief-tab"
+							data-bs-toggle="tab" data-bs-target="#ResearchTeachingReliefDocuments"
+							type="button" role="tab" aria-controls="ResearchTeachingReliefDocuments" aria-selected="false">
+						Teaching Relief Documents
+					</button>
+				</li>
+
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="workShopAccommodation-tab"
+							data-bs-toggle="tab" data-bs-target="#workShopAccommodation"
+							type="button" role="tab" aria-controls="workShopAccommodation" aria-selected="false">
+						Accommodation
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="improvingStaffFlights-tab"
+							data-bs-toggle="tab" data-bs-target="#ImprovingStaffResearchFlights"
+							type="button" role="tab" aria-controls="ImprovingStaffResearchFlights" aria-selected="false">
+						Flights
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="improvingStaffOtherCosts-tab"
+							data-bs-toggle="tab" data-bs-target="#ImprovingStaffResearchOtherCosts"
+							type="button" role="tab" aria-controls="ImprovingStaffResearchOtherCosts" aria-selected="false">
+						Other Costs
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="improvingStaffTotalCost-tab"
+							data-bs-toggle="tab" data-bs-target="#ImprovingStaffResearchTotalCostBreakdown"
+							type="button" role="tab" aria-controls="ImprovingStaffResearchTotalCostBreakdown" aria-selected="false">
+						* Total Cost Breakdown
+					</button>
+				</li>
+			</ul>
+
+			<div class="tab-content" id="project2TabContent">
+
+				<div id="WorkshopReg" class="tab-pane fade show active" role="tabpanel" aria-labelledby="WorkshopReg-tab">
+					<div class="mb-4">
+
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							<strong>One</strong> document must be added. Only PDF upload is allowed (Max 5 MB).
+							<span class='text-danger d-none'>*</span>
+						</div>
+
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input disabled required type="file" class="form-control" id="CareerDevelopmentWorkshopRegDoc" name="CareerDevelopmentWorkshopRegDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input disabled type="button" id="CareerDevelopmentWorkshopRegDocBtn" class="btn btn-outline-primary ucdp-upload-btn" value="Add Document" />
+							</div>
+						</div>
+
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofCareerDevelopmentWorkshopRegFiles">
+								<thead>
+									<tr>
+										<th>
+											File Name
+										</th>
+										<th>
+											Action
+										</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+
+				<div id="ProofOfInvitation" class="tab-pane fade" role="tabpanel" aria-labelledby="proofOfInvitation-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							<strong>One</strong> document must be added.
+							Only PDF upload is allowed (Max 5 MB).
+							<span class='text-danger d-none'>*</span>
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input disabled required type="file" class="form-control" id="CareerDevelopmentProofOfInvitationDoc" name="CareerDevelopmentProofOfInvitationDoc" title="Only PDF uploads are allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input disabled type="button" id="CareerDevelopmentProofOfInvitationDocBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="row g-2 mt-3">
+							<div class="col-md-6">
+								<div id="progressbar-5">
+									<div class="progress-label"></div>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofCareerDevelopmentProofOfInvitationDocFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="ResearchTeachingReliefDocuments" class="tab-pane fade" role="tabpanel" aria-labelledby="researchTeachingRelief-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							A maximum of <strong> Ten </strong> documents can be added.
+							Only PDF uploads are allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+							<span class='text-danger'>*</span>
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input disabled required type="file" class="form-control" id="CareerDevelopmentTeachingDoc" name="CareerDevelopmentTeachingDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input disabled type="button" id="CareerDevelopmentTeachingDocBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="row g-2 mt-3">
+							<div class="col-md-6">
+								<div id="progressbar-5">
+									<div class="progress-label"></div>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofCareerDevelopmentTeachingFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="workShopAccommodation" class="tab-pane fade" role="tabpanel" aria-labelledby="workShopAccommodation-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							A maximum of <strong>Three</strong> documents can be added.
+							Only PDF uploads are allowed (Max 5 MB).
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input required type="file" class="form-control" id="CareerDevelopmentWorkshopAccommodationDoc" name="CareerDevelopmentWorkAccommodationDoc" accept=".pdf,application/pdf" title="Only PDF uploads are allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input type="button" id="CareerDevelopmentWorkshopAccommodationBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofWorkshopAccommodationDocumentsFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="ImprovingStaffResearchFlights" class="tab-pane fade" role="tabpanel" aria-labelledby="improvingStaffFlights-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							A maximum of <strong>Three</strong> documents can be added.
+							Only PDF uploads are allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input required type="file" class="form-control" id="ImprovingStaffResearchFlightsDoc" name="ImprovingStaffResearchFlightsDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input type="button" id="ImprovingStaffResearchFlightsDocBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofImprovingStaffResearchFlightsDocumentsFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="ImprovingStaffResearchOtherCosts" class="tab-pane fade" role="tabpanel" aria-labelledby="improvingStaffOtherCosts-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							<strong>One</strong> document can be added.
+							Only PDF upload is allowed (Max 5 MB).
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input required type="file" class="form-control" id="ImprovingStaffResearchOtherCostsDoc" name="ImprovingStaffResearchOtherCostsDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input type="button" id="ImprovingStaffResearchOtherCostsDocBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="row g-2 mt-3">
+							<div class="col-md-6">
+								<div id="progressbar-5">
+									<div class="progress-label"></div>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofImprovingStaffResearchOtherCostsDocumentsFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="ImprovingStaffResearchTotalCostBreakdown" class="tab-pane fade" role="tabpanel" aria-labelledby="improvingStaffTotalCost-tab">
+					<div class="mb-4">
+						<div class="alert alert-info small-text" role="alert">
+							<i class="bi bi-info-circle-fill"></i>
+							<strong>One</strong> document can be added.
+							Only PDF upload is allowed (Max 5 MB).
+						</div>
+						<div class="row g-2 align-items-end">
+							<div class="col-md-6">
+								<input required type="file" class="form-control" id="ImprovingStaffResearchTotalCostBreakdownDoc" name="ImprovingStaffResearchTotalCostBreakdownDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+							</div>
+							<div class="col-md-2">
+								<input type="button" id="ImprovingStaffResearchTotalCostBreakdownDocBtn" class="btn btn-primary hidden-xs" value="Add Document(s)" />
+							</div>
+						</div>
+						<div class="row g-2 mt-3">
+							<div class="col-md-6">
+								<div id="progressbar-5">
+									<div class="progress-label"></div>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive mt-3">
+							<table class="table table-hover" id="ListofImprovingStaffResearchTotalCostBreakdownDocumentsFiles">
+								<thead>
+									<tr>
+										<th>File Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+		<div id="teachingReliefScheduleSection">
+			@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new ResearchSuite.Models.UCDP.Shared.StepSectionHeaderViewModel
+						{
+				Title = "Teaching relief",
+						Subtitle = "The following schedules are reflect the Academic Calendar and the UJ tariffs. Complete the amount of hours per week. NOTE In the table below UJ, Public holidays, recess and study weeks are EXCLUDED as it cannot be claimed for."
+						})
+
+			<div class="col-md-12">
+
+				<div class="alert alert-warning mt-3 mb-4 py-3 px-4 text-white" role="alert">
+					<div class="d-flex align-items-start gap-2">
+						<i class="fas fa-info-circle mt-1"></i>
+						<div>
+							<p class="m-0">
+								Schedule for the academic calendar
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="table-responsive">
+
+					<table id="tblPaymentsStep4" class="project2 table table-bordered align-middle">
+						<thead>
+							<tr>
+								<th class="d-none">Id</th>
+								<th>Type</th>
+
+								<th>From</th>
+
+								<th>To</th>
+
+								<th>Weeks</th>
+
+								<th>Hours/Week</th>
+
+								<th>Total Hours</th>
+
+								<th>
+									UJ Rate/Hour
+									<button type="button" class="btn btn-link p-0 m-0 border-0 shadow-none" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="You can access the UJ Tariff Plan from the menu on the left." data-bs-original-title="You can access the UJ Tariff Plan from the menu on the left.">
+										<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+									</button>
+								</th>
+
+								<th>Total For Month</th>
+
+								<th></th>
+							</tr>
+
+						</thead>
+
+						<tbody>
+					</table>
+
+					<table>
+						<tfoot>
+
+							<tr>
+								<td class="col-md-2 me-md-1">
+									<select required name="txtStudyTypeStep4"
+											id="txtStudyTypeStep4" class="form-select">
+										<option value="">Select type</option>
+										<option value="Lecturer">Lecturer</option>
+										<option value="Tutor">Tutor</option>
+										<option value="Marking">Marking</option>
+										<option value="Research Assistant">Research Assistant</option>
+										<option value="Other">Other</option>
+									</select>
+								</td>
+
+								<td class="col-md-2 me-md-1">
+									<input type="date" id="txtFromStep4" class="form-control datepicker" placeholder="dd/MM/yyyy" />
+								</td>
+
+								<td class="col-md-2 me-md-1">
+									<input type="date" id="txtToStep4" class="form-control datepicker" placeholder="dd/MM/yyyy" />
+								</td>
+
+								<td class="col-md-1  me-md-1">
+									<input type="text" placeholder="Weeks" id="txtNumberOfWeeksStep4" class="form-control txtNumberOfWeeksStep4CalcTrigger" />
+								</td>
+
+								<td class="col-md-1  me-md-1">
+									<input type="text" placeholder="Hours/week" id="txtHrsPerWeekStep4" class="form-control txtHrsPerWeekStep4CalcTrigger" />
+								</td>
+
+								<td class="col-md-1  me-md-1">
+									<input type="text" readonly id="txtNumberOfHoursStep4" class="form-control" />
+								</td>
+
+								<td class="col-md-1  me-md-1">
+									<input type="text" placeholder="UJ Rate/Hour" step="1" id="txtUJRatePerHrStep4" class="form-control txtUJRatePerHrStep4CalcTrigger" />
+								</td>
+
+								<td class="col-md-1  me-md-1">
+									<input type="text" readonly id="txtMonthTotalStep4" class="form-control" />
+								</td>
+
+								<td class="col-md-1">
+									<button type="button" class="btn btn-outline-primary" id="btnAddPaymentsStep4">
+										Add
+									</button>
+									<button type="button" id="btnClearPaymentStep4" class="btn btn-outline-secondary d-none">
+										Clear
+									</button>
+								</td>
+							</tr>
+						</tfoot>
+
+					</table>
+				</div>
+
+				<div class="mt-3 col-md-3 ms-auto">
+					<label class="form-label" for="TotalStep4">Total</label>
+					<input readonly id="TotalStep4"
+						   name="TotalStep4"
+						   class="form-control" />
+				</div>
+
+			</div>
+		</div>
+	</form>
+
+	@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepWizardButtons.cshtml", new StepWizardButtonsViewModel
+		{
+		NextButtonClass = "nextBtnResearch",
+		CloseButtonId = "btnCloseResearch",
+		BackButtonClass = "backBtnResearch",
+		ShowBackButton = true
+		})
+
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>

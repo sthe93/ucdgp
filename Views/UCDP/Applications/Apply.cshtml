@@ -1,0 +1,305 @@
+﻿@using ResearchSuite.Models.UCDP.Shared
+@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+
+@{
+	ViewData["Title"] = "Funding Call Application";
+}
+
+<div class="container-fluid py-4" id="ucdpApplyRoot" data-mode="@ViewBag.Mode" data-is-readonly="@ViewBag.IsReadOnly.ToString().ToLower()" data-is-editmode="@ViewBag.IsEditMode.ToString().ToLower()">
+	<div class="form-section ucdp-application-shell">
+
+		@await Html.PartialAsync(
+		"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+				new StepSectionHeaderViewModel
+				{
+					Title = "Funding Call Application",
+					Subtitle = "Complete each section below to submit your application"
+				})
+
+		<div class="ucdp-stepper-shell mb-4">
+			<div class="stepwizard setup-panel ucdp-bubble-stepper">
+
+				<div id="ApplicantDetailsStep" class="stepwizard-step">
+					<a href="#ApplicantDetailsTab" class="step-bubble" disabled="disabled" title="Applicant Details">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-user"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">Applicant Details</span>
+							<span class="step-bubble-subtitle">Personal profile</span>
+						</span>
+					</a>
+				</div>
+
+				<div id="ApproveDiv" class="stepwizard-step">
+					<a href="#ApproveTab" class="step-bubble" disabled="disabled" title="Projects attached to this funding call">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-diagram-project"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">Approved Projects</span>
+							<span class="step-bubble-subtitle">Project selection</span>
+						</span>
+					</a>
+				</div>
+
+				<div id="ImprovementStaffDiv" class="stepwizard-step" style="display:none">
+					<a href="#ImprovementStaffTab" class="step-bubble" disabled="disabled" title="Research improvement of staff qualifications">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-graduation-cap"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">Improvement of Staff Qualifications</span>
+							<span class="step-bubble-subtitle">Project 1</span>
+						</span>
+					</a>
+				</div>
+
+				<div id="ResearchCareerDiv" class="stepwizard-step" style="display:none">
+					<a href="#ResearchCareerTab" class="step-bubble" disabled="disabled" title="Research career development of emerging and mid-career researchers">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-chart-line"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">Research career development of emerging and mid‑career researchers</span>
+							<span class="step-bubble-subtitle">Project 2</span>
+						</span>
+					</a>
+				</div>
+
+				<div id="MobilityProgrammesDiv" class="stepwizard-step" style="display:none">
+					<a href="#MobilityProgrammesTab" class="step-bubble" disabled="disabled" title="International collaboration and networking">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-globe"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">International collaboration &amp; networking</span>
+							<span class="step-bubble-subtitle">Project 5</span>
+						</span>
+					</a>
+				</div>
+
+				<div id="SupportingInformationDiv" class="stepwizard-step">
+					<a href="#SupportingInformationTab" class="step-bubble" disabled="disabled" title="Supporting information and financial implications">
+						<span class="step-bubble-icon">
+							<i class="fa-solid fa-file-lines"></i>
+						</span>
+						<span class="step-bubble-text">
+							<span class="step-bubble-title">Supporting Information and Financial Implication</span>
+							<span class="step-bubble-subtitle">Final section</span>
+						</span>
+					</a>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="ucdp-step-content">
+			<div class="panel panel-primary setup-content" id="ApplicantDetailsTab">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepApplicantDetails.cshtml", Model)
+			</div>
+
+			<div class="panel panel-primary setup-content" id="ApproveTab" style="display:none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepApprovedProjects.cshtml", Model)
+			</div>
+
+			<div class="panel panel-primary setup-content" id="ImprovementStaffTab" style="display:none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepImprovingStaffResearch.cshtml", Model)
+			</div>
+
+			<div class="panel panel-primary setup-content" id="ResearchCareerTab" style="display:none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepResearchCareer.cshtml", Model)
+			</div>
+
+			<div class="panel panel-primary setup-content" id="MobilityProgrammesTab" style="display:none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepMobility.cshtml", Model)
+			</div>
+
+			<div class="panel panel-primary setup-content" id="SupportingInformationTab" style="display:none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Partials/_StepFinancialmplication.cshtml", Model)
+			</div>
+		</div>
+		<div id="sharedHiddenFields">
+			<input type="hidden" id="UserId" name="UserId" value="@Model?.UserDetails?.UserId" />
+			<input type="hidden" id="Id" name="Id" value="@Model?.Id" />
+			<input type="hidden" id="FundingCallDetailsId" name="FundingCallDetailsId" value="@Model?.FundingCallDetails?.Id" />
+			<input type="hidden" id="ApplicantCategory" name="ApplicantCategory" value="@Model?.ApplicantCategory" />
+			<input type="hidden" id="AppointmentCategory" name="AppointmentCategory" value="@Model?.AppointmentCategory" />
+            <input type="hidden" id="ReturnUrl" value="@ViewBag.ReturnUrl" />
+		</div>
+	</div>
+</div>
+
+<div id="dashLoading"
+     class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+@section Scripts {
+	<script src="~/js/ucdp/apply.js"></script>
+	<script src="~/js/ucdp/Stepper.js"></script>
+	<script src="~/js/ucdp/apply/document-staging.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/_stepapplicantdetails.js" asp-append-version="true"></script>
+	<script src="~/js/ucdp/application/viewmotivationletter.js"></script>
+	<script src="~/js/ucdp/application/viewdocument.js" ?v=@DateTime.Now.Ticks></script>
+	<script src="~/js/ucdp/apply/stepResearchCareer.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/stepProject1.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/project5.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/apply/approvedProjects.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/application/_financial-implication.js"></script>
+}
+
+<div class="modal fade" id="pdfModal" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-centered pdf-modal-dialog">
+		<div class="modal-content pdf-modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Document Viewer</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+
+			<div class="modal-body pdf-modal-body">
+				<iframe id="pdfViewer" class="pdf-iframe"></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="viewDocumentModalLabel">Document</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<iframe id="documentViewer"></iframe>
+			</div>
+			<div class="modal-footer">
+				<div id="footerDiv" style="padding-right:50px; padding-bottom:20px" class="row">
+				</div>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="documentViewerModalLabel">View Document</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body p-0">
+				<iframe id="documentViewerIframe" src="" width="100%" height="700px" style="border:0;"></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Delete document modal -->
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header" style="background:#ff6a00;color:#fff;">
+				<h5 class="modal-title" id="commentsModalLabel">Delete File</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<label for="deleteFileComments" class="form-label small text-muted">Are you sure you want to delete this file?</label>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary closeBtn" data-bs-dismiss="modal">Close</button>
+				<button id="btnSubmitDeleteFile" type="button" class="btn" style="background:#ff6a00;color:#fff;border-color:#ff6a00;">Delete</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Terms & Conditions modal - styled to match existing modals in this solution -->
+<div class="modal fade" id="myTermsAndCondition" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true" data-bs-backdrop="static">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header" style="background:#ff6a00;color:#fff;">
+				<h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body p-4">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<p>
+							I confirm that the information supplied in this application is correct and that, if my application is successful, I understand that I will be subject to,
+							and will abide by the policies (UJ financial and other administrative processes and policies (eg. UJ’s Travel Policy; UJ rates for temporary staff, etc.),
+							requirements and rules of the Department of Higher Education and Training (DHET) University Capacity Development Programme/Grant (UCDP/G).
+						</p>
+
+						<p style="font-weight: bold; padding-left: 30px">
+							I understand that my application will only be considered if:
+						</p>
+
+						<ul style="padding-left:50px">
+							<li>Application is completed in full.</li>
+							<li>There is an indication of the previous UCDG-supported project's outcome (if previously funded).</li>
+							<li>All required supporting documents stipulated in the guidelines are attached.</li>
+							<li>Read the terms and condition of the grant <a asp-area="" asp-controller="Home" asp-action="GetTCManual" style="text-decoration:underline" target="_blank" class="text-orange"><strong>HERE</strong></a>.</li>
+							<li>Applications with co-funding will be given priority.</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary closeBtn" data-bs-dismiss="modal">Reject</button>
+				<button type="button" class="btn" id="acceptTerms" style="background:#ff6a00;color:#fff;border-color:#ff6a00">Accept</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Decline application modal -->
+<div class="modal fade" id="addDeclineApplicationModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#ff6a00;color:#fff;">
+                <h5 class="modal-title" id="commentsModalLabel">Decline Application</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="declineApplicationComments" class="form-label small text-muted">Enter reason for declining the application (max 300 chars)</label>
+                <textarea id="declineApplicationComments" name="comment" maxlength="300" rows="6" class="form-control" placeholder="Enter comments here..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary closeBtn" data-bs-dismiss="modal">Close</button>
+                <button id="btnSubmitDeclineApplication" type="button" class="btn" style="background:#ff6a00;color:#fff;border-color:#ff6a00;">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RFI application modal -->
+<div class="modal fade" id="addRFIApplicationModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#ff6a00;color:#fff;">
+				<h5 class="modal-title" id="commentsModalLabel">Return Application For Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="rfiApplicationComments" class="form-label small text-muted">Enter reason for return the application for information (max 300 chars)</label>
+                <textarea id="rfiApplicationComments" name="comment" maxlength="300" rows="6" class="form-control" placeholder="Enter comments here..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary closeBtn" data-bs-dismiss="modal">Close</button>
+                <button id="btnSubmitRFIApplication" type="button" class="btn" style="background:#ff6a00;color:#fff;border-color:#ff6a00;">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+

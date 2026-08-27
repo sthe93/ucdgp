@@ -1,0 +1,302 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+	@model ResearchSuite.Models.Oross.NewSubmissionViewModel
+	var basePath = HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+	ViewData["Title"] = Model.IsEditMode ? "Edit Research Submission" : "New Research Submission";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var headerText = Model.IsEditMode ? "Edit Research Submission" : "New Research Submission";
+}
+
+<section class="py-4 container">
+	<form asp-controller="Oross" asp-action="NewSubmission" method="post" enctype="multipart/form-data" id="orossForm">
+		@Html.AntiForgeryToken()
+
+		@Html.HiddenFor(m => m.Username)
+		@Html.HiddenFor(m => m.Giud)
+		<input type="hidden" id="IsEditMode" name="IsEditMode" value="@(Model.IsEditMode.ToString().ToLower())" />
+		@Html.HiddenFor(m => m.AuthorJson, new { id = "AuthorJson" })
+
+		<input type="hidden" id="title-exists-message" value="@TempData["TitleExists"]" />
+
+		<div class="form-section mb-4 px-3">
+			<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+				<h2 class="text-orange mb-0">@headerText</h2>
+			</div>
+			<div class="row g-4 align-items-start">
+				<div class="col-md-12">
+					<div class="mb-4 mt-3">
+						@await Html.PartialAsync("_SwitchWithTooltip", Model.InstitutionalRepoModel)
+					</div>
+				</div>
+			</div>
+
+			@await Html.PartialAsync("_SwitchWithTooltip", Model.OwnWorkModel)
+
+			<div class="accordion mb-4" id="authorSectionAccordion">
+				<div class="accordion-item">
+					<h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingAuthors">
+						<button class="accordion-button collapsed flex-grow-1" type="button"
+								data-bs-toggle="collapse"
+								data-bs-target="#collapseAuthors"
+								aria-expanded="false"
+								aria-controls="collapseAuthors">
+							Manage authors
+						</button>
+
+						@if (!Model.IsEditMode)
+						{
+							<button id="addAuthorBtn" class="btn btn-primary btn-sm ms-2" type="button">Add author</button>
+						}
+
+					</h2>
+
+
+					<div id="collapseAuthors" class="accordion-collapse collapse show" aria-labelledby="headingAuthors" data-bs-parent="#authorSectionAccordion">
+						<div class="accordion-body p-3">
+							<ul id="authorList" class="list-group"></ul>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			@if (!Model.IsEditMode)
+			{
+				<div class="mb-3 mt-4 position-relative">
+					@Html.LabelFor(m => m.NotificationEmails, "Notification emails", new { @class = "form-label" })
+					@Html.TextAreaFor(m => m.NotificationEmails, new { @class = "form-control", @rows = "3", @placeholder = "e.g. jane.doe@uj.ac.za, naledi.m@uj.ac.za" })
+					@Html.ValidationMessageFor(m => m.NotificationEmails, "", new { @class = "text-danger" })
+
+					<div class="form-text text-muted">
+						Separate by comma, space, or new line. Invalid emails will be flagged below.
+					</div>
+					<div id="emailFeedback" class="mt-2 small"></div>
+					<div class="mt-1">
+						<button type="button" id="clearEmailsBtn" class="btn btn-sm btn-outline-secondary">Clear</button>
+						<button type="button" id="saveEmailsBtn" class="btn btn-sm btn-outline-primary">Save list</button>
+					</div>
+				</div>
+			}
+			<div class="row g-4 align-items-start mb-4">
+				<!-- Dropdown: Research Type -->
+				<div class="col-md-12">
+					@Html.LabelFor(m => m.ResearchType, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.DropDownListFor(m => m.ResearchType, Model.ResearchTypeOptions, new { @class = "form-select" })
+					@Html.ValidationMessageFor(m => m.ResearchType, "", new { @class = "text-danger" })
+				</div>
+			</div>
+
+			@* Hidden element for JS *@
+			<div id="researchTypesData" data-types='@Html.Raw(Json.Serialize(Model.ResearchOutputTypes))' class="d-none"></div>
+
+			@* <h5 class="text-muted mb-2">2. Additional Details</h5> *@
+			<div id="Section_Journal" class="publication-section">
+				@await Html.PartialAsync("Partials/_journal", Model)
+			</div>
+
+		</div>
+
+	</form>
+</section>
+
+
+<div class="modal fade" id="addAuthorModal" tabindex="-1" aria-labelledby="addAuthorModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<form id="addAuthorForm" class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addAuthorModalLabel">Add Author</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<div class="mb-3">
+					<label for="authorNumberInput" class="form-label">Student number / Staff number / Username</label>
+					<div class="input-group mb-4">
+						<input type="text" id="authorNumberInput" class="form-control" placeholder="e.g. 2021123456" />
+						<button type="button" id="searchAuthorBtn" class="btn btn-outline-primary">Search</button>
+					</div>
+					<div class="alert alert-info small-text mt-1" role="alert">
+						<i class="bi bi-info-circle-fill"></i>
+						If the user profile cannot be found, it may mean the user's email address is not correctly recorded on Oracle EBS.
+						Please ask HR Admin to update the details by contacting
+						<u><strong><a href="mailto:hradmin@uj.ac.za" class="text-primary">hradmin@uj.ac.za</a></strong></u>.
+						Once the update has been made, sign out and sign in again to refresh the profile.
+					</div>
+
+				</div>
+
+				<div id="internalAuthorDetails" class="border rounded p-3 mb-2 d-none">
+					<div class="row g-2">
+						<div class="col-md-6">
+							<strong>Username:</strong> <span id="detailUsername"></span>
+						</div>
+						<div class="col-md-6">
+							<strong>Number:</strong> <span id="detailStaffNumber"></span>
+						</div>
+					</div>
+
+					<div class="row g-2 mt-2">
+						<div class="col-md-6">
+							<strong>First name:</strong> <span id="detailFirstname"></span>
+						</div>
+						<div class="col-md-6">
+							<strong>Last name:</strong> <span id="detailLastname"></span>
+						</div>
+					</div>
+
+					<div class="row g-2 mt-2">
+						<div class="col-md-6">
+							<strong>Email address:</strong> <span id="detailEmail"></span>
+						</div>
+						<div class="col-md-6">
+							<strong>Position:</strong> <span id="detailPosition"></span>
+						</div>
+					</div>
+
+					<div class="row g-2 mt-2">
+						<div class="col-md-6">
+							<strong>Faculty:</strong> <span id="detailFaculty"></span>
+						</div>
+						<div class="col-md-6">
+							<strong>Department:</strong> <span id="detailDepartment"></span>
+						</div>
+					</div>
+					<div class="row g-3 mt-3 align-items-center">
+						<div class="col-md-6">
+							<label for="orchidInput" class="form-label mb-1">ORCHID ID (optional)</label>
+							<input type="text" id="orchidInput" class="form-control" placeholder="Enter ORCHID ID" />
+						</div>
+						<div class="col-md-6">
+							<div class="form-section p-2 mt-3 border rounded bg-light-subtle w-100">
+								<div class="d-flex justify-content-between align-items-center">
+									<label class="fw-bold mb-0 me-2">Author affiliated with another institution</label>
+									<div class="uj-switch-toggle" data-input-id="affiliatedSwitch">
+										<span class="switch-label off me-1">No</span>
+										<input type="hidden" id="affiliatedSwitch" name="affiliatedSwitch" value="false" />
+										<div class="tri-state-slider off">
+											<div class="slider-handle"></div>
+										</div>
+										<span class="switch-label on ms-1">Yes</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+
+					<div id="affiliationFields" class="mt-3 d-none">
+						<div class="row g-2">
+							<div class="col-md-6">
+								<label for="affiliationInstitution" class="form-label">Institution</label>
+								<input type="text" id="affiliationInstitution" class="form-control" placeholder="Enter institution name" placeholder="e.g. Harvard University" maxlength="25" />
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Institution affiliation type</label>
+								<select id="externalInstitutionType" class="form-select">
+									<option value="" disabled selected>Select institution</option>
+									<option value="1">Other SA institution</option>
+									<option value="2">Other international institution</option>
+									<option value="3">Other SA institution other than university</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<input type="hidden" name="LoggedInUser" id="LoggedInUser" />
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button type="submit" class="btn btn-primary" id="saveAuthorBtn">Add Author</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+
+<!-- Book Chapter Confirmation Modal -->
+<div class="modal fade" id="bookChapterModal" tabindex="-1" aria-labelledby="bookChapterModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="bookChapterModalLabel">Confirm book chapter type</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Is the book chapter you are submitting an introduction or a conclusion?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" id="bookChapterYesBtn">Yes</button>
+				<button type="button" class="btn btn-secondary" id="bookChapterNoBtn">No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="invalidChapterModal" tabindex="-1" aria-labelledby="invalidChapterModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content border border-danger">
+			<div class="modal-header bg-danger text-white">
+				<h5 class="modal-title" id="invalidChapterModalLabel">Invalid chapter type</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>Introduction and Conclusion are not claimable book chapters.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="fileErrorModal" tabindex="-1" aria-labelledby="fileErrorModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-danger text-white">
+				<h5 class="modal-title" id="fileErrorModalLabel">Duplicate file detected</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="fileErrorModalBody">
+				<!-- Dynamic message will be inserted here -->
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Ok</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="viewVerifyModal" tabindex="-1" aria-labelledby="viewVerifyModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="viewVerifyModalLabel">View & Verify</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<iframe id="documentViewer"></iframe>
+				<div class="form-check mt-3">
+					<input class="form-check-input" type="checkbox" value="" id="modalVerifyCheckbox" data-bs-dismiss="modal">
+
+					<label class="form-check-label text-light" id="modalVerifyLabel" for="modalVerifyCheckbox">
+						I confirm I have viewed and verified the document.
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="orossLoading" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+	<div class="spinner-border text-light spinner-lg" role="status">
+		<span class="visually-hidden">Loading...</span>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="~/js/oross/oross-form.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/oross/journal.js?v=@DateTime.Now.Ticks"></script>
+}

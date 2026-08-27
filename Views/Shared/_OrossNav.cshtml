@@ -1,0 +1,34 @@
+﻿@using ResearchSuite.Helpers
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	var currentPath = Context.Request.Path.ToString().TrimEnd('/').ToLower();
+	var basePath = HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+	var moduleName = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+	var user = Context.User;
+
+	var userRole = UserHelper.GetRoleForApp(user, moduleName);
+
+}
+
+<aside id="sidebar" class="module-sidebar position-fixed bottom-0">
+	<div class="sidebar-inner py-4 px-3">
+		<div class="sidebar-title mb-4 px-2 fw-bold small">
+			<div class="d-flex justify-content-between align-items-center">
+				<span class="text-primary text-uppercase">OROST</span>
+
+				@if (!string.IsNullOrWhiteSpace(userRole) && userRole != "Unknown")
+				{
+					<span class="badge rounded-pill bg-secondary ms-2">@userRole</span>
+				}
+			</div>
+			@* <span class="text-primary">@moduleName.ToUpper()</span>
+			<div class="text-muted small mt-1">@userRole</div> *@
+		</div>
+		<nav class="nav flex-column sidebar-nav">
+
+			<a class="nav-link @(currentPath == "/oross/index" ? "active" : "")" href="@($"{basePath}/Oross/Index")">
+				<i class="fas fa-file-alt me-2"></i> Research Submissions
+			</a>
+		</nav>
+	</div>
+</aside>

@@ -1,0 +1,164 @@
+﻿@model ResearchSuite.Models.Oross.SubmissionFilter
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+	ViewData["Title"] = "Research Submissions";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var basePath = HttpContextAccessor.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+	var userRole = HttpContextAccessor.HttpContext?.User?.FindFirst("role_oross")?.Value?.ToLowerInvariant();
+	var username = HttpContextAccessor.HttpContext?.User?.FindFirst("Username")?.Value?.ToLowerInvariant();
+	var loggedInFirstName = HttpContextAccessor.HttpContext?.User?.FindFirst("FirstName")?.Value?.ToLowerInvariant();
+	var loggedInLastName =HttpContextAccessor.HttpContext?.User?.FindFirst("LastName")?.Value?.ToLowerInvariant();
+
+}
+<section class="py-4">
+
+	<div class="form-section mb-4">
+		<form id="filterForm" class="row g-3 mb-5 align-items-end">
+			@Html.AntiForgeryToken()
+			<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+				<h2 class="text-orange mb-0">Research Submissions Dashboard</h2>
+				<a href="@($"{basePath}/Oross/NewSubmission")" class="btn btn-outline-orange fw-bold">
+					+ New submission
+				</a>
+			</div>
+			<input type="hidden" id="currentUserRole" value="@userRole" />
+			<input type="hidden" id="currentusername" value="@username" />
+			<input type="hidden" id="loggedInFirstName" value="@loggedInFirstName" />
+			<input type="hidden" id="loggedInLastName" value="@loggedInLastName" />
+
+			<div class="row g-3 align-items-end">
+
+				<!-- SubmissionsType -->
+				<div class="col-md-4">
+					<label class="form-label">Submission type</label>
+					<select class="form-select" name="SubmissionsType" id="SubmissionsType">
+						<option value="0">All</option>
+						<option value="1">Submissions created by me</option>
+						<option value="2">On behalf of author</option>
+						@if (userRole == "faculty coordinator")
+						{
+							<option value="3">Faculty submissions</option>
+						}
+					</select>
+				</div>
+
+				<!-- Faculty -->
+				@if (userRole == "admin")
+				{
+					<div class="col-md-4">
+						<label class="form-label text-light">Faculty</label>
+						<select class="form-select" name="Faculty" id="Faculty"
+								asp-items="Model.submissionViewModel.FacultyOptions">
+						</select>
+					</div>
+				}
+				<!-- SDG -->
+				<div class="col-md-4">
+					<label class="form-label text-light">SDG</label>
+					<select class="form-select" name="Sdg" id="Sdg"
+							asp-items="Model.submissionViewModel.SDGOptions">
+					</select>
+				</div>
+				@if (userRole == "admin" || userRole == "faculty coordinator")
+				{
+					<!-- Research Type -->
+					<div class="col-md-4">
+						<label class="form-label text-light">Research type</label>
+						<select class="form-select" name="ResearchType" id="ResearchType"
+								asp-items="Model.submissionViewModel.ResearchTypeOptions">
+						</select>
+					</div>
+
+					<!-- Start Date -->
+					<div class="col-md-4">
+						<label class="form-label text-light">Start date</label>
+						<input asp-for="StartDate" class="form-control datepicker" placeholder="e.g., 6 Jul 2022" />
+					</div>
+
+					<!-- End Date -->
+					<div class="col-md-4">
+						<label class="form-label text-light">End date</label>
+						<input asp-for="EndDate" class="form-control datepicker" placeholder="e.g., 6 Jul 2022" />
+					</div>
+				}
+
+				<div class="col-md-4 d-flex gap-2">
+					<button type="submit" class="btn btn-primary flex-grow-1">
+						<i class="bi bi-search me-1"></i> Search
+					</button>
+
+					<button type="button" class="btn btn-secondary flex-grow-1" id="exportExcelBtn">
+						<i class="bi bi-save me-1 me-1"></i> Export
+					</button>
+				</div>
+
+			</div>
+
+		</form>
+		<div class="table-responsive">
+			<table id="UserDashBoardTable" class="table table-bordered w-100 mb-0">
+				<thead>
+					<tr>
+						<th>Reference Number</th>
+						<th>Created By</th>
+						<th>Author</th>
+						<th>Primary Author</th>
+						<th>Research Type</th>
+						<th>Publication Title</th>
+						<th>Faculty</th>
+						<th>SDG</th>
+						<th>Included to Repository</th>
+						<th>Created Date</th>
+						<th>RFA Date</th>
+						<th>RFA Status</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+</section>
+
+
+
+
+
+
+<!-- Confirm Add to Repository Modal -->
+<div class="modal fade" id="confirmAddToRepoModal" tabindex="-1" aria-labelledby="confirmAddToRepoLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="confirmAddToRepoLabel">Confirm add to repository</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to add the research output titled:
+				<span id="repo-paper-title"></span> to the repository?
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button id="btnConfirmAddToRepo" type="button" class="btn btn-primary">Yes, add</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="exportLoading" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+	<div class="spinner-border text-light spinner-lg" role="status">
+		<span class="visually-hidden">Loading...</span>
+	</div>
+</div>
+<div id="appBasePathContainer" data-base-path="@basePath"></div>
+<div id="toastMessages" data-success="@TempData["SuccessMessage"]" data-failure="@TempData["FailureMessage"]">
+</div>
+
+@section Scripts {
+	<script src="~/js/oross/_userdashboard.js?v=@DateTime.Now.Ticks"></script>
+}

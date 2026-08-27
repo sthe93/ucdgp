@@ -1,0 +1,376 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@using System.Globalization
+@using System.Linq
+@using ResearchSuite.Models.UCDP.Shared
+
+@{
+	var user = Model?.UserDetails;
+	var previousFundingList = Model?.previousFundingViewModel as IEnumerable<ResearchSuite.Models.UCDP.PreviousFundingViewModel>
+									?? Enumerable.Empty<ResearchSuite.Models.UCDP.PreviousFundingViewModel>();
+
+	var hasPreviousFunding = previousFundingList.Any();
+	var PreviousFundingValue = hasPreviousFunding ? "Yes" : "No";
+
+	var approvedAmount = previousFundingList
+		.Where(x => !string.IsNullOrWhiteSpace(x?.ApplicationDetails?.ApprovedAmount))
+		.Select(x => x.ApplicationDetails.ApprovedAmount)
+		.FirstOrDefault();
+
+	var approvedAmountDisplay = "";
+
+	if (!string.IsNullOrWhiteSpace(approvedAmount))
+	{
+		var cleanedAmount = approvedAmount
+			.Replace("R", "")
+			.Replace(" ", "")
+			.Replace(",", "")
+			.Trim();
+
+		if (decimal.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedAmount))
+		{
+			approvedAmountDisplay = $"R{parsedAmount.ToString("N2", CultureInfo.InvariantCulture)}";
+		}
+	}
+
+	// var PreviousFundingOutcome = previousFundingList
+	// 	.Where(x => !string.IsNullOrWhiteSpace(x?.ApplicationDetails?.OutputMeasure))
+	// 	.Select(x => x.ApplicationDetails.OutputMeasure)
+	// 	.FirstOrDefault();
+
+	int? previousFundingYear = previousFundingList
+		.Select(x => x?.ApplicationDetails?.FundingStartDate)
+		.Where(d => d.HasValue)
+		.OrderByDescending(d => d.Value)
+		.Select(d => (int?)d.Value.Year)
+		.FirstOrDefault();
+	bool requiresMotivationLetter = hasPreviousFunding;
+	bool showUpload = hasPreviousFunding;
+
+	var staffNumber = user?.StaffNumber ?? "";
+	var maskedStaffNumber = !string.IsNullOrWhiteSpace(staffNumber) && staffNumber.Length > 5
+		? staffNumber.Substring(0, staffNumber.Length - 5) + "*****"
+		: staffNumber;
+
+	var idPassport = user?.IdPassportNumber ?? "";
+	var maskedIdPassport = !string.IsNullOrWhiteSpace(idPassport) && idPassport.Length > 7
+		? idPassport.Substring(0, idPassport.Length - 7) + "*******"
+		: idPassport;
+
+	var nationality = user?.Nationality ?? "";
+	var maskedNationality = !string.IsNullOrWhiteSpace(nationality) && nationality.Length > 4
+		? "*******"
+		: nationality;
+
+	var gender = user?.Gender ?? "";
+	var maskedGender = !string.IsNullOrWhiteSpace(gender) && gender.Length > 0
+		? "*******"
+		: gender;
+
+	var race = user?.Race ?? "";
+	var maskedRace = !string.IsNullOrWhiteSpace(race) && race.Length > 0
+		? "*******"
+		: race;
+
+	var title = user?.Title ?? "";
+	var maskedTitle = !string.IsNullOrWhiteSpace(title) && title.Length > 0
+		? "*******"
+		: title;
+
+	var fundingStartDate =
+		(Model?.Id == 0 || Model?.FundingStartDate == default(DateTime))
+			? (Model?.FundingCallDetails?.OpeningDate != null
+				? Model.FundingCallDetails.OpeningDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
+				: "")
+			: Model.FundingStartDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+
+	var fundingEndDate =
+		(Model?.Id == 0 || Model?.FundingEndDate == default(DateTime))
+			? (Model?.FundingCallDetails?.ClosingDate != null
+				? Model.FundingCallDetails.ClosingDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
+				: "")
+			: Model.FundingEndDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+}
+
+<div class="panel-body">
+
+	@await Html.PartialAsync(
+	"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+		new StepSectionHeaderViewModel
+		{
+			Title = "Applicant details",
+			Subtitle = "Review your profile information and complete the required funding details below"
+		})
+
+	@Html.AntiForgeryToken()
+
+	<form id="ApplicantDetailsForm" class="row g-4">
+		<div class="col-md-4">
+			<label class="form-label">First name</label>
+			<input required disabled placeholder="First Name" class="form-control" type="text" name="FirstName" id="FirstName" value="@user?.FirstName" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Surname</label>
+			<input disabled placeholder="Surname" class="form-control" type="text" name="Surname" id="Surname" value="@user?.Surname" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Employee number</label>
+			<input disabled placeholder="Employee number" class="form-control" type="text" name="EmployeeNumber" id="EmployeeNumber" value="@maskedStaffNumber" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Title</label>
+			<input disabled placeholder="Title" class="form-control" type="text" name="Title" id="Title" value="@maskedTitle" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Nationality</label>
+			<input disabled placeholder="Nationality" class="form-control" type="text" name="Nationality" id="Nationality" value="@maskedNationality" />
+		</div>
+
+		<div class="col-md-4">
+			<label for="dob" class="form-label">Date of birth</label>
+			<input disabled class="form-control" id="dob" name="dob" readonly type="text" value='@(user?.DateOfBirth?.ToString("dd-MMMM-yyyy", CultureInfo.InvariantCulture) ?? "")' />
+		</div>
+
+		<div class="col-md-4">
+			<label for="iDPassportNumber" class="form-label">ID/Passport number</label>
+			<input disabled class="form-control" id="iDPassportNumber" name="iDPassportNumber" readonly type="text" value="@maskedIdPassport" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Email address</label>
+			<input required disabled placeholder="Email Address" class="form-control" type="text" name="EmailAddress" id="EmailAddress" value="@user?.EmailAddress" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Contact number</label>
+			<input disabled placeholder="Contact Number" class="form-control" type="text" name="ContactNumber" id="ContactNumber" value="@user?.CellPhoneNumber" />
+		</div>
+
+		<div class="col-md-4">
+			<label for="telephoneNumber" class="form-label">Telephone number</label>
+			<input disabled class="form-control" id="telephoneNumber" name="telephoneNumber" readonly type="text" value="@user?.TelephoneNumber" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Faculty</label>
+			<input required disabled placeholder="Faculty" class="form-control" type="text" name="Faculty" id="Faculty" value="@user?.Faculty" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Department</label>
+			<input disabled placeholder="Department" class="form-control" type="text" name="Department" id="Department" value="@user?.Department" />
+		</div>
+
+		<div class="col-md-4">
+			<label for="campus" class="form-label">Campus</label>
+			<input disabled class="form-control" id="campus" name="campus" readonly type="text" value="@user?.Campus" />
+		</div>
+
+		<div class="col-md-4">
+			<label for="position" class="form-label">Position</label>
+			<input disabled class="form-control" id="position" name="position" readonly type="text" value="@user?.Position" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Race</label>
+			<input required disabled placeholder="Race" class="form-control" type="text" name="Race" id="Race" value="@maskedRace" />
+		</div>
+
+		<div class="col-md-4">
+			<label class="form-label">Gender</label>
+			<input required disabled placeholder="Gender" class="form-control" type="text" name="Gender" id="Gender" value="@maskedGender" />
+		</div>
+
+		<div class="col-md-4">
+			<label for="disability" class="form-label">Disability</label>
+			<input disabled class="form-control" id="disability" name="disability" readonly type="text" value="@user?.Disability" />
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">First Line manager</label>
+			<input disabled placeholder="Line Manager/HOD" class="form-control" type="text" name="LineManagerHOD" id="LineManagerHOD" value="@user?.HOD" />
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">Second Line manager</label>
+			<input disabled placeholder="Executive / Vice Dean" class="form-control" type="text" name="FacultyViceDean" id="FacultyViceDean" value="@user?.ViceDean" />
+		</div>
+
+		<div class="col-md-12">
+			@await Html.PartialAsync(
+						"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+						new StepSectionHeaderViewModel
+						{
+							Title = "Funding application details",
+							Subtitle = "Complete the fields below to continue with your application"
+						})
+		</div>
+
+		<div class="col-md-3">
+			<label for="FundingStartDate" class="form-label">Funding start date <span class="text-danger">*</span></label>
+			<input disabled required type="text" id="FundingStartDate" name="FundingStartDate" class="form-control" value="@fundingStartDate" />
+		</div>
+
+		<div class="col-md-3">
+			<label for="FundingEndDate" class="form-label">Funding end date <span class="text-danger">*</span></label>
+			<input disabled required type="text" id="FundingEndDate" name="FundingEndDate" class="form-control" value="@fundingEndDate" />
+		</div>
+
+		<div class="col-md-6">
+			<label for="CostCentre" class="form-label">Research cost centre</label>
+			<div class="input-group">
+				<input placeholder="Enter Cost Centre Number" class="form-control" type="text" name="CostCentre" id="CostCentre" value="@Model?.CostCentreNumber" />
+				<button id="btnCostCentre" type="button" class="btn btn-outline-primary">
+					<span class="btn-icon d-none"></span>
+					<span class="btn-label">Verify</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">
+				Cost centre name
+				<button type="button"
+						class="btn btn-link p-0 m-0 border-0 shadow-none"
+						data-bs-toggle="tooltip"
+						data-bs-placement="top"
+						title="Please note that selecting the incorrect cost center number will delay your application.">
+					<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+				</button>
+			</label>
+			<input disabled class="form-control" type="text" name="costcentrename" id="costcentrename" value="@Model?.CostCentreName" />
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">Cost centre number</label>
+			<input disabled class="form-control" type="text" name="costcentrenumber" id="costcentrenumber" value="@Model?.CostCentreNumber" />
+		</div>
+
+		@if (hasPreviousFunding)
+		{
+			@* decimal parsedAmount = 0;
+			var hasAmount = decimal.TryParse(approvedAmount, out parsedAmount); *@
+
+			<div class="col-md-12">
+				@await Html.PartialAsync(
+				"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+						new StepSectionHeaderViewModel
+						{
+							Title = "Previous funding",
+							Subtitle = "Provide details of previous funding received"
+						})
+		</div>
+
+		<div id="divPreviousFundingDetails" class="col-12"></div>
+
+		<div class="col-md-6">
+			<label class="form-label">Previous awarded amount</label>
+			<input readonly disabled class="form-control"
+				   type="text"
+				   name="previousfundingamount"
+				   id="previousfundingamount"
+				   value="@approvedAmountDisplay" />
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">Year funded</label>
+			<input disabled name="previousfundingyear" id="previousfundingyear" class="form-control" value="@(previousFundingYear?.ToString() ?? "")" />
+		</div>
+
+		<div class="col-12">
+			<label class="form-label">State the measurable output impact achieved <span class="text-danger">*</span></label>
+			<textarea maxlength="500" class="form-control" id="previousfundingoutcome" name="previousfundingoutcome" rows="4">@(Model.PreviousFundingOutcome ?? "")</textarea>
+		</div>
+				}
+
+		<input type="hidden" value="@requiresMotivationLetter.ToString().ToLower()" id="UploadMotivtion" name="UploadMotivtion" />
+		<input type="hidden" value="@PreviousFundingValue.ToLower()" id="PreviousFunding" name="PreviousFunding" />
+
+		<div class="col-md-12">
+			@await Html.PartialAsync(
+			"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+						new StepSectionHeaderViewModel
+						{
+							Title = "Applicant classification",
+							Subtitle = "Select the categories that apply to the applicant"
+						})
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">Category of applicant or for a target group <span class="text-danger">*</span></label>
+
+			<div class="form-check mb-2">
+				<input type="radio" class="form-check-input" name="targetGroup" value="Registered For Doctoral" id="targetGroupDoctoral" @(Model.ApplicantCategory == "Registered For Doctoral" ? "checked" : "")>
+
+				<label class="form-check-label" for="targetGroupDoctoral">Registered for doctoral study</label>
+			</div>
+
+			<div class="form-check mb-2">
+				<input type="radio" class="form-check-input" name="targetGroup"
+					   value="Registered For Master" id="targetGroupMaster"
+					   @(Model.ApplicantCategory == "Registered For Master" ? "checked" : "")>
+
+				<label class="form-check-label" for="targetGroupMaster">Registered for master’s study</label>
+			</div>
+
+			<div class="form-check mb-2">
+				<input type="radio" class="form-check-input" name="targetGroup"
+					   value="Emerging Researcher" id="targetGroupEmergingResearcher"
+					   @(Model.ApplicantCategory == "Emerging Researcher" ? "checked" : "")>
+				<label class="form-check-label" for="targetGroupEmergingResearcher">Emerging researcher (Recent PhD recipient)</label>
+			</div>
+
+			<div class="form-check mb-2">
+				<input type="radio" class="form-check-input" name="targetGroup"
+					   value="Emerging Supervisor" id="targetGroupEmergingSupervisor"
+					   @(Model.ApplicantCategory == "Emerging Supervisor" ? "checked" : "")>
+
+				<label class="form-check-label" for="targetGroupEmergingSupervisor">Emerging supervisor</label>
+			</div>
+
+			<div class="form-check">
+				<input type="radio" class="form-check-input" name="targetGroup"
+					   value="Active Researchers" id="targetGroupActiveResearchers"
+					   @(Model.ApplicantCategory == "Active Researchers" ? "checked" : "")>
+				<label class="form-check-label" for="targetGroupActiveResearchers">Active researchers</label>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<label class="form-label">Appointment category of applicant <span class="text-danger">*</span></label>
+
+			<div class="form-check mb-2">
+				<input type="radio" class="form-check-input"
+					   id="PermanentAppointmentGroupId"
+					   name="appointmentGroup"
+					   value="Permanent"
+					   @(Model.AppointmentCategory == "Permanent" ? "checked" : "")>
+
+
+				<label class="form-check-label" for="PermanentAppointmentGroupId">Academic/research permanent</label>
+			</div>
+
+			<div class="form-check">
+				<input type="radio" class="form-check-input"
+					   id="FixedTermAppointmentGroupId"
+					   name="appointmentGroup"
+					   value="Fixed Term Contract"
+					   @(Model.AppointmentCategory == "Fixed Term Contract" ? "checked" : "")>
+				<label class="form-check-label" for="FixedTermAppointmentGroupId">Academic/research fixed term contract</label>
+			</div>
+		</div>
+	</form>
+
+	@await Html.PartialAsync(
+		"~/Views/UCDP/Applications/Shared/_StepWizardButtons.cshtml",
+		new StepWizardButtonsViewModel
+		{
+			NextButtonId = "btnApplicationDetails",
+			NextButtonClass = "nextBtn",
+			CloseButtonId = "btnClose",
+			ShowBackButton = false
+		})
+</div>

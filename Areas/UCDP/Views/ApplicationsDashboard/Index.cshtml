@@ -1,0 +1,319 @@
+﻿@using ResearchSuite.Helpers
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+	ViewData["Title"] = "Applications Dashboard";
+
+	var currentPath = (Context.Request.Path.Value ?? "").TrimEnd('/').ToLowerInvariant();
+
+	var basePath = (HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "").TrimEnd('/');
+	if (string.IsNullOrWhiteSpace(basePath))
+		basePath = (Context.Request.PathBase.HasValue ? Context.Request.PathBase.Value : "").TrimEnd('/');
+
+	var user = Context.User;
+
+	var roles = UserHelper.GetRolesForApp(user, "ucdg");
+
+	var hasTemp = user.HasClaim("hasTempRole_ucdg", "1");
+	var tempCsv = user.FindFirst("tempRoleTypes_ucdg")?.Value ?? "";
+	var tempTypes = tempCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+	var roleDisplayList = roles
+		.Select(r => r.Trim())
+		.Where(r => !string.IsNullOrWhiteSpace(r))
+		.ToList();
+
+	if (hasTemp)
+	{
+		roleDisplayList.AddRange(tempTypes.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
+	}
+
+	var roleDisplay = roleDisplayList.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+	var roleDisplayText = roleDisplay.Count > 0 ? string.Join(", ", roleDisplay) : "applicant";
+
+	bool IsFundAdmin() => roles.Contains("fund administrator");
+}
+
+
+<section class="py-4">
+	<div class="form-section">
+		<!-- Header -->
+		<div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+			<div>
+				<h2 class="text-orange mb-0">Applications Dashboard</h2>
+				@* <div class="text-muted small">
+					Roles: <span class="fw-semibold">@roleDisplayText</span>
+				</div> *@
+			</div>
+
+			<div class="d-flex gap-2">
+				@if (IsFundAdmin())
+				{
+					<button id="btnRefreshApprovers" class="btn btn-outline-secondary btn-sm" type="button">
+						Refresh Active Approver Assignments
+					</button>
+				}
+				
+			</div>
+		</div>
+
+		<!-- Tabs -->
+		<ul class="nav nav-tabs" id="appsTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="tab-attention" data-bs-toggle="tab" data-bs-target="#pane-attention" type="button" role="tab">
+					Needs My Attention (New) <span class="badge text-bg-danger ms-1" id="countAttention">0</span>
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tab-mine" data-bs-toggle="tab" data-bs-target="#pane-mine" type="button" role="tab">
+					My Applications <span class="badge text-bg-secondary ms-1" id="countMine">0</span>
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tab-history" data-bs-toggle="tab" data-bs-target="#pane-history" type="button" role="tab">
+					History / All <span class="badge text-bg-secondary ms-1" id="countHistory">0</span>
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content border border-top-0 rounded-bottom p-3" id="appsTabsContent">
+
+			<!-- TAB 1 -->
+			<div class="tab-pane fade show active" id="pane-attention" role="tabpanel" aria-labelledby="tab-attention">
+
+				@await Html.PartialAsync(
+				"~/Views/UCDP/Applications/Shared/_DashboardFilters.cshtml",
+								new ResearchSuite.Models.UCDP.DashboardFilterViewModel
+								{
+									Prefix = "Attention"
+								})
+
+				<div class="table-responsive">
+					<table id="tblAttention" class="table table-hover align-middle table-apps-dashboard">
+						<thead class="table-light">
+							<tr>
+								<th class="col-index">#</th>
+								<th class="col-ref">Reference Number</th>
+								<th class="col-funding">Funding Call Name</th>
+								<th class="col-project">Project</th>
+								<th class="col-money">DHET Requested Amount</th>
+								<th class="col-money">DHET Approved Amount</th>
+								<th class="col-submittedby">Submitted By</th>
+								<th class="col-date">Submitted Date</th>
+								<th class="col-status">Status</th>
+								<th class="col-actions text-end">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyAttention"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- TAB 2 -->
+			<div class="tab-pane fade" id="pane-mine" role="tabpanel" aria-labelledby="tab-mine">
+				@await Html.PartialAsync(
+								"~/Views/UCDP/Applications/Shared/_DashboardFilters.cshtml",
+								new ResearchSuite.Models.UCDP.DashboardFilterViewModel
+								{
+									Prefix = "Mine"
+								})
+
+				<div class="table-responsive">
+					<table id="tblMine" class="table table-hover align-middle table-apps-dashboard">
+						<thead class="table-light">
+							<tr>
+								<th class="col-index">#</th>
+								<th class="col-ref">Reference Number</th>
+								<th class="col-funding">Funding Call Name</th>
+								<th class="col-project">Project</th>
+								<th class="col-money">DHET Requested Amount</th>
+								<th class="col-money">DHET Approved Amount</th>
+								<th class="col-submittedby">Submitted By</th>
+								<th class="col-date">Submitted Date</th>
+								<th scope="col">Documents</th>
+								<th class="col-status">Status</th>
+								<th class="col-actions text-end">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyMine"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- TAB 3 -->
+			<div class="tab-pane fade" id="pane-history" role="tabpanel" aria-labelledby="tab-history">
+				@await Html.PartialAsync(
+								"~/Views/UCDP/Applications/Shared/_DashboardFilters.cshtml",
+								new ResearchSuite.Models.UCDP.DashboardFilterViewModel
+								{
+									Prefix = "History"
+								})
+				<div class="table-responsive">
+					<table id="tblHistory" class="table table-hover align-middle table-apps-dashboard">
+						<thead class="table-light">
+							<tr>
+								<th class="col-index">#</th>
+								<th class="col-ref">Reference Number</th>
+								<th class="col-funding">Funding Call Name</th>
+								<th class="col-project">Project</th>
+								<th class="col-money">DHET Requested Amount</th>
+								<th class="col-money">DHET Approved Amount</th>
+								<th class="col-submittedby">Submitted By</th>
+								<th class="col-date">Submitted Date</th>
+								<th class="col-status">Status</th>
+								<th class="col-actions text-end">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyHistory"></tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+</section>
+
+
+<!-- Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="appDetails" aria-labelledby="appDetailsLabel">
+	<div class="offcanvas-header">
+		<div>
+			<h5 class="offcanvas-title mb-0" id="appDetailsLabel">Application Details</h5>
+			<div class="text-muted small" id="appDetailsRef">Ref: —</div>
+		</div>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+
+	<div class="offcanvas-body">
+		<div class="card mb-3">
+			<div class="card-body">
+				<div class="d-flex justify-content-between">
+					<div>
+						<div class="text-muted small">Applicant</div>
+						<div class="fw-semibold" id="appDetailsApplicant">—</div>
+					</div>
+					<div class="text-end">
+						<div class="text-muted small">Current Stage</div>
+						<div class="fw-semibold" id="appDetailsStage">—</div>
+					</div>
+				</div>
+
+				<hr class="my-3">
+
+				<div class="row g-2">
+					<div class="col-6">
+						<div class="text-muted small">Submitted</div>
+						<div id="appDetailsSubmitted">—</div>
+					</div>
+					<div class="col-6">
+						<div class="text-muted small">Status</div>
+						<div id="appDetailsStatus">—</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="card mb-0" id="appDetailsCommentsCard">
+			<div class="card-body">
+				<div class="d-flex justify-content-between align-items-start">
+					<div>
+						<div class="fw-semibold" id="appDetailsCommentsTitle">Comments</div>
+						<div class="text-muted small" id="appDetailsCommentsMeta">—</div>
+					</div>
+				</div>
+
+				<hr class="my-3" />
+
+				<div class="d-flex align-items-center gap-2 d-none" id="appDetailsCommentsLoading">
+					<div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+					<div class="text-muted small">Loading...</div>
+				</div>
+
+				<div class="text-muted small d-none" id="appDetailsCommentsEmpty">No comments found.</div>
+
+				<div id="appDetailsCommentsList"></div>
+			</div>
+		</div>
+
+		
+	</div>
+</div>
+
+<div class="modal fade" id="refreshApproversModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Approver refresh result</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<div class="row g-2 mb-3">
+					<div class="col"><strong>Considered:</strong> <span id="rr_considered">0</span></div>
+					<div class="col"><strong>Updated:</strong> <span id="rr_updated">0</span></div>
+					<div class="col"><strong>Still stuck:</strong> <span id="rr_stillStuck">0</span></div>
+				</div>
+
+				<div id="rr_noFailures" class="alert alert-success" style="display:none;">
+					No failures 🎉
+				</div>
+
+				<div id="rr_failuresSection" style="display:none;">
+					<h6>Failure counts</h6>
+					<ul id="rr_failureCounts" class="mb-3"></ul>
+
+					<h6>Examples</h6>
+					<div class="table-responsive">
+						<table class="table table-sm">
+							<thead>
+								<tr>
+									<th>Reference #</th>
+									<th>Status</th>
+									<th>Reason</th>
+									<th>DesiredOwner</th>
+									<th>Detail</th>
+								</tr>
+							</thead>
+							<tbody id="rr_failuresTable"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<div id="dashLoadingModal" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center">
+	<div class="loading-modal__content border-0 shadow-none">
+		<div class="loading-modal__body d-flex justify-content-center align-items-center">
+			<div class="spinner-border text-orange loading-modal__spinner" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<span id="createPdfUrl" data-url="@Url.Action("CreatePdfDocument", "MyApplications", new { area = "Ucdp" })" hidden></span>
+@await Html.PartialAsync("~/Views/Ucdp/applications/partials/_ApplicationModals.cshtml")
+
+<div id="appsDashboardRoot"
+	 data-basepath="@Url.Content("~/")">
+</div>
+@section Scripts {
+	
+	<script src="~/js/ucdp/application/applications-dashboard.js"></script>
+	<script src="~/js/ucdp/application/viewdocument.js"></script>
+	<script src="~/js/ucdp/application/awardletter.js"></script>
+
+
+}

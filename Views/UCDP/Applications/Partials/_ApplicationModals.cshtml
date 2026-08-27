@@ -1,0 +1,136 @@
+﻿
+
+
+<div class="modal fade" id="openAttachedDocumentListModal" tabindex="-1" aria-labelledby="openAttachedDocumentListModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="openAttachedDocumentListModalLabel"><i class="fa fa-briefcase" aria-hidden="true"></i> Application Documents</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="panel panel-default">
+					<div id="feedbackDashboardHeader" class="panel-heading">
+						<div class="row">
+							<div class="col-md-6 pull-left">
+								<h3 id="searchedItem" class="panel-title"></h3>
+							</div>
+							<div class="col-md-6 pull-right">
+							</div>
+						</div>
+					</div>
+					<div id="dashboardTableWrapper" class="panel-body">
+						<input type="text" id="myDocSearch" placeholder="Search by reference number, funding call name, submitted by, status.." title="Type anything">
+						<br />
+						<table id="tblApplicationsDocumentsGrid" class="table table-striped table-bordered table-hover" cellspacing="0" style="width: 1120px;">
+							<thead>
+								<tr>
+									<th scope="col">#</th>
+									<th scope="col">Document Name</th>
+									<th scope="col">Category</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody id="tblApplicationsDocumentsBody">
+								<tr><td style="text-align:center" colspan="12"><i class="fa fa-2x fa-circle-o-notch fa-spin fa-fw"></i></td></tr>
+							</tbody>
+
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="viewDocumentModalLabel">Document</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<iframe id="documentViewer"></iframe>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="openCommentListModal" tabindex="-1" aria-labelledby="openCommentListModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="openCommentListModalLabel">Application Comments</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<br />
+				<div class="panel panel-default">
+					<div id="feedbackDashboardHeader" class="panel-heading">
+						<div class="row">
+							<div class="col-md-6 pull-left">
+								<h3 id="searchedItem" class="panel-title"></h3>
+							</div>
+							<div class="col-md-6 pull-right">
+							</div>
+						</div>
+					</div>
+					<div id="dashboardTableWrapper" class="panel-body">
+						<input style="width: 60%; height:45px; " type="text" id="myCommentsSearch" placeholder="Search by reference number, funding call name, comment by " title="Type anything">
+						<br />
+						<br />
+						<table id="tblCommentsGrid" class="table table-striped table-bordered table-hover" cellspacing="0">
+							<thead>
+								<tr>
+									<th scope="col">Reference Number</th>
+									<th scope="col">FundingCall Name</th>
+									<th scope="col">Comment By</th>
+									<th scope="col">Comment</th>
+									@*<th scope="col">Action</th>*@
+								</tr>
+							</thead>
+							<tbody id="tblCommentsBody">
+								<tr><td style="text-align:center" colspan="12"><i class="fa fa-2x fa-circle-o-notch fa-spin fa-fw"></i></td></tr>
+							</tbody>
+
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="awardLetterModal" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title">Award Letter</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+
+			<div class="modal-body">
+				<iframe id="awardLetterViewer"></iframe>
+			</div>
+
+			<div class="modal-footer">
+				<div id="awardLetterFooter"></div>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+					Close
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>

@@ -1,0 +1,103 @@
+﻿@using ResearchSuite.Helpers;
+@{
+    @model ResearchSuite.Models.DocumentUploadViewModel
+    ViewData["Title"] = "Tariffs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = Context.User;
+    var userRole = UserHelper.GetRoleForApp(user, "ucdg");
+    bool IsAdmin() => userRole == "Fund Administrator" || userRole == "SIA Director";
+    bool IsApplicant() => !IsAdmin();
+}
+
+
+<section class="py-4">
+    <div class="form-section mb-4" style="padding:20px">
+        <div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+            @if (IsApplicant())
+            {
+                <h2 class="text-orange mb-0">View Tariff Plan</h2>
+                <h3>@userRole</h3>
+            } else
+            {
+                <h2 class="text-orange mb-0">Please Attach Tariff Plan</h2>
+            }
+        </div>
+
+        @if (!IsApplicant())
+        {
+            <div class="mb-2 text-muted small">
+                <i class="bi bi-info-circle-fill text-orange"></i>
+                Click on "Choose File" button select document to upload then click on "Add Document" to upload to your selected document.<strong> One</strong> document must be added.
+                Only PDF  upload is allowed (Max 5 MB).Please note once File has been uploaded, it will display below with a default name <strong>Tariff Plan</strong>. Click <strong>View</strong>
+                to check if correct file is uploaded.
+            </div>
+
+            <form id="tariffUploadForm" enctype="multipart/form-data" class="mb-3">
+                <div class="mb-3">
+                    <label for="tariffPlanFile" class="form-label">Tariff Plan <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control" id="tariffPlanFile" name="tariffPlanFile" accept=".pdf" />
+                    <div id="tariffUploadError" class="text-danger mt-2"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" id="addTariffBtn">
+                    <i class="bi bi-upload"></i> Add Document
+                </button>
+            </form>
+        }
+
+        <!-- Documents Card -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                @if (!IsApplicant())
+                {
+                    <h5 class="mb-0">Uploaded Document</h5>
+                }
+            </div>
+            <div class="card-body">
+                @if (Model != null)
+                {
+                    <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@Model.LabelText</span>
+                            @if (!string.IsNullOrEmpty(Model.DocName))
+                                {
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm view-tariff-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewModal"
+                                        data-docname="@Model.LabelText"
+                                        data-docurl="@Model.DocUrl"
+                                        data-docid="@Model.InputId">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                }
+                            </li>
+                    </ul>
+                }
+                else
+                {
+                    <p>No documents uploaded.</p>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Tariff Plan PDF Modal -->
+<div class="modal fade" id="tariffPlanModal" tabindex="-1" aria-labelledby="tariffPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tariffPlanModalLabel">View Tariff Plan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="tariffPlanViewer" src="" width="100%" height="600px" style="border:0;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ucdp/administration.js?v=@DateTime.Now.Ticks"></script>
+}

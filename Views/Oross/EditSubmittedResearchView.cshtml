@@ -1,0 +1,583 @@
+﻿@using ResearchSuite.Models.Oross;
+@model dynamic
+@{
+    ViewBag.Title = "EditResearchView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Get base path or empty string if not set
+    //var basePath = HttpContextAccessor.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+}
+<html lang="en">
+<head>
+
+</head>
+<body>
+    <section class="container py-4">
+	<h2 class="text-orange mb-4">Edit research submission</h2>
+    </section>
+    <div class="form-section mb-4">
+    <div class="container" id="ResearchTableDiv">
+        <div class="panel panel-body">
+         @*    <div class="panel-body" style="background-color:#f5f5f5; border-color:#ddd; color:#333;width:100%;font-size:15px;font-weight:300">Research Information</div> *@
+           
+                     <h5 class="text-muted mb-3">Research Information</h5>
+         <div class="row" contenteditable="false" id="EditableForm">
+                <div class="col-md-12">
+                    @foreach (SubmittedResearchViewModel.TempGetResearchOutPutInfo info in Model.info)
+
+                    {
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Date Created :</strong></label>
+                                    <input type="text" value="@info.CreatedDate" class="form-control" readonly style="color: #888; width: 250px; background-color: #f8f8f8;">
+                                    <input type="hidden" id="hdResearchId" value="@info.ResearchId" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Created By :</strong></label>
+                                    <input type="text" value="@info.CreatedBy" class="form-control" readonly style="color: #888; width: 250px; background-color: #f8f8f8;">
+                                    <input type="hidden" id="hdCreatedBy" value="@info.CreatedBy" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Publication Year :</strong></label>
+                                    <select id="txtEditPublicationYear" class="form-control" style="width:250px" name="PublicationYear">
+                                        <option>Select</option>
+                                        <option>2024</option>
+                                        <option>2023</option>
+                                        <option>2022</option>
+                                    </select>
+                                    <script nonce="@Context.Items["CSPNonce"]">
+                                        var existingValue = "@info.Publication_Year";
+                                        document.getElementById("txtEditPublicationYear").value = existingValue;
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Research Output :</strong></label>
+                                    <input type="text" value="@info.Research_Output" class="form-control" readonly style="color: #888; width: 250px; background-color: #f8f8f8;">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Publication Title :</strong></label>
+                                    <input type="hidden" id="hdPublicationTitle" value="@info.PublicationTitle" />
+                                    <input type="text" id="txtEditPublicationTitle" class="form-control" style="width: 250px" name="PublicationTitle" value="@info.PublicationTitle" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Publish :</strong></label>
+                                    <input type="text" value="@info.Publish" class="form-control" readonly style="color: #888; width: 250px; background-color: #f8f8f8;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Faculty :</strong></label>
+                                    <select id="txtEditFaculty" class="form-control" style="width:250px" name="Faculty">
+                                        <option>Select</option>
+                                        <option>Academic development support</option>
+                                        <option>Art,Design and Architecture</option>
+                                        <option>College of Business and Economics</option>
+                                        <option>Education</option>
+                                        <option>Engineering & Built Environment</option>
+                                        <option>Johannesburg Business School</option>
+                                        <option>Health Sciences</option>
+                                        <option>Humanities</option>
+                                        <option>Law</option>
+                                        <option>Science</option>
+                                        <option>Non-Faculty</option>
+                                    </select>
+                                    <script nonce="@Context.Items["CSPNonce"]">
+                                        var existingValue = "@info.Faculty";
+                                        document.getElementById("txtEditFaculty").value = existingValue;
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Department Name :</strong></label>
+                                    <input type="text" id="txtEditDepartmentName" class="form-control" style="width: 250px" name="DepartmentName" value="@info.DepartmentName" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>SoTL Publication :</strong></label>
+                                    <select id="txtEditSoTLPublication" name="SoTLPublication" class="form-control" style="width: 250px">
+                                        <option>Select</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                    <script nonce="@Context.Items["CSPNonce"]">
+                                        var existingValue = "@info.SoTLPublication";
+                                        document.getElementById("txtEditSoTLPublication").value = existingValue;
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                        if (@info.OutPutType.ToString() == "4")
+                        {
+                            <div class="form-group row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label><strong>ISSN :</strong></label>
+                                        <input type="text" id="txtEditISSN" class="form-control" style="width:250px" name="ISSN" value="@info.ISSN" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label><strong>Conference Name :</strong></label>
+                                        <input type="text" id="txtEditConferenceName" class="form-control " style="width: 250px" name="ConferenceName" value="@info.ConferenceName" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+
+                                </div>
+                            </div>
+                        }
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>The name of the public funder :</strong></label>
+                                    <input type="text" id="txtEditNameOfPublicationFunder" class="form-control " style="width: 250px" name="NameOfPublicFunder" value="@info.NameOfPublicFunder" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>4IR Publication :</strong></label>
+                                    <select id="txtEdita4IRPublication" name="a4IRPublication" class="form-control" style="width: 250px">
+                                        <option>Select</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                    <script nonce="@Context.Items["CSPNonce"]">
+                                        var existingValue = "@info.a4IRPublication";
+                                        document.getElementById("txtEdita4IRPublication").value = existingValue;
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>SDG :</strong></label>
+                                    <select id="txtEditSDG" class="form-control" style="width:250px" name="SDG">
+                                        <option>Select</option>
+                                        <option>SDG 1: No Poverty</option>
+                                        <option>SDG 2: Zero Hunger</option>
+                                        <option>SDG 3: Good Health and Well-being</option>
+                                        <option>SDG 4: Quality Education</option>
+                                        <option>SDG 5: Gender Equality</option>
+                                        <option>SDG 6: Clean Water and Sanitation</option>
+                                        <option>SDG 7: Affordable and Clean Energy</option>
+                                        <option>SDG 8: Decent Work and Economic Growth</option>
+                                        <option>SDG 9: Industry, Innovation and Infrastructure</option>
+                                        <option>SDG 10: Reduced Inequality</option>
+                                        <option>SDG 11: Sustainable Cities and Communities</option>
+                                        <option>SDG 12: Responsible Consumption and Production</option>
+                                        <option>SDG 13: Climate Action</option>
+                                        <option>SDG 14: Life Below Water</option>
+                                        <option>SDG 15: Life On Land</option>
+                                        <option>SDG 16: Peace and Justice Strong Institutions</option>
+                                        <option>SDG 17: Partnerships To Achieve The Goal</option>
+                                    </select>
+                                    <script nonce="@Context.Items["CSPNonce"]">
+                                        var existingValue = "@info.SDG";
+                                        document.getElementById("txtEditSDG").value = existingValue;
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label><strong>Re-Submission Date :</strong></label>
+                                    <input type="text" value="@info.ReSubmissionDate" class="form-control" readonly style="color: #888; width: 250px; background-color: #f8f8f8;">
+                                </div>
+                            </div>
+                        </div>
+
+                        if (@info.OutPutType.ToString() == "1")
+                        {
+                            <div class="form-group row">
+                                <hr />
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label><strong>Open Access :</strong></label>
+                                        <input type="text" value="@info.OpenAccess" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label><strong>Any additional URL :</strong></label>
+                                        <input type="text" id="txtEditAnyAdditionalURL" class="form-control" name="AnyAdditionalURL" style="width: 500px" value="@info.AnyAdditionalURL" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label><strong>Publication fees applicable? :</strong></label>
+                                        <input type="text" value="@info.PublicationFeesApplicable" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                    </div>
+                                </div>
+                            </div>
+                            if (@info.PublicationFeesApplicable == "No")
+                            {
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Reason(s) for non payment of publication fees :</strong></label>
+                                            <input type="text" value="@info.PublicationFeesReason" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            if (@info.PublicationFeesApplicable == "Yes")
+                            {
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Publication fee description :</strong></label>
+                                            <input type="text" value="@info.PublicationFeeDescription" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Publisher Currency :</strong></label>
+                                            <input type="text" value="@info.PublisherCurrencyName" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Total cost of publishing the article (In the publisher’s currency) :</strong></label>
+                                            <input type="text" value="@info.TotalCostOfPublishingArticle" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Amount contributed by the institution towards the total publication fee (In the publisher’s currency) :</strong></label>
+                                            <input type="text" value="@info.AmountContributedByInstitution" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><strong>Amount contributed by the institution towards the total publication fee (In south african rand at the time of payment) :</strong></label>
+                                            <input type="text" value="@info.AmountContributedByInstitutionInSARand" class="form-control" readonly style="color: #888; width: 500px; background-color: #f8f8f8;">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <hr />
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label><strong>If any of the internal authors are also affiliated to other SA institutions :</strong></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+
+                            <div class="col-md-12">
+                                <table class="table table-striped" id="AffiliatedToOtherSAInstitutionTable" style="width:100%">
+                                    <thead class="thead-dark">
+                                        <tr>
+
+                                            <th style="width:350px" scope="col">Internal Author</th>
+                                            <th style="width:350px" scope="col">Student/Staff number</th>
+                                            <th style="width:350px" scope="col">Other SA institution</th>
+
+                                        </tr>
+                                        @foreach (SubmittedResearchViewModel.TempGetResearchOutPutAffiliatedToOtherSAInstitution otherSAInstitution in Model.otherSAInstitutions)
+                                        {
+                                            <tr>
+
+                                                <td>@otherSAInstitution.InternalAurthor</td>
+                                                <td>@otherSAInstitution.StudentStaffNumber</td>
+                                                <td>@otherSAInstitution.OtherSAInstitution</td>
+
+                                            </tr>
+                                        }
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label><strong>If any of the internal authors are also affiliated to other International institutions :</strong></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <table class="table table-striped" id="AffiliatedToOtherInternationalInstitutionTable" style="width:100%">
+                                    <thead class="thead-dark">
+                                        <tr>
+
+                                            <th style="width:350px" scope="col">Internal Author</th>
+                                            <th style="width:350px" scope="col">Student/Staff number</th>
+                                            <th style="width:350px" scope="col">Other International Institution</th>
+
+                                        </tr>
+                                        @foreach (SubmittedResearchViewModel.TempGetResearchOutPutAffiliatedToOtherInternationalInstitution otherInternationalInstitution in Model.otherInternationalInstitutions)
+                                        {
+                                            <tr>
+
+                                                <td>@otherInternationalInstitution.InternalAurthor</td>
+                                                <td>@otherInternationalInstitution.StudentStaffNumber</td>
+                                                <td>@otherInternationalInstitution.OtherInternationalInstitution</td>
+
+                                            </tr>
+                                        }
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label><strong>If any of the internal authors are also affiliated to other SA institutions other than universities :</strong></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+
+                            <div class="col-md-12">
+                                <table class="table table-striped" id="AffiliatedToOtherSAInstitutionOtherThanUniversityTable" style="width:100%">
+                                    <thead class="thead-dark">
+                                        <tr>
+
+                                            <th style="width:350px" scope="col">Internal Author</th>
+                                            <th style="width:350px" scope="col">Student/Staff number</th>
+                                            <th style="width:350px" scope="col">Other SA Institution Other Than University</th>
+
+                                        </tr>
+                                        @foreach (SubmittedResearchViewModel.TempGetResearchOutPutAffiliatedToOtherSAInstitutionOtherThanUniversity otherSAInstitutionOtherThanUniversity in Model.otherSAInstitutionOtherThanUniversities)
+                                        {
+                                            <tr>
+
+                                                <td>@otherSAInstitutionOtherThanUniversity.InternalAurthor</td>
+                                                <td>@otherSAInstitutionOtherThanUniversity.StudentStaffNumber</td>
+                                                <td>@otherSAInstitutionOtherThanUniversity.OtherSAInstitutionOtherThanUniversity</td>
+
+                                            </tr>
+                                        }
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="AuthorTableDiv">
+            <div class="panel panel-body">
+              @*  <div class="panel-body" style="background-color:#f5f5f5; border-color:#ddd; color:#333;width:100%;font-size:15px;font-weight:300">Authors</div> *@
+
+                 <h5 class="text-muted mb-3">Authors</h5>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-striped" id="AuthorsTable" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Staff Number</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Position</th>
+                                    <th scope="col">Faculty</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col">ORCHID ID</th>
+                                </tr>
+                                @foreach (SubmittedResearchViewModel.TempGetResearchOutPutAuthor author in Model.authors)
+                                {
+                                    <tr>
+
+                                        <td>@author.StaffNumber</td>
+                                        <td>@author.LastName</td>
+                                        <input type="hidden" id="hdLastName" value="@author.LastName" />
+                                        <td>@author.FirstName</td>
+                                        <input type="hidden"  id="hdFirstName" value="@author.FirstName" />
+                                        <td>@author.Position</td>
+                                        <td>@author.Faculty</td>
+                                        <td>@author.Department</td>
+                                        <td>@author.ORCHID</td>
+
+                                    </tr>
+                                }
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" id="DocumentTableDiv">
+            <div class="panel panel-body">
+@*<div class="panel-body" style="background-color:#f5f5f5; border-color:#ddd; color:#333;width:100%;font-size:15px;font-weight:300">Documents</div>*@
+       <h5 class="text-muted mb-3">Documents</h5>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-striped" id="tblDocumentTable" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+
+                                    <th>Document Name</th>
+                                    <th>Actions</th>
+                                </tr>
+
+                                @foreach (SubmittedResearchViewModel.TempGetResearchOutPutDocument document in Model.documents)
+                                {
+                                    <tr>
+
+                                        <td>@document.DocumentName</td>
+
+                                        @if (document.DocumentExtention != ".pdf")
+                                        {
+                                            <td  style="width:auto">
+                                                <a href="@Url.Action("DownloadWord", "Authenticate", new { GuidID = document.GuidID, ViewId = document.ViewId})" class="btn btn-xs btn-link">Download</a>
+                                                <div class="btn-group" role="group" style="width:400px" aria-label="First group">
+                                                    <label for="fileReUpload">&nbspTo Re-upload</label>
+                                                    <!-- Add a unique ID to the input element based on the document's ViewId -->
+                                                    <input data-uploadDocType="fileReUpload" id="fileReUpload_@document.ViewId" data-documentId="@document.ViewId" style="width: 200px;" class="btn btn-xs btn-link fileReUpload" type="file" name="fileReUpload" />
+                                                </div>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td  style="width:auto">
+                                                <div class="btn-group" role="group" aria-label="First group">
+                                                    <button id="btnOpen" value="@document.ViewId;@document.GuidID" type="button" class="btn btn-xs btn-link btnOpen">Open</button>
+                                                    <button id="btnOpen_@document.ViewId" value="@document.ViewId;@document.DocumentGuid" type="button" style="display: none;" class="btn btn-xs btn-link btnOpen2">View</button>
+                                                    <button id="btnOpen_@document.ViewId" value="@document.ViewId;@document.DocumentGuid" type="button" style="display: none;" class="btn btn-xs btn-link btnReUpload_View">Submit</button>
+                                                    <div class="btn-group" role="group" style="width:400px" aria-label="First group">
+                                                        <input  style="width:auto" type="hidden" id="hdfileReuploadResearch" />
+                                                        <label for="fileReUpload">&nbsp&nbsp&nbspTo Re-upload</label>
+                                                        <!-- Add a unique ID to the input element based on the document's ViewId -->
+                                                        <input data-uploadDocType="fileReUpload" id="fileReUpload_@document.ViewId" data-documentId="@document.ViewId" style="width: 200px;" class="btn btn-xs btn-link fileReUpload" type="file" name="fileReUpload" />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </thead>
+                        </table>
+                        <input type="Hidden" id="GetViewId">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="viewDocModal_UploadResearch" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="saveUserModalLabel">
+            <div id="viewDocModalDiag_UploadResearch" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div id="saveFeedbackModalBody_UploadResearch" class="modal-body">
+                        <form id="frmAddModule_UploadResearch" onsubmit="false">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div id="docBodyPreview_UploadResearch" class="col-md-12">
+                                        <embed id="pdfViewerPrintDoc_UploadResearch" name="pdfViewerPrintDo_UploadResearch" type="application/pdf" style="width:100%; height:550px" src="#" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary hidden-xs" id="btnVarifyDocument">Verify</button>
+                        <button type="reset" class="btn btn-primary hidden-xs" id="btnCloseViewDocument">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal" id="viewDocModal_Comment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="saveUserModalLabel">
+            <div id="viewDocModalDiag_UploadResearch" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div id="saveFeedbackModalBody_UploadResearch" class="modal-body">
+                        <form id="frmAddModule_UploadResearch" onsubmit="false">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    Enter Comments:<br />
+                                    <div id="docBodyPreview_UploadResearch" class="col-md-12">
+                                        <textarea id="comment" name="Rmessage" maxlength="300" style="width: 100%; height: 300px; color: black;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" style="width:auto" class="btn btn-primary hidden-xs" id="btnConfirmRFA">Submit</button>
+                        <button type="reset" class="btn btn-primary hidden-xs" id="btnCloseViewRFA">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="panel panel-body">
+                <button type="button" class="btn btn-primary hidden-xs" id="btnClose_View" data-dismiss="modal">Close</button>
+                <button type="button" value="hiddenId" class="btn btn-primary hidden-xs" id="btnSubmitRFA" data-dismiss="modal">Submit</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+
+
+<style nonce="@Context.Items["CSPNonce"]">
+    .tooltip {
+        width: 500px;
+        /*max-width: 300%; */
+    }
+
+    .btn-primaryBack[disabled] {
+        color: #ffffff;
+        text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+        background-color: #D95B28;
+        border-color: #D95B28;
+        width: 75px;
+    }
+
+    .btn-primaryBack {
+        color: #ffffff;
+        text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+        background-color: #D95B28;
+        border-color: #D95B28;
+        width: 75px;
+    }
+</style>
+
+@section Scripts {
+<script src="~/js/oross/_submittedresearchview.js"></script>
+}
+
+@Html.Partial("~/Views/Oross/ViewResearchDoc.cshtml")

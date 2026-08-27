@@ -1,0 +1,160 @@
+﻿@using ResearchSuite.Models.UCDP.Shared
+@{
+	ViewData["Title"] = "Funding calls";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<ResearchSuite.Models.UCDP.FundingCallsModel>
+
+<div class="container-fluid py-4">
+	<div class="form-section">
+		@await Html.PartialAsync(
+		"~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml",
+				new StepSectionHeaderViewModel
+				{
+					Title = "Funding Call Dashboard",
+					Subtitle = "Search available funding calls and continue existing applications."
+				})
+
+		<div class="card dashboard-filter-card mb-4">
+			<div class="card-body">
+
+				<!-- ROW 1 -->
+				<div class="row g-3 mb-2">
+					<div class="col-md-6">
+						<label for="searchcallname" class="form-label small mb-1 text-white">Funding Call Name</label>
+						<input type="text" id="searchcallname" class="form-control" placeholder="Search by funding call name" value="@ViewBag.SearchCallName" />
+					</div>
+
+					<div class="col-md-3">
+						<label for="OpeningDateFilter" class="form-label small mb-1 text-white">Opening Date</label>
+						<input id="OpeningDateFilter" type="text" class="form-control datepicker" placeholder="Opening date" value="@ViewBag.OpeningDateFilter" />
+					</div>
+
+					<div class="col-md-3">
+						<label for="ClosingDateFilter" class="form-label small mb-1 text-white">Closing Date</label>
+						<input id="ClosingDateFilter" type="text" class="form-control datepicker" placeholder="Closing date" value="@ViewBag.ClosingDateFilter" />
+					</div>
+				</div>
+
+				<!-- ROW 2 -->
+				<div class="row g-3 align-items-end">
+					<div class="col-md-6">
+						<label for="ProjectName" class="form-label small mb-1 text-white">Project Name</label>
+						<select id="ProjectName" class="form-select" asp-items="@ViewBag.ProjectList">
+							<option value="">All projects</option>
+						</select>
+					</div>
+
+					<div class="col-md-6">
+						<div class="d-flex gap-1 justify-content-md-end">
+
+							<button type="button" class="btn btn-outline-primary filter-btn" id="btnSearchFunding">
+								<i class="fa fa-search me-1"></i>
+								Search
+							</button>
+
+							<button type="button" id="clearFilterBtn" class="btn btn-outline-secondary filter-btn">
+								<i class="fa fa-rotate-left me-1"></i>
+								Clear
+							</button>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		
+
+		@if (Model != null)
+		{
+			<div id="fundingCallDashboardTable" class="position-relative">
+				<partial name="~/Views/Ucdp/_FundingCallDashboard.cshtml" model="Model" />
+			</div>
+		}
+		else
+		{
+			<div id="fundingCallDashboardTable" class="position-relative"></div>
+		}
+	</div>
+
+</div>
+<div class="modal fade" id="myDisclaimer" tabindex="-1" aria-labelledby="myDisclaimerLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myDisclaimerLabel">Disclaimer</h4>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<form id="fundingCallsdisclamier">
+					<input type="hidden" name="fundingId" id="fundingId" value="" />
+					<input type="hidden" id="disclaimerActionType" value="" />
+
+					<div class="form-group">
+						<h4 class="mb-3">UCDP Guidelines</h4>
+						<p>
+							Information regarding gender and ethnic group is for statistical reporting only.
+							All information submitted is treated confidentially.
+						</p>
+
+						<h5 class="mb-2">Protection of Personal Information</h5>
+						<p>
+							I hereby give consent to the University to process my Personal Information where
+							the processing is required for purposes of delivering the UCDP.
+							The University acknowledges and agrees that the Personal Information will not,
+							under any circumstances, be processed for purposes prohibited by POPI and/or the
+							principles contained in POPI and that the processing of Personal Information will
+							be done fairly and in accordance with legal provisions.
+						</p>
+
+						<div class="alert alert-info mt-4">
+							<div class="fw-semibold mb-2">Check the following before submitting the application</div>
+
+							<p class="mb-2">
+								Click
+								<a asp-area=""
+								   asp-controller="Home"
+								   asp-action="GetTCManualFirst"
+								   target="_blank"
+								   class="fw-semibold text-orange">
+									here
+								</a>
+								for the UCDP Guidelines.
+							</p>
+
+							<p class="mb-2 fw-semibold">Note:</p>
+
+							<ul class="mb-3">
+								<li>Due to the limited funding available, applications are processed on a first-come, first-served basis.</li>
+								<li>Applications with co-funding will be given priority.</li>
+								<li>Applicants will be notified of the status of their applications at every stage. Please follow up with your HOD/Dean or contact UCDP (ucdp@uj.ac.za).</li>
+								<li>Incomplete applications, such as missing supporting documents, will delay processing.</li>
+								<li>The DHET does not fund:</li>
+							</ul>
+
+							<ol class="mb-0">
+								<li>Daily subsistence.</li>
+								<li>Equipment of any nature.</li>
+								<li>Miscellaneous expenses.</li>
+								<li>Car hire without motivation.</li>
+								<li>Teaching relief (Lecturing) in December.</li>
+							</ol>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Reject</button>
+				<button type="button" class="btn btn-primary" id="btnOk">Accept</button>
+			</div>
+		</div>
+	</div>
+</div>
+@section Scripts {
+	<script src="~/js/ucdp/_projects.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/ucdp/fundingcalldashboard.js?v=@DateTime.Now.Ticks"></script>
+}

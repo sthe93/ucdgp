@@ -1,0 +1,49 @@
+﻿@model SwitchWithTooltipModel
+
+
+<div id="@Model.InputId + " Wrapper"" class="form-section p-3 border rounded bg-light-subtle">
+	<div class="d-flex justify-content-between align-items-start flex-wrap">
+		<div class="d-flex flex-column">
+			<label for="@Model.InputId" class="fw-bold mb-0">
+				@Model.LabelText
+				<span class="text-danger ms-1">*</span>
+			</label>
+		</div>
+
+		<div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+			@if (!string.IsNullOrEmpty(Model.TooltipText))
+			{
+				<button type="button"
+						class="btn btn-link p-0 m-0 border-0 shadow-none"
+						data-bs-toggle="tooltip"
+						data-bs-placement="top"
+						title="@Model.TooltipText">
+					<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+				</button>
+			}
+
+			<div class="uj-switch-toggle" data-input-id="@Model.InputId">
+				<span class="switch-label off me-1">No</span>
+
+				<input type="hidden"
+					   id="@Model.InputId"
+					   name="@Model.ModelName"
+					   value="@(Model.IsChecked?.ToString().ToLower() ?? "")" />
+
+				<div class="tri-state-slider @(Model.IsChecked == true ? "on" : Model.IsChecked == false ? "off" : "null") @(Model.IsEditMode ? "disabled" : "")"
+					 @(Model.IsEditMode ? "data-disabled=true" : "")>
+					<div class="slider-handle"></div>
+				</div>
+
+				<span class="switch-label on ms-1">Yes</span>
+			</div>
+		</div>
+	</div>
+
+	@if (!string.IsNullOrWhiteSpace(Model.Text))
+	{
+		<div class="switch-text mt-3">
+			@Model.Text
+		</div>
+	}
+</div>

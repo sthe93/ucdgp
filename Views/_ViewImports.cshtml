@@ -1,0 +1,10 @@
+﻿@using ResearchSuite
+@using ResearchSuite.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@functions {
+    public string IsActive(string action)
+    {
+        var current = ViewContext.RouteData.Values["action"]?.ToString();
+        return current == action ? "fw-bold text-orange" : "";
+    }
+}

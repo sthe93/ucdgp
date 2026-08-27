@@ -1,0 +1,366 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@using ResearchSuite.Models.UCDP
+@using ResearchSuite.Models.UCDP.Shared
+
+
+
+<div class="panel panel-primary">
+	<div class="panel-body">
+
+		@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+				{
+			Title = "Improvement of staff qualifications",
+				Subtitle = "Complete the Project 1 details below"
+				})
+		@Html.AntiForgeryToken()
+		<form id="Project1DetailsForm" class="row g-3">
+			<input type="hidden" id="Id" name="Id" value="@Model.Id" />
+			<input type="hidden" id="FundingCallDetailsId" name="FundingCallDetailsId" value="@Model.FundingCallDetailsId" />
+			<input type="hidden" id="UserId" name="UserId" value="@Model.UserId" />
+
+			<div class="row g-3">
+				<div class="col-md-4">
+					@Html.LabelFor(m => m.StudyingTowards, new { @class = "form-label" }) <span class="text-danger">*</span>
+					<select required name="StudyingTowards" id="StudyingTowards" class="form-select">
+						<option value="">--Select studying towards--</option>
+						<option value="Doctoral degree" selected="@(Model.StudyingTowards == "Doctoral degree")">Doctoral degree</option>
+						<option value="Master degree" selected="@(Model.StudyingTowards == "Master degree")">Master’s degree</option>
+					</select>
+					@Html.ValidationMessageFor(m => m.StudyingTowards, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-4">
+					@Html.LabelFor(m => m.FirstYearRegistration, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.FirstYearRegistration, new { @class = "form-control", maxlength = "4" })
+					@Html.ValidationMessageFor(m => m.FirstYearRegistration, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-4">
+					@Html.LabelFor(m => m.PlannedGraduationYear, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.PlannedGraduationYear, new { @class = "form-control", maxlength = "4" })
+					@Html.ValidationMessageFor(m => m.PlannedGraduationYear, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.FieldOfStudy, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.TextBoxFor(m => m.FieldOfStudy, new { @class = "form-control" })
+					@Html.ValidationMessageFor(m => m.FieldOfStudy, "", new { @class = "text-danger" })
+				</div>
+
+				<div class="col-md-6">
+					@Html.LabelFor(m => m.TitleOfThesis, new { @class = "form-label" })
+					@Html.TextBoxFor(m => m.TitleOfThesis, new { @class = "form-control" })
+					@Html.ValidationMessageFor(m => m.TitleOfThesis, "", new { @class = "text-danger" })
+				</div>
+				<div class="col-md-8">
+					@Html.LabelFor(m => m.Describe, new { @class = "form-label" }) <span class="text-danger">*</span>
+					@Html.TextAreaFor(m => m.Describe, new { @class = "form-control", rows = "4" })
+					@Html.ValidationMessageFor(m => m.Describe, "", new { @class = "text-danger" })
+				</div>
+				<!-- Nature of Support -->
+				<div class="col-md-4 px-3" id="supportRequiredGroup">
+					@Html.LabelFor(m => m.SupportRequired, new { @class = "form-label" }) <span class="text-danger">*</span>
+					<div class="form-check mb-2">
+						<input type="checkbox" value="Teaching relief" class="form-check-input" id="SupportRequired_TeachingRelief" name="SupportRequired"
+							   @(Model.SupportRequired != null && Model.SupportRequired.Contains("Teaching relief") ? "checked" : "") />
+						<label class="form-check-label" for="SupportRequired_TeachingRelief">Teaching relief</label>
+					</div>
+
+					<div class="form-check mb-2">
+						<input type="checkbox" value="Research Assistance" class="form-check-input" id="SupportRequired_ResearchAssistance" name="SupportRequired"
+							   @(Model.SupportRequired != null && Model.SupportRequired.Contains("Research Assistance") ? "checked" : "") />
+
+						<label class="form-check-label" for="SupportRequired_ResearchAssistance"> Research assistance	</label>
+					</div>
+
+					<div class="form-check">
+						<input type="checkbox" value="Financial Support" class="form-check-input" id="SupportRequired_FinancialSupport" name="SupportRequired"
+							   @(Model.SupportRequired != null && Model.SupportRequired.Contains("Financial Support") ? "checked" : "") />
+						<label class="form-check-label" for="SupportRequired_FinancialSupport">	Financial support</label>
+					</div>
+				</div>
+
+			</div>
+			<div class="col-md-12">
+
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+								{
+					Title = "Supporting documents",
+								Subtitle = "Please attach documents"
+								})
+
+				<ul class="nav nav-tabs mb-3" id="project1DocsTab" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="proof-tab" data-bs-toggle="tab" data-bs-target="#proof-pane" type="button" role="tab">
+							Proof of registration
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="supervisor-tab" data-bs-toggle="tab" data-bs-target="#supervisor-pane" type="button" role="tab">
+							Supervisor letter
+						</button>
+					</li>
+					<li class="nav-item d-none" role="presentation" id="teachingReliefDocsTabItem">
+						<button class="nav-link" id="teachingrelief-tab" data-bs-toggle="tab" data-bs-target="#teachingrelief-pane" type="button" role="tab">
+							Teaching relief documents
+						</button>
+					</li>
+					<li class="nav-item d-none" role="presentation" id="researchAssistanceDocsTabItem">
+						<button class="nav-link" id="researchassistance-tab" data-bs-toggle="tab" data-bs-target="#researchassistance-pane" type="button" role="tab">
+							Research assistance documents
+						</button>
+					</li>
+					<li class="nav-item d-none" role="presentation" id="financialSupportDocsTabItem">
+						<button class="nav-link" id="financialsupport-tab" data-bs-toggle="tab" data-bs-target="#financialsupport-pane" type="button" role="tab">
+							Financial support documents
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="cost-tab" data-bs-toggle="tab" data-bs-target="#cost-pane" type="button" role="tab">
+							Cost breakdown
+						</button>
+					</li>
+				</ul>
+
+				<div class="tab-content" id="project1DocsTabContent">
+					<div class="tab-pane fade show active" id="proof-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1ProofOfRegistrationUpload)
+					</div>
+
+					<div class="tab-pane fade" id="supervisor-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1SupervisorLetterUpload)
+					</div>
+
+					<div class="tab-pane fade" id="teachingrelief-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1TeachingReliefUpload)
+					</div>
+
+					<div class="tab-pane fade" id="researchassistance-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1ResearchAssistanceUpload)
+					</div>
+
+					<div class="tab-pane fade" id="financialsupport-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1FinancialSupportUpload)
+					</div>
+
+					<div class="tab-pane fade" id="cost-pane" role="tabpanel">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project1CostBreakdownUpload)
+					</div>
+				</div>
+			</div>
+			<div id="teachingReliefSection" class="col-md-12 d-none">
+				@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+								{
+					Title = "Support details",
+								Subtitle = "Complete the relevant support information below"
+								})
+
+				<div class="row g-3">
+					<div class="col-md-12" id="appointmentOptionGroup">
+						<label class="form-label">Details of proposed temporary staff appointment for <span class="text-danger">*</span></label>
+						<div class="text-muted small mb-2">Select the applicable option</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Studies" name="AppointmentOption" value="Master and doctoral studies"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Master and doctoral studies") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Studies">Master’s and doctoral studies</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Collaboration" name="AppointmentOption" value="Research associates collaboration"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Research associates collaboration") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Collaboration">Research associates collaboration</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Emerging" name="AppointmentOption" value="Emerging researchers"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Emerging researchers") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Emerging">Emerging researchers</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Active" name="AppointmentOption" value="Active researchers"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Active researchers") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Active">Active researchers</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Supervision" name="AppointmentOption" value="Supervision mentoring coaching"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Supervision mentoring coaching") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Supervision">Supervision, mentoring and coaching</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOption_Workshops" name="AppointmentOption" value="Research development workshops"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Research development workshops") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOption_Workshops">Research development workshops – consultants/facilitators</label>
+						</div>
+
+						<div class="form-check mb-2">
+							<input type="radio" class="form-check-input" id="AppointmentOtherCheck" name="AppointmentOption" value="Other"
+								   @(Model.AppointmentOption != null && Model.AppointmentOption.Contains("Other") ? "checked" : "")>
+							<label class="form-check-label" for="AppointmentOtherCheck">Other</label>
+						</div>
+
+						<input type="text" id="AppointmentOtherText" name="AppointmentOtherText" value="@Model.AppointmentDescribe" class="form-control mt-2 d-none"
+							   placeholder="Specify other appointment type" />
+					</div>
+				</div>
+
+				<hr class="my-4" />
+
+				<div class="row g-3">
+					<div class="col-md-12">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+												{
+							Title = "Temporary appointees",
+												Subtitle = "Add the details of the person or people who will be appointed temporarily."
+												})
+
+						<div class="table-responsive">
+							<table class="table table-bordered align-middle" id="temporaryAppointeesTable">
+								<thead>
+									<tr>
+										<th>Surname</th>
+										<th>Name</th>
+										<th>Email</th>
+										<th>Contact Number</th>
+										<th>Start Date</th>
+										<th>End Date</th>
+										<th>ID/Passport</th>
+										<th>Staff Status</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+
+						<div class="row g-2 mt-2">
+							<div class="col-md-2"><input type="text" id="appointeeSurname" class="form-control" placeholder="Surname" /></div>
+							<div class="col-md-2"><input type="text" id="appointeeName" class="form-control" placeholder="Name" /></div>
+							<div class="col-md-2"><input type="email" id="appointeeEmail" class="form-control" placeholder="Email" /></div>
+							<div class="col-md-2"><input type="text" id="appointeeContact" class="form-control" placeholder="Contact Number" /></div>
+							<div class="col-md-2"><input type="text" id="appointeeStartDate" class="form-control datepicker" placeholder="dd/MM/yyyy" /></div>
+							<div class="col-md-2"><input type="text" id="appointeeEndDate" class="form-control datepicker" placeholder="dd/MM/yyyy" /></div>
+
+							<div class="col-md-3"><input type="text" id="appointeeIdNumber" class="form-control" placeholder="ID/Passport" /></div>
+							<div class="col-md-3"><input type="text" id="appointeeStaffStatus" class="form-control" placeholder="Staff Status" readonly /></div>
+
+							<div class="col-md-2 d-flex gap-2 align-items-end">
+								<button type="button" class="btn btn-outline-primary flex-fill" id="btnAddAppointee">
+									Add appointee
+								</button>
+								<button type="button" id="btnClearAppointee" class="btn btn-outline-secondary flex-fill d-none">
+									Clear
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<hr class="my-4" />
+
+				<div class="row g-3">
+					<div class="col-md-12">
+						@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+												{
+							Title = "Teaching relief schedule",
+												Subtitle = "Payments will be monthly."
+												})
+						<div class="alert alert-warning mt-3 mb-4 py-3 px-4 text-white" role="alert">
+							<div class="d-flex align-items-start gap-2">
+								<i class="fas fa-info-circle mt-1"></i>
+								<div>
+									<strong>Required documents for appointment</strong>
+									<p class="mb-2 mt-1">
+										Once the replacement lecturer has been appointed, please submit the following documents:
+									</p>
+									<ul class="mb-2 ps-3">
+										<li>HR appointment letter</li>
+										<li>Certified copy of the highest qualification</li>
+										<li>Certified copy of ID or passport</li>
+									</ul>
+									<p class="mb-0">
+										Please email these documents to
+										<a href="mailto:ucdp@uj.ac.za" class="fw-semibold text-orange">ucdp@uj.ac.za</a>.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive">
+							<table class="table table-bordered align-middle" id="teachingReliefScheduleTable">
+								<thead>
+									<tr>
+										<th>Type</th>
+										<th>From</th>
+										<th>To</th>
+										<th>Weeks</th>
+										<th>Hours/Week</th>
+										<th>Total Hours</th>
+										<th>Rate/Hour</th>
+										<th>Total For Month</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+
+						<div class="row g-2 mt-2">
+							<div class="col-md-2">
+								<select id="scheduleType" class="form-select">
+									<option value="">Select type</option>
+									<option value="Lecturer">Lecturer</option>
+									<option value="Tutor">Tutor</option>
+									<option value="Marking">Marking</option>
+									<option value="Research Assistant">Research Assistant</option>
+									<option value="Other">Other</option>
+								</select>
+							</div>
+							<div class="col-md-2"><input type="text" id="scheduleFrom" class="form-control datepicker" placeholder="dd/MM/yyyy" /></div>
+							<div class="col-md-2"><input type="text" id="scheduleTo" class="form-control datepicker" placeholder="dd/MM/yyyy" /></div>
+							<div class="col-md-1"><input type="text" id="scheduleWeeks" class="form-control" placeholder="Weeks" min="1" /></div>
+							<div class="col-md-1"><input type="text" id="scheduleHoursPerWeek" class="form-control" placeholder="Hours/week" min="1" /></div>
+							<div class="col-md-1"><input type="text" id="scheduleTotalHours" class="form-control" placeholder="Total hours" readonly /></div>
+							<div class="col-md-1"><input type="text" id="scheduleRatePerHour" class="form-control" placeholder="Rate" min="0.01" /></div>
+							<div class="col-md-1"><input type="text" id="scheduleMonthTotal" class="form-control" placeholder="Total" readonly /></div>
+							<div class="col-md-1 d-flex gap-2 align-items-end">
+								<button type="button" class="btn btn-outline-primary w-100" id="btnAddSchedule">
+									Add
+								</button>
+								<button type="button" id="btnClearPayment" class="btn btn-outline-secondary flex-fill d-none">
+									Clear
+								</button>
+							</div>
+						</div>
+
+						<div class="mt-3 col-md-3 ms-auto">
+							<label class="form-label">Total</label>
+							<input type="text" id="teachingReliefGrandTotal" class="form-control" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<input type="hidden" id="appointeeIdHidden" value="" />
+			<input type="hidden" id="paymentIdHidden" value="" />
+
+
+
+			<div id="project1Data"
+				 data-temp-appointees='@Html.Raw(Json.Serialize(Model.TemporaryAppointees ?? new List<TemporaryAppointeeViewModel>()))'
+				 data-payments='@Html.Raw(Json.Serialize(Model.Payments ?? new List<PaymentsViewModel>()))'>
+			</div>
+
+		</form>
+
+		@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepWizardButtons.cshtml", new StepWizardButtonsViewModel
+				{
+			NextButtonClass = "nextBtnImproveStaff",
+				CloseButtonId = "btnCloseImproveStaff",
+				BackButtonClass = "backBtnImproveStaff",
+				ShowBackButton = true
+				})
+	</div>
+</div>

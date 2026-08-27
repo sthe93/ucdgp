@@ -1,0 +1,1111 @@
+﻿@using ResearchSuite.Helpers
+@using ResearchSuite.Helpers.Ucdp
+@using ResearchSuite.Models.UCDP.Enums
+@model ResearchSuite.Models.UCDP.ProgressReportDetailsViewModel
+@{
+    ViewData["Title"] = "Create Progress Report";
+    var user = Context.User;
+    var userRoles = UserHelper.GetRolesForApp(user, "ucdg");
+
+    bool IsApplicant() =>
+        userRoles.Any(r =>
+        r.Equals("applicant", StringComparison.OrdinalIgnoreCase));
+
+    bool IsFA() =>
+       userRoles.Any(r =>
+       r.Equals("fund administrator", StringComparison.OrdinalIgnoreCase));
+
+    bool IsMoviationalLetterMandatory() =>
+        Model.FundingCallStartDate.Year < (DateTime.Now.Year) && !Model.IsViewOnly;
+}
+
+<section class="py-4">
+    <div class="form-section mb-4" style="padding:20px">
+        <div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+            <h2 class="text-orange mb-0">Progress Report</h2>
+        </div>
+
+        <input type="hidden" value="@Model.Username" id="Username" name="Username">
+        <input type="hidden" value="@Model.FundingCallId" id="FundingCallId" name="FundingCallId">
+        <input type="hidden" value="@Model.ApplicationId" id="ApplicationId" name="ApplicationId">
+        <input type="hidden" value="@Model.Id" id="ReportId" name="ReportId">
+        <input type="hidden" value="@Model.IsViewOnly" id="IsViewOnly" name="IsViewOnly">
+        <input type="hidden" value="@IsApplicant()" id="IsApplicant" name="IsApplicant">
+        <input type="hidden" value="@Model.ViewReportSource" id="ViewReportSource" name="ViewReportSource">
+        <input type="hidden" value="@IsMoviationalLetterMandatory()" id="IsMoviationalLetterMandatory" name="IsMoviationalLetterMandatory">
+        <!-- Tabs -->
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-3" id="reportTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="recipient-tab" data-bs-toggle="tab" data-bs-target="#recipient" type="button" role="tab" aria-controls="recipient" aria-selected="true">
+                            <i class="bi bi-person-fill me-1"></i> Grant Recipient Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="qualification-tab" data-bs-toggle="tab" data-bs-target="#qualification" type="button" role="tab" aria-controls="qualification" aria-selected="false">
+                            <i class="bi bi-mortarboard-fill me-1"></i> Qualifications
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="teaching-tab" data-bs-toggle="tab" data-bs-target="#teaching" type="button" role="tab" aria-controls="teaching" aria-selected="false">
+                            <i class="bi bi-pencil-square me-1"></i> Teaching Relief Appointment
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="publications-tab" data-bs-toggle="tab" data-bs-target="#publications" type="button" role="tab" aria-controls="publications" aria-selected="false">
+                            <i class="bi bi-journal-text me-1"></i> Publications
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab" aria-controls="projects" aria-selected="false">
+                            <i class="bi bi-search me-1"></i> Research Projects
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="collab-tab" data-bs-toggle="tab" data-bs-target="#collab" type="button" role="tab" aria-controls="collab" aria-selected="false">
+                            <i class="bi bi-people-fill me-1"></i> Collaborative Projects
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="motivational-tab" data-bs-toggle="tab" data-bs-target="#motivational" type="button" role="tab" aria-controls="motivational" aria-selected="false">
+                            <i class="bi bi-postcard me-1"></i> Motivational Letter
+                            @if (IsMoviationalLetterMandatory())
+                            {
+                                <span class="text-danger">*</span>
+                            }
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button @(!Model.IsViewOnly ? "disabled" : "") class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="false">
+                            <i class="bi bi-cash-stack me-1"></i> Financial Report
+                        </button>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Recipient tab (example form layout matching codebase patterns) -->
+                    <div class="tab-pane fade show active" id="recipient" role="tabpanel" aria-labelledby="recipient-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">Grant Recipient Details</div>
+
+                        <form id="createReportForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Employee number</label>
+                                <input type="text" class="form-control" id="StaffNumber" name="StaffNumber" asp-for="StaffNumber" value="@Model.StaffNumber.Remove(Model.StaffNumber.Length - 5, 5)*******" required disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" id="Title" name="Title" asp-for="Title" value="@("*****")"  required disabled />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="FirstName" name="FirstName" asp-for="FirstName" required disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Surname</label>
+                                <input type="text" class="form-control" id="Surname" name="Surname" asp-for="Surname" required disabled />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Project Funded as Approved (in Rands)</label>
+                                <input type="text" class="form-control" id="ApprovedAmount" name="ApprovedAmount" asp-for="ApprovedAmount" required disabled value="@TextFormatHelper.FormatCurrency(Model.ApprovedAmount)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category of applicant or for a target group</label>
+                                <input type="text" class="form-control" id="ApplicantCategory" name="ApplicantCategory" asp-for="ApplicantCategory" required disabled />
+                            </div>
+
+                            <div class="col-12 d-flex justify-content-between mt-3">
+                                <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                @if (Model.IsViewOnly)
+                                {
+                                    <button type="button" class="btn btn-success" id="btnNextToQualification"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" id="btnNextToQualification"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                }
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Qualification tab (placeholder) -->
+                    <div class="tab-pane fade" id="qualification" role="tabpanel" aria-labelledby="qualification-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">Qualifications</div>
+
+                        <form id="qualificationForm" class="row g-3">
+                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <label class="form-label mb-0">Qualification Mode</label>
+                                    <div class="small text-muted">Select whether the qualification is still in progress or already graduated.</div>
+                                </div>
+
+                                <!-- Switch / radio group (matches NewSubmission style concept) -->
+                                <div>
+                                    <div class="btn-group" role="group" aria-label="Qualification mode">
+                                        <input type="radio" class="btn-check" asp-for="IsQualificationInProgressMode" id="QualificationModeInProgress" autocomplete="off" value="true" disabled="@Model.IsViewOnly">
+                                        <label class="btn btn-outline-secondary btn-sm" for="QualificationModeInProgress">In Progress</label>
+
+                                        <input type="radio" class="btn-check" asp-for="IsQualificationInProgressMode" id="QualificationModeGraduated" autocomplete="off" value="false" disabled="@Model.IsViewOnly">
+                                        <label class="btn btn-outline-secondary btn-sm" for="QualificationModeGraduated">Graduated</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="hidden" asp-for="IsQualificationInProgressMode" id="IsQualificationInProgressMode" name="IsQualificationInProgressMode" />
+                            <input type="hidden" asp-for="IsQualificationInPrgress" id="IsQualificationInPrgress" name="IsQualificationInPrgress" />
+                            <input type="hidden" asp-for="IsQualificationGraduated" id="IsQualificationGraduated" name="IsQualificationGraduated" />
+                            <hr />
+                            <div id="inProgressSection" class="row g-3">
+                                @if ((Model.IsQualificationInPrgress && Model.IsViewOnly) || !Model.IsViewOnly)
+                                {
+                                    <div class="col-md-6 inProgressInnerSection">
+                                        <label class="form-label">Qualification <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="QualificationName" name="QualificationName" asp-for="QualificationName" required disabled="@Model.IsViewOnly" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Planned Graduation Year <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="QualificationInPrgressGraduationYear" name="QualificationInPrgressGraduationYear" asp-for="QualificationInPrgressGraduationYear" required disabled="@Model.IsViewOnly" />
+                                    </div>
+
+                                }
+                                @if ((Model.IsQualificationInPrgress && Model.IsViewOnly) || !Model.IsViewOnly)
+                                {
+                                    <div class="inProgressInnerSection">
+                                        <div class="col-12">
+                                            <label class="form-label">Field of Study <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="QualificationInPrgressFieldOfStudy" name="QualificationInPrgressFieldOfStudy" asp-for="QualificationInPrgressFieldOfStudy" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Title of Thesis <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="QualificationInPrgressTitleofThesis" name="QualificationInPrgressTitleofThesis" asp-for="QualificationInPrgressTitleofThesis" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Institution Registered With <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="QualificationInPrgressInstitution" name="QualificationInPrgressInstitution  " asp-for="QualificationInPrgressInstitution" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12 mt-3">
+                                            <ul class="nav nav-tabs" id="qualificationDocsTabs" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="proof-tab" data-bs-toggle="tab" data-bs-target="#proof" type="button" role="tab" aria-controls="proof" aria-selected="true">Proof Of Registration</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="supervisor-tab" data-bs-toggle="tab" data-bs-target="#supervisor" type="button" role="tab" aria-controls="supervisor" aria-selected="false">Progress Report from Supervisor</button>
+                                                </li>
+                                            </ul>
+
+                                            <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                                <div class="tab-pane fade show active" id="proof" role="tabpanel" aria-labelledby="proof-tab">
+                                                    <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                    <div class="small text-muted mb-2">Only pdf documents are allowed. If more than 1 document, create a single file. (Max 5 MB).</div>
+
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <input type="file" id="proofFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                        <button type="button" id="btnAddProof" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                    </div>
+
+                                                    <ul id="proofFilesList" class="list-unstyled mb-0">
+                                                        @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                        {
+                                                            var fileExists = false;
+                                                            foreach (var doc in Model.ApplicationDocuments)
+                                                            {
+                                                                if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.ProofOfReg.GetDescription())
+                                                                {
+                                                                    fileExists = true;
+                                                                    <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                        <span>@doc.Filename</span>
+                                                                        <span>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-primary btn-sm view-file"
+                                                                                    data-document-id="@doc.DocumentId"
+                                                                                    data-filename="@doc.Filename"
+                                                                                    data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                                <i class="bi bi-eye"></i> View
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                                <i class="bi bi-trash"></i> Delete
+                                                                            </button>
+                                                                        </span>
+                                                                    </li>
+                                                                }
+                                                            }
+                                                            if (!fileExists)
+                                                            {
+                                                                <li class="py-2 text-muted">No documents attached.</li>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+
+                                                <div class="tab-pane fade" id="supervisor" role="tabpanel" aria-labelledby="supervisor-tab">
+                                                    <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                    <div class="small text-muted mb-2">Only pdf documents are allowed. If more than 1 document, create a single file. (Max 5 MB).</div>
+
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <input type="file" id="supervisorFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                        <button type="button" id="btnAddSupervisor" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                    </div>
+
+                                                    <ul id="supervisorFilesList" class="list-unstyled mb-0">
+                                                        @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                        {
+                                                            var fileExists = false;
+                                                            foreach (var doc in Model.ApplicationDocuments)
+                                                            {
+                                                                if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.SupervisorReport.GetDescription())
+                                                                {
+                                                                    fileExists = true;
+                                                                    <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                        <span>@doc.Filename</span>
+                                                                        <span>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-primary btn-sm view-file"
+                                                                                    data-document-id="@doc.DocumentId"
+                                                                                    data-filename="@doc.Filename"
+                                                                                    data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                                <i class="bi bi-eye"></i> View
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                                <i class="bi bi-trash"></i> Delete
+                                                                            </button>
+                                                                        </span>
+                                                                    </li>
+                                                                }
+                                                            }
+                                                            if (!fileExists)
+                                                            {
+                                                                <li class="py-2 text-muted">No documents attached.</li>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-12 d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-dark" id="btnBackToRecipient"><i class="bi bi-chevron-left me-1"></i> Back</button>
+                                    <div>
+                                        <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                        @if (Model.IsViewOnly)
+                                        {
+                                            <button type="button" class="btn btn-success" id="btnNextToGraduated"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-success" id="btnNextToGraduated"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="graduatedSection" class="row g-3" style="display:none">
+                                @if ((Model.IsQualificationGraduated && Model.IsViewOnly) || !Model.IsViewOnly)
+                                {
+                                    <div class="col-md-6 graduatedSectionInnerSection">
+                                        <label class="form-label">Qualification</label>
+                                        <input type="text" class="form-control" id="QualificationGraduatedName" name="QualificationGraduatedName" asp-for="QualificationGraduatedName" required disabled="@Model.IsViewOnly" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Year of Graduation</label>
+                                        <input type="text" class="form-control" id="QualificationGraduatedYear" name="QualificationGraduatedYear" asp-for="QualificationGraduatedYear" required disabled="@Model.IsViewOnly" />
+                                    </div>
+                                }
+
+                                @if ((Model.IsQualificationGraduated && Model.IsViewOnly) || !Model.IsViewOnly)
+                                {
+                                    <div class="graduatedSectionInnerSection">
+                                        <div class="col-12">
+                                            <label class="form-label">Field of Study</label>
+                                            <textarea class="form-control" id="QualificationGraduatedFieldOfStudy" name="QualificationGraduatedFieldOfStudy" asp-for="QualificationGraduatedFieldOfStudy" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Title of Thesis</label>
+                                            <textarea class="form-control" id="QualificationGraduatedTitleofThesis" name="QualificationGraduatedTitleofThesis" asp-for="QualificationGraduatedTitleofThesis" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Institution Registered With</label>
+                                            <textarea class="form-control" id="QualificationGraduatedInstitution" name="QualificationGraduatedInstitution" asp-for="QualificationGraduatedInstitution" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                        </div>
+
+                                        <div class="col-12 mt-3">
+                                            <ul class="nav nav-tabs" id="qualificationGraduationDocsTabs" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="proof-grad-tab" data-bs-toggle="tab" data-bs-target="#proofGrad" type="button" role="tab" aria-controls="proofGrad" aria-selected="true">Proof Of Graduation</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="supervisor-grad-tab" data-bs-toggle="tab" data-bs-target="#supervisorGrad" type="button" role="tab" aria-controls="supervisorGrad" aria-selected="false">Graduation Report from Supervisor</button>
+                                                </li>
+                                            </ul>
+
+                                            <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                                <div class="tab-pane fade show active" id="proofGrad" role="tabpanel" aria-labelledby="proof-grad-tab">
+                                                    <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                    <div class="small text-muted mb-2">Only pdf documents are allowed. If more than 1 document, create a single file. (Max 5 MB).</div>
+
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <input type="file" id="proofGradFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                        <button type="button" id="btnAddGradProof" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                    </div>
+
+                                                    <ul id="proofGradFilesList" class="list-unstyled mb-0">
+                                                        @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                        {
+                                                            var fileExists = false;
+                                                            foreach (var doc in Model.ApplicationDocuments)
+                                                            {
+                                                                if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.ProofOfGraduation.GetDescription())
+                                                                {
+                                                                    fileExists = true;
+                                                                    <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                        <span>@doc.Filename</span>
+                                                                        <span>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-primary btn-sm view-file"
+                                                                                    data-document-id="@doc.DocumentId"
+                                                                                    data-filename="@doc.Filename"
+                                                                                    data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                                <i class="bi bi-eye"></i> View
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                                <i class="bi bi-trash"></i> Delete
+                                                                            </button>
+                                                                        </span>
+                                                                    </li>
+                                                                }
+                                                            }
+                                                            if (!fileExists)
+                                                            {
+                                                                <li class="py-2 text-muted">No documents attached.</li>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+
+                                                <div class="tab-pane fade" id="supervisorGrad" role="tabpanel" aria-labelledby="supervisor-grad-tab">
+                                                    <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                    <div class="small text-muted mb-2">Only pdf documents are allowed. If more than 1 document, create a single file. (Max 5 MB).</div>
+
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <input type="file" id="supervisorGradFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                        <button type="button" id="btnAddSupervisorGrad" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                    </div>
+
+                                                    <ul id="supervisorGradFilesList" class="list-unstyled mb-0">
+                                                        @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                        {
+                                                            var fileExists = false;
+                                                            foreach (var doc in Model.ApplicationDocuments)
+                                                            {
+                                                                if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.SupervisorGraduationLetter.GetDescription())
+                                                                {
+                                                                    fileExists = true;
+                                                                    <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                        <span>@doc.Filename</span>
+                                                                        <span>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-primary btn-sm view-file"
+                                                                                    data-document-id="@doc.DocumentId"
+                                                                                    data-filename="@doc.Filename"
+                                                                                    data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                                <i class="bi bi-eye"></i> View
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                                <i class="bi bi-trash"></i> Delete
+                                                                            </button>
+                                                                        </span>
+                                                                    </li>
+                                                                }
+                                                            }
+                                                            if (!fileExists)
+                                                            {
+                                                                <li class="py-2 text-muted">No documents attached.</li>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-12 d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-dark" id="btnBackToInProgress"><i class="bi bi-chevron-left me-1"></i> Back</button>
+                                    <div>
+                                        <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                        @if (Model.IsViewOnly)
+                                        {
+                                            <button type="button" class="btn btn-success" id="btnNextToTeaching"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-success" id="btnNextToTeaching"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Teaching tab (placeholder) -->
+                    <div class="tab-pane fade" id="teaching" role="tabpanel" aria-labelledby="teaching-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">Teaching Relief Appointment</div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Have you been funded for teaching relief/replacement lecturer?<span class="text-danger">*</span></label>
+                            <select class="form-select" id="IsReliefAppointment" name="IsReliefAppointment" asp-for="IsReliefAppointment" asp-items="Model.IsReliefAppointmentOptions" disabled="@Model.IsViewOnly">
+                                <option value="">Select...</option>
+                            </select>
+                        </div>
+                        @if ((Model.IsReliefAppointment && Model.IsViewOnly) || !Model.IsViewOnly)
+                        {
+                            <div id="reliefAppointmentInnerSection">
+                                <div class="col-12 mt-3">
+                                    <ul class="nav nav-tabs" id="teachingReliefDocsTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="teachingReliefProofTab" data-bs-toggle="tab" data-bs-target="#proof" type="button" role="tab" aria-controls="proof" aria-selected="true">Proof Of Appointment</button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                        <div class="tab-pane fade show active" id="teachingReliefProof" role="tabpanel" aria-labelledby="teachingReliefProofTab">
+                                            <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                            <div class="small text-muted mb-2">Only pdf documents are allowed. Maximum of <b>three</b> documents can be added. (Max 5 MB).</div>
+                                            <div>The supporting documents as proof of appointment for the replacement lecturer.</div>
+                                            <ul>
+                                                <li>HR appointment letter.</li>
+                                                <li>A certified copy of the Highest Qualification.</li>
+                                                <li>A certified copy of ID or passport.</li>
+                                            </ul>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <input type="file" id="teachingReliefProofFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                <button type="button" id="btnAddTeachingReliefProof" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                            </div>
+
+                                            <ul id="teachingReliefProofFilesList" class="list-unstyled mb-0">
+                                                @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                {
+                                                    var fileExists = false;
+                                                    foreach (var doc in Model.ApplicationDocuments)
+                                                    {
+                                                        if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.ProofOfAppointment.GetDescription())
+                                                        {
+                                                            fileExists = true;
+                                                            <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                <span>@doc.Filename</span>
+                                                                <span>
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-primary btn-sm view-file"
+                                                                            data-document-id="@doc.DocumentId"
+                                                                            data-filename="@doc.Filename"
+                                                                            data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                        <i class="bi bi-eye"></i> View
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                        <i class="bi bi-trash"></i> Delete
+                                                                    </button>
+                                                                </span>
+                                                            </li>
+                                                        }
+                                                    }
+                                                    if (!fileExists)
+                                                    {
+                                                        <li class="py-2 text-muted">No documents attached.</li>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <li class="py-2 text-muted">No documents attached.</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-12 d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-dark" id="btnBackToQualification"><i class="bi bi-chevron-left me-1"></i> Back</button>
+
+                            <div>
+                                <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                @if (Model.IsViewOnly)
+                                {
+                                    <button type="button" class="btn btn-success" id="btnNextToPublications"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" id="btnNextToPublications"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publications tab (placeholder) -->
+                    <div class="tab-pane fade" id="publications" role="tabpanel" aria-labelledby="publications-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">
+                            Research Publications (Outputs)
+                            <div class="small" style="opacity:.95; margin-top:6px;">
+                                NB: Report ONLY on research publications associated with DHET UCDG funding received during the @Model.FundingCallStartDate.Year.ToString() grant period.
+                            </div>
+                        </div>
+
+                        <form id="publicationsForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Is Research Publication Output available?<span class="text-danger">*</span></label>
+                                <select class="form-select" id="IsResearchPublication" name="IsResearchPublication" asp-for="IsResearchPublication" asp-items="Model.IsResearchPublicationOptions" disabled="@Model.IsViewOnly">
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                            @if ((Model.IsResearchPublication && Model.IsViewOnly) || !Model.IsViewOnly)
+                            {
+                                <div id="researchPublicationInnerSection">
+                                    <div class="col-12">
+                                        <label class="form-label">List DHET accredited Journal Article/s in progress:</label>
+                                        @* <textarea class="form-control" id="journalArticles" name="journalArticles" rows="3" placeholder="List titles, authors, status, expected publication..." disabled></textarea> *@
+                                        <textarea class="form-control" id="ResearchAccreditedJournal" name="ResearchAccreditedJournal" asp-for="ResearchAccreditedJournal" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">List DHET accredited Chapter/s in progress:</label>
+                                        @* <textarea class="form-control" id="bookChapters" name="bookChapters" rows="3" placeholder="List chapters, book title, editors, status..." disabled></textarea> *@
+                                        <textarea class="form-control" id="ResearchAccreditedChapter" name="ResearchAccreditedChapter" asp-for="ResearchAccreditedChapter" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">List DHET accredited Scholarly book/s in progress:</label>
+                                        @* <textarea class="form-control" id="scholarlyBooks" name="scholarlyBooks" rows="3" placeholder="List book title, publisher, status..." disabled></textarea> *@
+                                        <textarea class="form-control" id="ResearchAccreditedBook" name="ResearchAccreditedBook" asp-for="ResearchAccreditedBook" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">List DHET accredited Conference article/s in progress:</label>
+                                        @* <textarea class="form-control" id="conferenceArticles" name="conferenceArticles" rows="3" placeholder="List conference name, paper title, status..." disabled></textarea> *@
+                                        <textarea class="form-control" id="ResearchAccreditedConference" name="ResearchAccreditedConference" asp-for="ResearchAccreditedConference" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-12 d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-dark" id="btnBackToTeaching"><i class="bi bi-chevron-left me-1"></i> Back</button>
+
+                                <div>
+                                    <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                    @if (Model.IsViewOnly)
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToProjects"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToProjects"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Projects tab (placeholder) -->
+                    <div class="tab-pane fade" id="projects" role="tabpanel" aria-labelledby="projects-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">
+                            Research Project/s
+                            <div class="small" style="opacity:.95; margin-top:6px;">
+                                NB: Report ONLY on research publications associated with DHET UCDG funding received during the @Model.FundingCallStartDate.Year.ToString() grant period.
+                            </div>
+                        </div>
+
+                        <form id="researchProjectForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Is research project/s available? <span class="text-danger">*</span></label>
+                                <select class="form-select" id="IsResearchProject" name="IsResearchProject" asp-for="IsResearchProject" asp-items="Model.IsResearchProjectOptions" disabled="@Model.IsViewOnly">
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                            @if ((Model.IsResearchProject && Model.IsViewOnly) || !Model.IsViewOnly)
+                            {
+                                <div id="researchProjectInnerSection">
+                                    <div class="col-12">
+                                        <label class="form-label">List research project/s supported through UCDG funds:</label>
+                                        @*<textarea class="form-control" id="ucdgFunds" name="ucdgFunds" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="ResearchProjectSupport" name="ResearchProjectSupport" asp-for="ResearchProjectSupport" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Activities - List the main activities implemented during the grant period @Model.FundingCallStartDate.Year.ToString()</label>
+                                        @* <textarea class="form-control" id="mainActivities" name="mainActivities" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="Activities" name="Activities" asp-for="Activities" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Outputs - List the main activities implemented during the grant period @Model.FundingCallStartDate.Year.ToString()</label>
+                                        @* <textarea class="form-control" id="mainOutputs" name="mainOutputs" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="Outputs" name="Outputs" asp-for="Outputs" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Outcomes - Provide a short description of main outcomes achieved. Align outcomes with outputs</label>
+                                        @* <textarea class="form-control" id="mainOutcomes" name="mainOutcomes" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="Outcome" name="Outcome" asp-for="Outcome" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <ul class="nav nav-tabs" id="researchProjectDocsTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="researchProjectDocsTabs" data-bs-toggle="tab" data-bs-target="#researchProject" type="button" role="tab" aria-controls="researchProject" aria-selected="true">Source of evidence</button>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                            <div class="tab-pane fade show active" id="researchProjectProof" role="tabpanel" aria-labelledby="researchProjectProofTab">
+                                                <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                <div class="small text-muted mb-2">Only pdf documents are allowed. Maximum of <b>seven</b> documents can be added. (Max 5 MB).</div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <input type="file" id="researchProjectProofFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                    <button type="button" id="btnAddResearchProject" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                </div>
+
+                                                <ul id="researchProjectFilesList" class="list-unstyled mb-0">
+                                                    @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                    {
+                                                        var fileExists = false;
+                                                        foreach (var doc in Model.ApplicationDocuments)
+                                                        {
+                                                            if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.SourceOfEvidence.GetDescription())
+                                                            {
+                                                                fileExists = true;
+                                                                <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                    <span>@doc.Filename</span>
+                                                                    <span>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-primary btn-sm view-file"
+                                                                                data-document-id="@doc.DocumentId"
+                                                                                data-filename="@doc.Filename"
+                                                                                data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                            <i class="bi bi-eye"></i> View
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                            <i class="bi bi-trash"></i> Delete
+                                                                        </button>
+                                                                    </span>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        if (!fileExists)
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="py-2 text-muted">No documents attached.</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-12 d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-dark" id="btnBackToPublications"><i class="bi bi-chevron-left me-1"></i> Back</button>
+                                <div>
+                                    <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                    @if (Model.IsViewOnly)
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToCollabProjects"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToCollabProjects"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Collaborative tab (placeholder) -->
+                    <div class="tab-pane fade" id="collab" role="tabpanel" aria-labelledby="collab-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">
+                            Collaborative Project/s
+                            <div class="small" style="opacity:.95; margin-top:6px;">
+                                NB: Report ONLY on research publications associated with DHET UCDG funding received during the @Model.FundingCallStartDate.Year.ToString() grant period.
+                            </div>
+                        </div>
+
+                        <form id="researchProjectForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Is collaborative project/s available? <span class="text-danger">*</span></label>
+                                <select class="form-select" id="IsCollaborativeProject" name="IsCollaborativeProject" asp-for="IsCollaborativeProject" asp-items="Model.IsCollaborativeProjectOptions" disabled="@Model.IsViewOnly">
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                            @if ((Model.IsCollaborativeProject && Model.IsViewOnly) || !Model.IsViewOnly)
+                            {
+                                <div id="collaborativeProjectInnerSection">
+                                    <div class="col-12">
+                                        <label class="form-label">List collaborative project/s supported by UCDG funds and provide details of collaborator/s:</label>
+                                        @* <textarea class="form-control" id="collaborativeUcdgFunds" name="collaborativeUcdgFunds" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="CollaborativeProjectSupported" name="CollaborativeProjectSupported" asp-for="CollaborativeProjectSupported" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Activities - List the main activities implemented during the grant period @Model.FundingCallStartDate.Year.ToString()</label>
+                                        @* <textarea class="form-control" id="collaborativeMainActivities" name="collaborativeMainActivities" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="CollaborativeActivities" name="CollaborativeActivities" asp-for="CollaborativeActivities" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Outputs - List the main activities implemented during the grant period @Model.FundingCallStartDate.Year.ToString()</label>
+                                        @* <textarea class="form-control" id="collaborativeMainOutputs" name="collaborativeMainOutputs" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="CollaborativeOutputs" name="CollaborativeOutputs" asp-for="CollaborativeOutputs" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Outcomes - Provide a short description of main outcomes achieved. Align outcomes with outputs</label>
+                                        @*  <textarea class="form-control" id="collaborativeMainOutcomes" name="collaborativeMainOutcomes" rows="3" placeholder="" disabled></textarea> *@
+                                        <textarea class="form-control" id="CollaborativeOutcome" name="CollaborativeOutcome" asp-for="CollaborativeOutcome" rows="3" required disabled="@Model.IsViewOnly"></textarea>
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <ul class="nav nav-tabs" id="collaborativeProjectDocsTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="collaborativeProjectDocsTabs" data-bs-toggle="tab" data-bs-target="#collaborativeProject" type="button" role="tab" aria-controls="collaborativeProject" aria-selected="true">Source of evidence for outcomes</button>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                            <div class="tab-pane fade show active" id="collaborativeProjectProof" role="tabpanel" aria-labelledby="collaborativeProjectTab">
+                                                <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                                <div class="small text-muted mb-2">Only pdf documents are allowed. Maximum of <b>seven</b> documents can be uploaded. (Max 5 MB).</div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <input type="file" id="collaborativeProjectProofFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                                    <button type="button" id="btnAddCollaborativeProject" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                                </div>
+
+                                                <ul id="collaborativeProjectFilesList" class="list-unstyled mb-0">
+                                                    @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                                    {
+                                                        var fileExists = false;
+                                                        foreach (var doc in Model.ApplicationDocuments)
+                                                        {
+                                                            if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.CollaborativeSourceOfEvidence.GetDescription())
+                                                            {
+                                                                fileExists = true;
+                                                                <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                    <span>@doc.Filename</span>
+                                                                    <span>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-primary btn-sm view-file"
+                                                                                data-document-id="@doc.DocumentId"
+                                                                                data-filename="@doc.Filename"
+                                                                                data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                                            <i class="bi bi-eye"></i> View
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                                            <i class="bi bi-trash"></i> Delete
+                                                                        </button>
+                                                                    </span>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        if (!fileExists)
+                                                        {
+                                                            <li class="py-2 text-muted">No documents attached.</li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="py-2 text-muted">No documents attached.</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-12 d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-dark" id="btnBackToProjects"><i class="bi bi-chevron-left me-1"></i> Back</button>
+
+                                <div>
+                                    <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                    @if (Model.IsViewOnly)
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToMotivationalLetter"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToMotivationalLetter"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Motivational letter tab (placeholder) -->
+                    <div class="tab-pane fade" id="motivational" role="tabpanel" aria-labelledby="motivational-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">
+                            Motivational Letter
+                        </div>
+
+                        <form id="motivationalLetterForm" class="row g-3">
+                            <div id="motivationalLetterInnerSection">
+                                <div class="col-12 mt-3">
+                                    <ul class="nav nav-tabs" id="motivationalLetterDocsTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="motivationalLetterDocsTabs" data-bs-toggle="tab" data-bs-target="#motivationalLetter" type="button" role="tab" aria-controls="motivationalLetter" aria-selected="true">Motivational Letter</button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                                        <div class="tab-pane fade show active" id="motivationalLetterProof" role="tabpanel" aria-labelledby="motivationalLetterTab">
+                                            <div class="alert alert-warning mb-3 p-2">
+                                                @if (IsMoviationalLetterMandatory() || Model.IsViewOnly)
+                                                {
+                                                    <strong>
+                                                        Please attach documents as requested to submit your application
+                                                    </strong>
+                                                }
+                                                else
+                                                {
+                                                    <strong>
+                                                        This document is not required 
+                                                    </strong>
+                                                }
+                                            </div>
+                                            <div class="small text-muted mb-2">Only pdf documents are allowed. Maximum of <b>one</b> documents can be uploaded. (Max 5 MB).</div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <input type="file" id="motivationalLetterProofFile" accept="application/pdf" class="form-control form-control-sm" disabled="@(Model.IsViewOnly || !IsMoviationalLetterMandatory())" />
+                                                <button type="button" id="btnMotivationalLetter" class="btn btn-info btn-sm ms-2" disabled="@(Model.IsViewOnly || !IsMoviationalLetterMandatory())">Add Document(s)</button>
+                                            </div>
+
+                                            <ul id="motivationalLetterFilesList" class="list-unstyled mb-0">
+                                                @if (Model.MotivationalLetter != null && Model.MotivationalLetter.Id > 0)
+                                                {
+                                                    <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                        <span>@Model.MotivationalLetter.Filename</span>
+                                                        <span>
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm view-file"
+                                                                    data-document-id="@Model.MotivationalLetter.Id"
+                                                                    data-filename="@Model.MotivationalLetter.Filename"
+                                                                    data-docurl="@Url.Action("ViewMotivationLetterById", "Applications", new { documentId = Model.MotivationalLetter.Id })">
+                                                                <i class="bi bi-eye"></i> View
+                                                            </button>
+                                                            <button type="button" class="btn btn-link p-0 text-danger delete-file" data-ismotivationalletter="true" data-document-id="@Model.MotivationalLetter.Id" data-filename="@Model.MotivationalLetter.Filename" disabled="@Model.IsViewOnly">
+                                                                <i class="bi bi-trash"></i> Delete
+                                                            </button>
+                                                        </span>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="py-2 text-muted">No documents attached.</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-dark" id="btnBackToCollab"><i class="bi bi-chevron-left me-1"></i> Back</button>
+
+                                <div>
+                                    <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                    @if (Model.IsViewOnly)
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToFinancialReport"> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-success" id="btnNextToFinancialReport"><i class="bi bi-floppy me-1"></i> Next <i class="bi bi-chevron-right me-1"></i></button>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Financial tab (placeholder) -->
+                    <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                        <div class="mb-3" style="background:#ff6a00;color:#fff;padding:8px 12px;border-radius:2px;">
+                            Financial Report
+                            <div class="small" style="opacity:.95; margin-top:6px;">
+                                NB: Upload financial report/statement of account from the research cost centre (where the UCDP funds were transferred).
+                            </div>
+                        </div>
+                        <div class="tab-content border p-3 pt-2" style="border-top:0;">
+                            <div class="tab-pane fade show active" id="financialReport" role="tabpanel" aria-labelledby="financialReportTab">
+                                <div class="alert alert-warning mb-3 p-2"><strong>Please attach documents as requested to submit your application</strong></div>
+                                <div class="small text-muted mb-2">Only pdf documents are allowed. Maximum of <b>seven</b> documents can be uploaded. (Max 5 MB).</div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <input type="file" id="financialReportFile" accept="application/pdf" class="form-control form-control-sm" disabled="@Model.IsViewOnly" />
+                                    <button type="button" id="btnAddfinancialReport" class="btn btn-info btn-sm ms-2" disabled="@Model.IsViewOnly">Add Document(s)</button>
+                                </div>
+
+                                <ul id="financialReportFilesList" class="list-unstyled mb-0">
+                                    @if (Model.ApplicationDocuments != null && Model.ApplicationDocuments.Any())
+                                    {
+                                        var fileExists = false;
+                                        foreach (var doc in Model.ApplicationDocuments)
+                                        {
+                                            if (doc.UploadType.Trim() == ProgressReportUploadTypeEnum.FinancialReport.GetDescription())
+                                            {
+                                                fileExists = true;
+                                                <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                    <span>@doc.Filename</span>
+                                                    <span>
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm view-file"
+                                                                data-document-id="@doc.DocumentId"
+                                                                data-filename="@doc.Filename"
+                                                                data-docurl="@Url.Action("ViewDocument", "Administration", new { documentId = doc.DocumentId })">
+                                                            <i class="bi bi-eye"></i> View
+                                                        </button>
+                                                        <button type="button" class="btn btn-link p-0 text-danger delete-file" data-document-id="@doc.DocumentId" data-filename="@doc.Filename" disabled="@Model.IsViewOnly">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </span>
+                                                </li>
+                                            }
+                                        }
+                                        if (!fileExists)
+                                        {
+                                            <li class="py-2 text-muted">No documents attached.</li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="py-2 text-muted">No documents attached.</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-dark" id="btnBackToMotivationalLetter"><i class="bi bi-chevron-left me-1"></i> Back</button>
+                            <div>
+                                @if (Model.Status == "New" && IsFA())
+                                {
+                                    <button id="btnReturnForInformation" type="button" class="btn btn-primary" style="background-color: #2c0740;" data-dismiss="modal">Return for information</button>
+                                }
+                                <a class="btn btn-secondary closeBtn"><i class="bi bi-x-circle me-1"></i> Close</a>
+                                @if (Model.Status == "New" && IsFA())
+                                {
+                                    <button type="button" class="btn btn-success" id="btnFinalizeReport"><i class="bi bi-check-square me-1"></i> Finalise</button>
+                                }
+                                else if (Model.Status != "New" && IsFA())
+                                {
+                                    <button type="button" class="btn btn-success" id="btnDoneFA"><i class="bi bi-check-square me-1"></i> Done</button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" id="btnDone"><i class="bi bi-check-square me-1"></i> Done</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms and Conditions modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Top accent to match other UCDP styling -->
+            <div style=""></div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    This form allows a ONCE off submission. No corrections and/or amendments can be made. Would you like to proceed with your submission?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="termsCancel" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="termsProceed" class="btn btn-success" style="background:#ff6a00;border-color:#ff6a00;">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return for ammendment modal -->
+<div class="modal fade" id="addRetunForInfoCommentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#ff6a00;color:#fff;">
+                <h5 class="modal-title" id="commentsModalLabel">Return for information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="retunForInfoComments" class="form-label small text-muted">Enter reason for returning the report (max 300 chars)</label>
+                <textarea id="retunForInfoComments" name="comment" maxlength="300" rows="6" class="form-control" placeholder="Enter comments here..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rfiModalCloseBtn" data-bs-dismiss="modal">Close</button>
+                <button id="btnSubmitRetunForInfo" type="button" class="btn" style="background:#ff6a00;color:#fff;border-color:#ff6a00;">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document viewer modal (used to view uploaded PDF files) -->
+<div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentViewerModalLabel">View Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="documentViewerIframe" src="" width="100%" height="700px" style="border:0;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return for ammendment modal -->
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#ff6a00;color:#fff;">
+                <h5 class="modal-title" id="commentsModalLabel">Delete File</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="deleteFileComments" class="form-label small text-muted">Are you sure you want to delete this file?</label>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary deleteModalCloseBtn" data-bs-dismiss="modal">Close</button>
+                <button id="btnSubmitDeleteFile" type="button" class="btn" style="background:#ff6a00;color:#fff;border-color:#ff6a00;">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ucdp/report.js"></script>
+}

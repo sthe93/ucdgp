@@ -1,0 +1,165 @@
+﻿@using ResearchSuite.Helpers
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model string;
+
+@{
+	var currentPath = (Context.Request.Path.Value ?? "").TrimEnd('/').ToLowerInvariant();
+	var basePath = (HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "").TrimEnd('/');
+	var appsPath = (basePath + "/ucdp/applications").ToLowerInvariant();
+	var moduleName = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+	var user = Context.User;
+
+	var appKey = Model.ToLowerInvariant();
+
+	var userRoles = UserHelper.GetRolesForApp(user, appKey);
+
+	var hasTemp = user.HasClaim($"hasTempRole_{appKey}", "1");
+	var tempTypesCsv = user.FindFirst($"tempRoleTypes_{appKey}")?.Value ?? "";
+	var tempTypes = tempTypesCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+	bool IsFundAdmin() => userRoles.Contains("fund administrator");
+	bool IsApplicant() => userRoles.Contains("applicant");
+
+	bool IsApprover() =>
+		userRoles.Any(r =>
+			r.Equals("hod", StringComparison.OrdinalIgnoreCase) ||
+			r.Equals("vice dean", StringComparison.OrdinalIgnoreCase) ||
+			r.Equals("sia director", StringComparison.OrdinalIgnoreCase) ||
+			r.Equals("fund administrator", StringComparison.OrdinalIgnoreCase) ||
+			r.Equals("admin", StringComparison.OrdinalIgnoreCase)
+		)
+		|| hasTemp;
+
+	var badges = userRoles.ToList();
+	// if (hasTemp)
+	// 	badges.AddRange(tempTypes.Select(t => t)); no need to add temps as the list could be long 
+	var displayBadges = badges?.Take(6).ToList() ?? new List<string>();
+	var extraCount = (badges?.Count ?? 0) - displayBadges.Count;
+}
+
+<aside id="sidebar" class="module-sidebar position-fixed bottom-0">
+	<div class="sidebar-inner py-4 px-3">
+
+		<!-- Module Title + Role -->
+		<div class="sidebar-title mb-4 px-2 fw-bold small">
+			<div class="d-flex justify-content-between align-items-start flex-wrap">
+				<span class="text-primary text-uppercase">UCDP</span>
+				<div class="d-flex flex-wrap gap-1">
+					@foreach (var r in displayBadges)
+					{
+						<span class="badge rounded-pill bg-secondary">@r</span>
+					}
+					@if (extraCount > 0)
+					{
+						<span class="badge rounded-pill bg-dark text-light">+@extraCount</span>
+					}
+				</div>
+			</div>
+		</div>
+
+		<nav class="nav flex-column sidebar-nav">
+
+			<!-- FUNDING CALLS -->
+			@if (IsApplicant() || IsApprover() || IsFundAdmin())
+			{
+				<div class="sidebar-section">
+					<a class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#fundingCallsGroup" role="button" aria-expanded="true">
+						<span><i class="fas fa-bullhorn me-2"></i> Funding Calls</span>
+						<i class="fas fa-chevron-down"></i>
+					</a>
+					<div class="collapse show" id="fundingCallsGroup">
+						<a class="nav-link ms-3 @(currentPath == "/ucdp/index" ? "active" : "")" href="@($"{basePath}/Ucdp/Index")">Available Calls</a>
+						@if (IsFundAdmin())
+						{
+							<a class="nav-link ms-3 @(currentPath == "/FundingCalls/Index" ? "active" : "")" href="@($"{basePath}/FundingCalls/Index")">Manage Calls</a>
+							//<a class="nav-link ms-3 @(currentPath == "/ucdp/pastcalls" ? "active" : "")" href="@($"{basePath}/Ucdp/PastCalls")">Past Calls</a>
+						}
+					</div>
+				</div>
+			}
+
+			<!-- APPLICATIONS -->
+			@if (IsApplicant() || IsApprover() || IsFundAdmin())
+			{
+				<div class="sidebar-section mt-2">
+					<a class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#applicationsGroup" role="button" aria-expanded="true">
+						<span><i class="fas fa-folder-open me-2"></i> Applications</span>
+						<i class="fas fa-chevron-down"></i>
+					</a>
+					<div class="collapse show" id="applicationsGroup">
+						<a class="nav-link ms-3 @(currentPath.StartsWith(appsPath) ? "active" : "")"
+						   href="@($"{basePath}/UCDP/Applications")">
+							Applications
+						</a>
+
+						@*@if (IsApplicant())
+						{
+							<a class="nav-link ms-3 @(currentPath == "/Ucdp/MyApplications" ? "active" : "")" href="@($"{basePath}/Ucdp/MyApplications")">My Applications</a>
+						}*@
+
+					</div>
+				</div>
+			}
+
+			<!-- PROGRESS REPORTS -->
+			@*@if (IsApplicant() || IsApprover() || IsAdmin())
+			{
+				<div class="sidebar-section mt-2">
+					<a class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#progressReportsGroup" role="button" aria-expanded="true">
+						<span><i class="fas fa-chart-line me-2"></i> Progress Reports</span>
+						<i class="fas fa-chevron-down"></i>
+					</a>
+					<div class="collapse show" id="progressReportsGroup">
+						<a class="nav-link ms-3 @(currentPath == "/ucdp/pendingreports" ? "active" : "")" href="@($"{basePath}/Ucdp/PendingReports")">Pending</a>
+						<a class="nav-link ms-3 @(currentPath == "/ucdp/returnedreports" ? "active" : "")" href="@($"{basePath}/Ucdp/ReturnedReports")">Returned</a>
+						<a class="nav-link ms-3 @(currentPath == "/ucdp/submittedreports" ? "active" : "")" href="@($"{basePath}/Ucdp/SubmittedReports")">Submitted</a>
+						<a class="nav-link ms-3 @(currentPath == "/ucdp/finalizedreports" ? "active" : "")" href="@($"{basePath}/Ucdp/FinalizedReports")">Finalized</a>
+					</div>
+				</div>
+			}*@
+
+			@if (IsApplicant())
+			{
+				<div class="sidebar-section mt-2">
+					<a class="nav-link @(currentPath == "/administration/tariffs" ? "active" : "")" href="@($"{basePath}/Administration/Tariffs")">
+						<i class="fas fa-project-diagram me-2"></i> Tariff Plan
+					</a>
+				</div>
+			}
+			<!-- PROJECTS -->
+			@if (IsFundAdmin())
+			{
+				<div class="sidebar-section mt-2">
+					<a class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#projectsGroup" role="button" aria-expanded="true">
+						<span><i class="fas fa-project-diagram me-2"></i> Projects</span>
+						<i class="fas fa-chevron-down"></i>
+					</a>
+
+					<div class="collapse show" id="projectsGroup">
+						<a class="nav-link ms-3 @(currentPath == "/project/index" ? "active" : "")"
+						   href="@($"{basePath}/Project/Index")">
+							Projects
+						</a>
+					</div>
+				</div>
+			}
+
+			<!-- ADMINISTRATION -->
+			@if (IsFundAdmin())
+			{
+				<div class="sidebar-section mt-2">
+					<a class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#adminGroup" role="button" aria-expanded="true">
+						<span><i class="fas fa-cogs me-2"></i> Administration</span>
+						<i class="fas fa-chevron-down"></i>
+					</a>
+					<div class="collapse show" id="adminGroup">
+
+						<a class="nav-link ms-3 @(currentPath == "/administration/tariffs" ? "active" : "")" href="@($"{basePath}/Administration/Tariffs")">Tariff Plan</a>
+						<a class="nav-link ms-3 @(currentPath == "/administration/reports" ? "active" : "")" href="@($"{basePath}/Administration/Reports")">Progress Reports</a>
+					</div>
+				</div>
+			}
+
+		</nav>
+	</div>
+</aside>

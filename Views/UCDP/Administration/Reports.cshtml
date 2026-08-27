@@ -1,0 +1,188 @@
+﻿@{
+    @model ResearchSuite.Models.DocumentUploadViewModel
+    ViewData["Title"] = "Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="py-4">
+    <div class="form-section mb-4" style="padding:20px">
+
+        <div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+            <h2 class="text-orange mb-0">Reports</h2>
+        </div>
+        <ul class="nav nav-tabs mb-3" id="reportTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pendingReport-tab" data-bs-toggle="tab" data-bs-target="#pendingReport" type="button" role="tab" aria-controls="pendingReport" aria-selected="true">
+                    Progress Report Pending
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reportRFI-tab" data-bs-toggle="tab" data-bs-target="#reportRFI" type="button" role="tab" aria-controls="reportRFI" aria-selected="false">
+                    Progress Report Returned For Information
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="submittedReport-tab" data-bs-toggle="tab" data-bs-target="#submittedReport" type="button" role="tab" aria-controls="submittedReport" aria-selected="false">
+                    Progress Report Submitted
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="finalizedReport-tab" data-bs-toggle="tab" data-bs-target="#finalizedReport" type="button" role="tab" aria-controls="finalizedReport" aria-selected="false">
+                    Progress Report Finalized
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="reportTabContent">
+            <div class="tab-pane fade show active" id="pendingReport" role="tabpanel" aria-labelledby="pendingReport-tab">
+                <div class="table-responsive">
+                    <div class="mb-2">
+                        <input id="pendingReportSearch"
+                               class="form-control"
+                               type="search"
+                               placeholder="Search by reference number, funding call name, submitted by"
+                               aria-label="Search pending reports" />
+                    </div>
+                    <table id="pendingReportTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reference Number</th>
+                                <th>Funding Call Name</th>
+                                <th>DHET Requested Amount</th>
+                                <th>Submitted By</th>
+                                <th>Submitted Date</th>
+                                <th>Approved Amount</th>
+                                <th>Application Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="reportRFI" role="tabpanel" aria-labelledby="reportRFI-tab">
+                <div class="table-responsive">
+                    <div class="mb-2">
+                        <input id="rfiReportSearch"
+                               class="form-control"
+                               type="search"
+                               placeholder="Search by reference number, full name"
+                               aria-label="Search RFI reports" />
+                    </div>
+
+                    <table id="reportRfiTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reference Number</th>
+                                <th>Full Name</th>
+                                <th>Applicant Category</th>
+                                <th>Approved Amount</th>
+                                <th>Report Status</th>
+                                <th>Created Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="submittedReport" role="tabpanel" aria-labelledby="submittedReport-tab">
+                <div class="table-responsive">
+                    <div class="mb-2">
+                        <input id="submittedReportSearch"
+                               class="form-control"
+                               type="search"
+                               placeholder="Search by reference number, full name"
+                               aria-label="Search RFI reports" />
+                    </div>
+
+                    <table id="submittedReportTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reference Number</th>
+                                <th>Full Name</th>
+                                <th>Applicant Category</th>
+                                <th>Approved Amount</th>
+                                <th>Report Status</th>
+                                <th>Created Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="finalizedReport" role="tabpanel" aria-labelledby="finalizedReport-tab">
+                <div class="table-responsive">
+                    <div class="mb-2">
+                        <input id="finalizedReportSearch"
+                               class="form-control"
+                               type="search"
+                               placeholder="Search by reference number, full name"
+                               aria-label="Search RFI reports" />
+                    </div>
+
+                    <table id="finalizedReportTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reference Number</th>
+                                <th>Full Name</th>
+                                <th>Applicant Category</th>
+                                <th>Approved Amount</th>
+                                <th>Report Status</th>
+                                <th>Created Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal for showing comments -->
+<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentsModalLabel">Report Comments</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="commentFilter mb-2">
+                    <input id="commentsFilter"
+                           class="form-control"
+                           type="search"
+                           placeholder="Search by commented by"
+                           aria-label="Search pending reports" />
+                </div>
+                <div id="commentsContainer">
+                    <table class="table table-striped" id="commentsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Added By</th>
+                                <th>Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ucdp/administration.js?v=@DateTime.Now.Ticks"></script>
+}

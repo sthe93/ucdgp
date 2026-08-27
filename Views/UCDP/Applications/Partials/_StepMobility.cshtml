@@ -1,0 +1,87 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@using ResearchSuite.Models.UCDP.Shared
+
+
+@* 	<div class="panel panel-primary setup-content" id="MobilityProgrammesTab"> *@
+		<div class="panel-body">
+
+			@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepSectionHeader.cshtml", new StepSectionHeaderViewModel
+						{
+				Title = "International collaboration & networking",
+						Subtitle = "Please attach the required supporting documents"
+						})
+
+			<div class="alert alert-warning">
+				This project does not accommodate presentation at international and national conferences.
+			</div>
+
+			<form id="Project5DetailsForm" class="row g-3">
+				@Html.AntiForgeryToken()
+
+				<input type="hidden" id="Id" name="Id" value="@Model.Id" />
+				<input type="hidden" id="FundingCallDetailsId" name="FundingCallDetailsId" value="@Model.FundingCallDetailsId" />
+				<input type="hidden" id="UserId" name="UserId" value="@Model.UserId" />
+
+				<div class="col-md-12">
+					<ul class="nav nav-tabs mb-3" id="project5DocsTab" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active" id="project5-proof-tab" data-bs-toggle="tab" data-bs-target="#project5-proof-pane" type="button" role="tab">
+								Proof of invitation
+							</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="project5-accommodation-tab" data-bs-toggle="tab" data-bs-target="#project5-accommodation-pane" type="button" role="tab">
+								Accommodation
+							</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="project5-flights-tab" data-bs-toggle="tab" data-bs-target="#project5-flights-pane" type="button" role="tab">
+								Flights
+							</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="project5-othercosts-tab" data-bs-toggle="tab" data-bs-target="#project5-othercosts-pane" type="button" role="tab">
+								Other costs
+							</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="project5-totalbreakdown-tab" data-bs-toggle="tab" data-bs-target="#project5-totalbreakdown-pane" type="button" role="tab">
+								Total cost breakdown
+							</button>
+						</li>
+					</ul>
+
+					<div class="tab-content" id="project5DocsTabContent">
+						<div class="tab-pane fade show active" id="project5-proof-pane" role="tabpanel">
+							@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project5ProofOfInvitationUpload)
+						</div>
+
+						<div class="tab-pane fade" id="project5-accommodation-pane" role="tabpanel">
+							@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project5AccommodationUpload)
+						</div>
+
+						<div class="tab-pane fade" id="project5-flights-pane" role="tabpanel">
+							@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project5FlightsUpload)
+						</div>
+
+						<div class="tab-pane fade" id="project5-othercosts-pane" role="tabpanel">
+							@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project5OtherCostsUpload)
+						</div>
+
+						<div class="tab-pane fade" id="project5-totalbreakdown-pane" role="tabpanel">
+							@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_DocumentUploadSection.cshtml", Model.Project5TotalCostBreakdownUpload)
+						</div>
+					</div>
+				</div>
+			</form>
+
+			@await Html.PartialAsync("~/Views/UCDP/Applications/Shared/_StepWizardButtons.cshtml", new StepWizardButtonsViewModel
+						{
+				NextButtonClass = "nextBtnMobility",
+						CloseButtonId = "btnCloseMobility",
+						BackButtonClass = "backBtnMobility",
+						ShowBackButton = true
+
+						})
+		</div>
+@* 	</div> *@

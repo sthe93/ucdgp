@@ -1,0 +1,66 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	ViewData["Title"] = "Research Suite Dashboard";
+	var appList = ViewData["ApplicationList"] as List<string> ?? new List<string>();
+	var basePath = HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+}
+<div class="landing-container text-white text-center">
+	<h1 class="display-5 fw-bold mb-3">Welcome to the <span class="text-orange">Research Suite</span></h1>
+	<p class="mb-2">Manage research submissions, grants and funding all in one place.</p>
+
+	<div class="bubble-grid">
+		<!-- OROSS -->
+		@if (appList.Contains("oross"))
+		{
+			<a href="@($"{basePath}/Home/SetCurrentApp?appName=oross")" class="bubble-tile oross-tile float-1">
+				<img src="~/images/oross-preview.png" alt="Online Research Output Submission Tool" />
+				<div class="bubble-caption">
+					<h5>OROST</h5>
+					<p class="small">Online Research Output Submission Tool</p>
+				</div>
+			</a>
+		}
+
+		<!-- UCDG -->
+		@if (appList.Contains("ucdg"))
+		{
+			<a href="@($"{basePath}/Home/SetCurrentApp?appName=ucdg")" class="bubble-tile ucdg-tile float-2">
+				<img src="~/images/ucdg-preview.jpg" alt="UCDG" />
+				<div class="bubble-caption">
+					<h5>UCDP</h5>
+					<p class="small">Support capacity development projects.</p>
+				</div>
+			</a>
+		}
+
+
+		<!-- URC -->
+		@* 	@if (appList.Contains("urc"))
+		{
+			<a href="@basePath/Urc/Index" class="bubble-tile urc-tile float-3">
+				<img src="~/images/urc-preview.jpg" alt="URC" />
+				<div class="bubble-caption">
+					<h5>URC</h5>
+					<p class="small">Apply for internal research funding.</p>
+				</div>
+			</a>
+		}
+	</div>*@
+	</div>
+
+<div class="notification-board mt-5 text-start px-4 py-3 rounded border shadow-sm bg-light text-dark">
+	<h5 class="mb-3"><i class="fas fa-bell me-2 text-warning"></i>Latest notifications</h5>
+	<ul class="list-unstyled mb-0 small">
+		<li class="mb-2">
+			<strong>[Mar 2026]</strong> If your user profile cannot be found on the system, please confirm with HR Admin that your email address is correctly updated on Oracle EBS.
+				You can contact HR Admin at <u><strong><a href="mailto:hradmin@uj.ac.za" class="text-primary">hradmin@uj.ac.za</a></strong></u>.
+				Once your details have been updated, please sign out and sign in again to refresh your profile.
+		</li>
+		<li class="mb-2">
+			<strong>[Nov 2025]</strong> Welcome to the new and improved version of OROST. 
+			We’ve applied more robust security measures to protect your information.
+		</li>
+	</ul>
+</div>
+
+</div>

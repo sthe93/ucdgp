@@ -1,0 +1,211 @@
+﻿@{
+    ViewData["Title"] = "Projects";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="py-4">
+    <div class="form-section mb-4" style="padding:20px">
+
+        <div class="d-flex justify-content-between align-items-center border-orange-line mb-4">
+            <h2 class="text-orange mb-0">Projects</h2>
+        </div>
+        <ul class="nav nav-tabs mb-3" id="projectTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab" aria-controls="projects" aria-selected="true">
+                    Projects
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cycles-tab" data-bs-toggle="tab" data-bs-target="#cycles" type="button" role="tab" aria-controls="cycles" aria-selected="false">
+                    Project Cycles
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="projectTabContent">
+            <div class="tab-pane fade show active" id="projects" role="tabpanel" aria-labelledby="projects-tab">
+           
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Project Cycle</label>
+                        <select id="projectCycleFilter" class="form-select">
+                            <option value="">All Project Cycles</option>
+                        </select>
+                    </div>
+                </div>
+
+        
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Project Name</label>
+                        <div class="input-group">
+                            <input type="text" id="projectSearch" class="form-control" placeholder="Search projects...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+         
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#projectModal">
+                        <i class="bi bi-plus-lg"></i> New
+                    </button>
+                </div>
+
+               
+                <div class="table-responsive">
+                    <table id="projectsTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 40%">Project Name</th>
+                                <th style="width: 15%">Project Active</th>
+                                <th style="width: 15%">Period</th>
+                                <th style="width: 15%">Project Cycle Active</th>
+                                <th style="width: 10%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted" id="tableInfo">Page 1 of 1</div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="prevPage" disabled>
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="nextPage" disabled>
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="cycles" role="tabpanel" aria-labelledby="cycles-tab">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#projectCycleModal">
+                        <i class="bi bi-plus-lg"></i> New
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="projectCyclesTable" class="table table-bordered w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Project Cycle Active</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- New/Edit Project Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form class="modal-content" id="projectForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectModalLabel">New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="projectId" />
+
+                <div class="mb-3">
+                    <label for="projectNameInput" class="form-label">Project Name <span class="text-danger">*</span></label>
+                    <input type="text" id="projectNameInput" class="form-control" placeholder="Enter project name" maxlength="500" />
+                </div>
+
+              
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="projectCycleSelect" class="form-label">Link to Project Cycle <span class="text-danger">*</span></label>
+                        <select id="projectCycleSelect" class="form-select">
+                            <option value="">Select Project Cycle</option>
+                        </select>
+                        <small class="text-muted">Project must be linked to at least one active cycle</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Status</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="enableProject" checked>
+                            <label class="form-check-label" for="enableProject">Active</label>
+                        </div>
+                        <small class="text-muted d-block">Inactive projects are hidden from applicants</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="projectSaveBtn">
+                    <i class="bi bi-save"></i> <span id="projectSaveBtnText">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="projectCycleModal" tabindex="-1" aria-labelledby="projectCycleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" id="projectCycleForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectCycleModalLabel">New Project Cycle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="projectCycleId" />
+                <div class="mb-3">
+                    <label for="projectPeriodInput" class="form-label">Period <span class="text-danger">*</span></label>
+                    <input type="text" id="projectPeriodInput" class="form-control" placeholder="Please type period in this format 2013-2020" />
+                    <div class="form-text text-danger mt-1">
+                        e.g: 2018-2020<br />
+                        NB: With no spaces in between the years
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="enableProjectCycle" />
+                    <label class="form-check-label" for="enableProjectCycle">
+                        Enable Project Cycle
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="projectCycleSaveBtn">
+                    <i class="bi bi-save"></i> <span id="projectCycleSaveBtnText">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading Modal (Keep existing) -->
+@* <div class="modal fade" id="loadingModal" tabindex="3" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-body d-flex justify-content-center align-items-center" style="min-height:120px;">
+                <div class="spinner-border text-orange spinner-lg" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ *@
+@section Scripts {
+    <script src="~/js/ucdp/_projects.js?v=@DateTime.Now.Ticks"></script>
+}

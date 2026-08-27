@@ -1,0 +1,795 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@using ResearchSuite.Helpers.Ucdp
+@using ResearchSuite.Models.UCDP
+
+@{
+	Layout = "~/Views/Shared/_LayoutPrint.cshtml";
+
+	string Safe(string value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
+
+	string Mask(string value, int keep)
+	{
+		if (string.IsNullOrWhiteSpace(value) || value.Length <= keep)
+			return "*******";
+
+		return value.Substring(0, value.Length - keep) + "*******";
+	}
+
+	bool HasProject(int id) => Model.SelectedProjects?.Any(x => x.ProjectId == id) == true;
+
+	var uploadedDocs = Model.UploadedDocs ?? new List<UploadDocumentViewModel>();
+
+	IEnumerable<UploadDocumentViewModel> Docs(params string[] types)
+	{
+		return uploadedDocs.Where(x =>
+			!string.IsNullOrWhiteSpace(x.UploadType) &&
+			types.Contains(x.UploadType.Trim()));
+	}
+
+	bool IsRadioSelected(string value, string selectedValue)
+	{
+		return !string.IsNullOrWhiteSpace(selectedValue)
+			&& selectedValue.Trim().Equals(value, StringComparison.OrdinalIgnoreCase);
+	}
+
+	bool IsCheckboxSelected(string value, IEnumerable<string> selectedValues)
+	{
+		if (selectedValues == null)
+			return false;
+
+		var selectedItems = selectedValues
+			.Where(x => !string.IsNullOrWhiteSpace(x))
+			.SelectMany(x => x.Split(',', StringSplitOptions.RemoveEmptyEntries))
+			.Select(x => x.Trim());
+
+		return selectedItems.Any(x =>
+			x.Equals(value, StringComparison.OrdinalIgnoreCase));
+	}
+	string Check(bool selected) => selected ? "☑" : "☐";
+	string Radio(bool selected) => selected ? "◉" : "○";
+
+	string FormatCurrency(object value)
+	{
+		if (value == null)
+			return "R0.00";
+
+		var text = value.ToString();
+
+		if (string.IsNullOrWhiteSpace(text))
+			return "R0.00";
+
+		text = text.Replace("R", "")
+				   .Replace(",", "")
+				   .Trim();
+
+		if (decimal.TryParse(
+			text,
+			System.Globalization.NumberStyles.Any,
+			System.Globalization.CultureInfo.InvariantCulture,
+			out var amount))
+		{
+			return "R" + amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
+		}
+
+		return "R0.00";
+	}
+
+	string FormatDecimal(object value)
+	{
+		if (value == null)
+			return "0.00";
+
+		var text = value.ToString()?.Trim();
+
+		if (string.IsNullOrWhiteSpace(text))
+			return "0.00";
+
+		text = text.Replace("R", "").Replace(" ", "");
+
+		if (text.Contains(",") && !text.Contains("."))
+			text = text.Replace(",", ".");
+		else
+			text = text.Replace(",", "");
+
+		if (decimal.TryParse(
+			text,
+			System.Globalization.NumberStyles.Any,
+			System.Globalization.CultureInfo.InvariantCulture,
+			out var amount))
+		{
+			return amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
+		}
+
+		return "0.00";
+	}
+
+	string FormatRate(decimal? value)
+	{
+		if (!value.HasValue)
+			return "R0.00";
+
+		return "R" + value.Value.ToString(
+			"#,##0.00",
+			System.Globalization.CultureInfo.InvariantCulture
+		);
+	}
+}
+
+
+<div class="pdf-page">
+
+	<section class="pdf-section">
+		<div class="pdf-heading">Applicant Details</div>
+
+		<div class="pdf-grid">
+			<div class="pdf-field">
+				<label>First Name</label>
+				<div>@Safe(Model.UserDetails?.FirstName)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Last Name</label>
+				<div>@Safe(Model.UserDetails?.Surname)</div>
+			</div>
+			<div class="pdf-field">
+				<label>Title</label>
+				<div>*****</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Nationality</label>
+				<div>*****</div>
+			</div>
+			<div class="pdf-field">
+				<label>ID/Passport Number</label>
+				<div>@Mask(Model.UserDetails?.IdPassportNumber, 7)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Date of Birth</label>
+				<div>@(Model.UserDetails?.DateOfBirth?.ToString("dd MMMM yyyy") ?? "-")</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Email Address</label>
+				<div>@Safe(Model.UserDetails?.EmailAddress)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Employee Number</label>
+				<div>@Mask(Model.UserDetails?.StaffNumber, 5)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Faculty</label>
+				<div>@Safe(Model.UserDetails?.Faculty)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Department</label>
+				<div>@Safe(Model.UserDetails?.Department)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Contact Number</label>
+				<div>@Safe(Model.UserDetails?.CellPhoneNumber)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Telephone Number</label>
+				<div>@Safe(Model.UserDetails?.TelephoneNumber)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Campus</label>
+				<div>@Safe(Model.UserDetails?.Campus)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Position</label>
+				<div>@Safe(Model.UserDetails?.Position)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Race</label>
+				<div>*****</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Gender</label>
+				<div>*****</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Line Manager/HOD</label>
+				<div>@Safe(Model.UserDetails?.HOD)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Executive / Vice Dean</label>
+				<div>@Safe(Model.UserDetails?.ViceDean)</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="pdf-section">
+		<div class="pdf-heading">Funding Details</div>
+
+		<div class="pdf-grid">
+			<div class="pdf-field">
+				<label>Period for which DHET support funding is required - Start Date</label>
+				<div>@Model.FundingStartDate.ToString("dd/MM/yyyy")</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Period for which DHET support funding is required - End Date</label>
+				<div>@Model.FundingEndDate.ToString("dd/MM/yyyy")</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Cost Centre Name</label>
+				<div>@Safe(Model.CostCentreName)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Cost Centre Number</label>
+				<div>@Safe(Model.CostCentreNumber)</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Have you received previous UCDG funding?</label>
+				<div>@Safe(Model.PreviousFunding)</div>
+			</div>
+
+			@if (Model.PreviousFunding == "Yes")
+			{
+				<div class="pdf-field">
+					<label>When (enter year)</label>
+					<div>@Safe(Model.PreviousFundingYear)</div>
+				</div>
+
+				<div class="pdf-field">
+					<label>How Much</label>
+					<div>@Safe(Model.PreviousFundingAmount)</div>
+				</div>
+
+				<div class="pdf-field full">
+					<label>Outcome</label>
+					<div class="pdf-textarea">@Safe(Model.PreviousFundingOutcome)</div>
+				</div>
+			}
+
+			<div class="pdf-field">
+				<label>Category of applicant or for a target group</label>
+
+				<div class="pdf-options">
+					<div>@Radio(IsRadioSelected("Registered For Doctoral", Model.ApplicantCategory)) Registered for doctoral study</div>
+
+					<div>@Radio(IsRadioSelected("Registered For Master", Model.ApplicantCategory)) Registered for master’s study</div>
+
+					<div>@Radio(IsRadioSelected("Emerging Researcher", Model.ApplicantCategory)) Emerging researcher (Recent PhD recipient)</div>
+
+					<div>@Radio(IsRadioSelected("Emerging Supervisor", Model.ApplicantCategory)) Emerging supervisor</div>
+
+					<div>@Radio(IsRadioSelected("Active Researchers", Model.ApplicantCategory)) Active researchers</div>
+				</div>
+			</div>
+
+			<div class="pdf-field">
+				<label>Appointment category of applicant</label>
+
+				<div class="pdf-options">
+					<div>@Radio(IsRadioSelected("Permanent", Model.AppointmentCategory)) Academic/research permanent</div>
+
+					<div>@Radio(IsRadioSelected("Fixed Term Contract", Model.AppointmentCategory)) Academic/research fixed term contract</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="pdf-section">
+		<div class="pdf-heading">Approved Projects</div>
+
+		@if (Model.FundingCallDetails?.FundingCallProjects != null && Model.SelectedProjects != null)
+		{
+			<ul class="pdf-list">
+				@foreach (var item in Model.FundingCallDetails.FundingCallProjects)
+				{
+					foreach (var selected in Model.SelectedProjects)
+					{
+						if (selected.ProjectId == item.Id)
+						{
+							<li>@item.ProjectName</li>
+						}
+					}
+				}
+			</ul>
+		}
+		else
+		{
+			<p>No projects selected.</p>
+		}
+	</section>
+
+	@if (HasProject(1))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">Improvement of Staff Qualifications</div>
+
+			<div class="pdf-grid">
+				<div class="pdf-field">
+					<label>Studying Towards</label>
+					<div>@Safe(Model.StudyingTowards)</div>
+				</div>
+
+				<div class="pdf-field">
+					<label>Year of 1st registration</label>
+					<div>@Safe(Model.FirstYearRegistration)</div>
+				</div>
+
+				<div class="pdf-field">
+					<label>Planned graduation year</label>
+					<div>@Safe(Model.PlannedGraduationYear)</div>
+				</div>
+
+				<div class="pdf-field full">
+					<label>Nature of Support Required</label>
+
+					<div class="pdf-options">
+						<div>@Check(IsCheckboxSelected("Teaching relief", Model.SupportRequired)) Teaching relief</div>
+						<div>@Check(IsCheckboxSelected("Research Assistance", Model.SupportRequired)) Research assistance</div>
+						<div>@Check(IsCheckboxSelected("Financial Support", Model.SupportRequired)) Financial support</div>
+					</div>
+				</div>
+
+				<div class="pdf-field full">
+					<label>Describe</label>
+					<div class="pdf-textarea">@Safe(Model.Describe)</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Details of Proposed Temporary Staff Appointment For</div>
+
+			<div class="pdf-field full">
+				<label>Selected Option</label>
+				<div class="pdf-subtext-light">Select the applicable option</div>
+
+				<div class="pdf-options">
+					<div>@Radio(IsCheckboxSelected("Master and doctoral studies", Model.AppointmentOption)) Master’s and doctoral studies</div>
+					<div>@Radio(IsCheckboxSelected("Research associates collaboration", Model.AppointmentOption)) Research associates collaboration</div>
+					<div>@Radio(IsCheckboxSelected("Emerging researchers", Model.AppointmentOption)) Emerging researchers</div>
+					<div>@Radio(IsCheckboxSelected("Active researchers", Model.AppointmentOption)) Active researchers</div>
+					<div>@Radio(IsCheckboxSelected("Supervision mentoring coaching", Model.AppointmentOption)) Supervision, mentoring and coaching</div>
+					<div>@Radio(IsCheckboxSelected("Research development workshops", Model.AppointmentOption)) Research development workshops – consultants/facilitators</div>
+					<div>@Radio(IsCheckboxSelected("Other", Model.AppointmentOption)) Other</div>
+				</div>
+			</div>
+
+			@if (!string.IsNullOrWhiteSpace(Model.AppointmentDescribe))
+			{
+				<div class="pdf-field full">
+					<label>Appointment Description</label>
+					<div class="pdf-textarea">@Safe(Model.AppointmentDescribe)</div>
+				</div>
+			}
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Documents Attached</div>
+
+			@{
+				var project1Docs = Docs(
+				UploadTypeEnum.ProofOfReg.GetDescription(),
+				UploadTypeEnum.SupervisorLetter.GetDescription(),
+				UploadTypeEnum.ResearchAssistance.GetDescription(),
+				UploadTypeEnum.ReliefDocuments.GetDescription(),
+				UploadTypeEnum.FinancialSupport.GetDescription(),
+				UploadTypeEnum.TotalCostBreakdown.GetDescription()
+				).ToList();
+			}
+
+			<table>
+				<thead>
+					<tr>
+						<th>Document Type</th>
+						<th>File Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (project1Docs.Any())
+					{
+						foreach (var doc in project1Docs)
+						{
+							<tr>
+								<td>@Safe(doc.UploadType)</td>
+								<td>@Safe(doc.Filename)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="2">No documents attached.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Teaching Relief Appointees</div>
+			<div class="pdf-subtext">Provide the following information of the person/s that will be appointed on a temporary basis.</div>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Surname</th>
+						<th>Name</th>
+						<th>Email Address</th>
+						<th>Contact Number</th>
+						<th>Staff Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model.TemporaryAppointees != null && Model.TemporaryAppointees.Any())
+					{
+						foreach (var item in Model.TemporaryAppointees)
+						{
+							<tr>
+								<td>@Safe(item.Surname)</td>
+								<td>@Safe(item.Name)</td>
+								<td>@Safe(item.EmailAddress)</td>
+								<td>@Safe(item.ContactNumber)</td>
+								<td>@Safe(item.StaffStatus)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="5">No temporary appointees captured.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Teaching Relief for Study & Research Purposes</div>
+			<div class="pdf-subtext">Payments will be monthly.</div>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Type of study & research purpose</th>
+						<th>Number of Weeks</th>
+						<th>Hours Per Week</th>
+						<th>Total Number of Hours</th>
+						<th>UJ Rate Per Hour</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model.Payments != null && Model.Payments.Any())
+					{
+						foreach (var item in Model.Payments)
+						{
+							<tr>
+								<td>@Safe(item.Type)</td>
+								<td>@FormatDecimal(item.NumberOfWeeks)</td>
+								<td>@FormatDecimal(item.HoursPerWeek)</td>
+								<td>@FormatDecimal(item.TotalNumberOfHours)</td>
+								<td>@FormatRate(item.RatePerHour)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="5">No payment schedule captured.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+	}
+
+	@if (HasProject(2))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">Research Career Development of Emerging and Mid-Career Researchers</div>
+
+			<div class="pdf-field full">
+				<label>Teaching Relief</label>
+
+				<div class="pdf-options">
+					<div>@Check(IsCheckboxSelected("Replacement by temporary lecturer", Model.CareerTeachingRelief)) Replacement by temporary lecturer</div>
+					<div>@Check(IsCheckboxSelected("Teaching assistance from senior tutor OR tutor", Model.CareerTeachingRelief)) Teaching assistance from senior tutor OR tutor</div>
+					<div>@Check(IsCheckboxSelected("Teaching assistance from tutor", Model.CareerTeachingRelief)) Teaching assistance from tutor/senior tutor/marker</div>
+					<div>@Check(IsCheckboxSelected("Lecturer", Model.CareerTeachingRelief)) Lecturer</div>
+				</div>
+			</div>
+
+			<div class="pdf-field full">
+				<label>Financial Support</label>
+
+				<div class="pdf-options">
+					<div>@Check(IsCheckboxSelected("DHET accredited", Model.CareerFinancialSupport)) DHET accredited national/international conference presentation</div>
+					<div>@Check(IsCheckboxSelected("Research development workshops", Model.CareerFinancialSupport)) Research development workshops</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Documents Attached</div>
+
+			@{
+				var careerDocs = Docs(
+				UploadTypeEnum.CareerDevelopmentWorkshop.GetDescription(),
+				UploadTypeEnum.CareerDevelopmentInvite.GetDescription(),
+				UploadTypeEnum.CareerDevelopmentTeaching.GetDescription(),
+				UploadTypeEnum.ResearchCareerAccommodation.GetDescription(),
+				UploadTypeEnum.ResearchCareerFlights.GetDescription(),
+				UploadTypeEnum.ResearchCareerOtherCosts.GetDescription(),
+				UploadTypeEnum.ResearchCareerTotalCostBreakdown.GetDescription()
+				).ToList();
+			}
+
+			<table>
+				<thead>
+					<tr>
+						<th>Document Type</th>
+						<th>File Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (careerDocs.Any())
+					{
+						foreach (var doc in careerDocs)
+						{
+							<tr>
+								<td>@Safe(doc.UploadType)</td>
+								<td>@Safe(doc.Filename)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="2">No documents attached.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Teaching Relief</div>
+			<div class="pdf-subtext">
+				The following schedules reflect the Academic Calendar and the UJ tariffs. Complete the amount of hours per week.
+				NOTE: In the table below UJ, public holidays, recess and study weeks are excluded as it cannot be claimed for.
+			</div>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Type of study & research purpose</th>
+						<th>Number of Weeks</th>
+						<th>Hours Per Week</th>
+						<th>Total Number of Hours</th>
+						<th>UJ Rate Per Hour</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model.CareerDevelopmentPayments != null && Model.CareerDevelopmentPayments.Any())
+					{
+						foreach (var item in Model.CareerDevelopmentPayments)
+						{
+							<tr>
+								<td>@Safe(item.Type)</td>
+								<td>@FormatDecimal(item.NumberOfWeeks)</td>
+								<td>@FormatDecimal(item.HoursPerWeek)</td>
+								<td>@FormatDecimal(item.TotalNumberOfHours)</td>
+								<td>@FormatRate(item.RatePerHour)	</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="5">No career development payment schedule captured.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+	}
+
+	@if (HasProject(3))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">Professionalisation of Academic and Research Staff</div>
+
+			<div class="pdf-field full">
+				<label>Financial Support</label>
+				<div>@Safe(Model.financialSupportItem)</div>
+			</div>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Documents Attached</div>
+
+			@{
+				var project3Docs = Docs(
+				UploadTypeEnum.ImprovingStaffResearch.GetDescription(),
+				UploadTypeEnum.ImproveResearchInvite.GetDescription()
+				).ToList();
+			}
+
+			<table>
+				<thead>
+					<tr>
+						<th>Document Type</th>
+						<th>File Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (project3Docs.Any())
+					{
+						foreach (var doc in project3Docs)
+						{
+							<tr>
+								<td>@Safe(doc.UploadType)</td>
+								<td>@Safe(doc.Filename)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="2">No documents attached.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+	}
+
+	@if (HasProject(4))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">Supervision Development</div>
+			<p>UJ supervision courses hosted by the Post Graduate School - For participation contact <strong>rcducdp@uj.ac.za</strong></p>
+		</section>
+	}
+
+	@if (HasProject(5))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">International Collaboration & Networking</div>
+			<p>This project does not accommodate presentation at international and national conferences.</p>
+		</section>
+
+		<section class="pdf-section">
+			<div class="pdf-heading">Documents Attached</div>
+
+			@{
+				var project5Docs = Docs(
+				UploadTypeEnum.MobilityProgrammes.GetDescription(),
+				UploadTypeEnum.MobilityProgrammesAccommodation.GetDescription(),
+				UploadTypeEnum.MobilityProgrammesFlight.GetDescription(),
+				UploadTypeEnum.MobilityProgrammesOtherCosts.GetDescription(),
+				UploadTypeEnum.MobilityProgrammesTotalCostBrakedown.GetDescription()
+				).ToList();
+			}
+
+			<table>
+				<thead>
+					<tr>
+						<th>Document Type</th>
+						<th>File Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (project5Docs.Any())
+					{
+						foreach (var doc in project5Docs)
+						{
+							<tr>
+								<td>@Safe(doc.UploadType)</td>
+								<td>@Safe(doc.Filename)</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr><td colspan="2">No documents attached.</td></tr>
+					}
+				</tbody>
+			</table>
+		</section>
+	}
+
+	@if (HasProject(6))
+	{
+		<section class="pdf-section">
+			<div class="pdf-heading">Providing Integrated Student Support and Development to Postgraduate Students</div>
+			<p>
+				Presented by Post Graduate School the project will offer: Research capacity development workshops;
+				online courses and/or resources for postgraduate students; Research writing support -
+				For participation contact <strong>rcducdp@uj.ac.za</strong>.
+			</p>
+		</section>
+	}
+
+	<section class="pdf-section">
+		<div class="pdf-heading">All Submitted Documents</div>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Document Type</th>
+					<th>File Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (uploadedDocs.Any())
+				{
+					foreach (var doc in uploadedDocs)
+					{
+						<tr>
+							<td>@Safe(doc.UploadType)</td>
+							<td>@Safe(doc.Filename)</td>
+						</tr>
+					}
+				}
+				else
+				{
+					<tr><td colspan="2">No documents attached.</td></tr>
+				}
+			</tbody>
+		</table>
+	</section>
+
+	<section class="pdf-section">
+		<div class="pdf-heading">Supporting Information</div>
+
+		<div class="pdf-field full">
+			<label>Motivation for financial support</label>
+			<div class="pdf-textarea">@Safe(Model.FinancialMotivation)</div>
+		</div>
+
+		<div class="pdf-field full">
+			<label>Progress of applicant in terms of the support applying for: Current progress of applicant towards goal (e.g. completion of dissertation, or article) Planned activities for the period that relief is requested</label>
+			<div class="pdf-textarea">@Safe(Model.ApplicantProgress)</div>
+		</div>
+
+		<div class="pdf-field full">
+			<label>State the measurable output(s) impact to be achieved by applicant(s): (Example Article in an accredited Journal)</label>
+			<div class="pdf-textarea">@Safe(Model.OutputMeasure)</div>
+		</div>
+	</section>
+
+	<section class="pdf-section">
+		<div class="pdf-heading">Financial Implication</div>
+
+		<table>
+			<tbody>
+				<tr><td>Other Funding</td><td>@FormatCurrency(Model.OtherFunding)</td></tr>
+				<tr><td>Faculty Contribution</td><td>@FormatCurrency(Model.FacultyContibution)</td></tr>
+				<tr><td>Departmental Contribution</td><td>@FormatCurrency(Model.DepartmentContribution)</td></tr>
+				<tr><td>Research Contribution</td><td>@FormatCurrency(Model.ResearchFundsContribution)</td></tr>
+				<tr><td>UCDG/DHET funds requested</td><td>@FormatCurrency(Model.DHETFundsRequested)</td></tr>
+				<tr><td><strong>Total Cost Of Application</strong></td><td><strong>@FormatCurrency(Model.TotalCost)</strong></td></tr>
+				<tr><td><strong>Final Amount: Fund Admin</strong></td><td><strong>@FormatCurrency(Model.FundAdminApprovedAmount)</strong></td></tr>
+				<tr><td><strong>Final Amount: SIA Director</strong></td><td><strong>@FormatCurrency(Model.ApprovedAmount)</strong></td></tr>
+			</tbody>
+		</table>
+
+		<p class="pdf-note">
+			The principle of co-funding applies: You are expected to explore other sources of funding
+			(research funds; departmental funds; faculty funds; external sources) and to detail what funding
+			is available from other sources. UCDP is unlikely to fund projects/activities in full.
+		</p>
+
+		<div class="pdf-field full">
+			<label>Fund Admin Comment</label>
+			<div class="pdf-textarea">@Safe(Model.FundAdminComment)</div>
+		</div>
+
+		<div class="pdf-field full">
+			<label>SIA Director Comment</label>
+			<div class="pdf-textarea">@Safe(Model.SIAComment)</div>
+		</div>
+	</section>
+
+</div>

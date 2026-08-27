@@ -1,0 +1,96 @@
+﻿@model ResearchSuite.Models.UCDP.ApplicationDetailsViewModel
+@using ResearchSuite.Helpers.Ucdp
+@{
+    ViewData["Title"] = "View Application Details";
+    //Layout = "~/Views/Shared/_Layout_Awards.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    @*<link rel="stylesheet" href="~/css/Content/bootstrap.css" />*@
+
+    string title = string.IsNullOrEmpty(Model.UserDetails.Title)
+    ? string.Empty
+    : char.ToUpper(Model.UserDetails.Title[0]) + Model.UserDetails.Title.Substring(1).ToLower();
+
+    string fullName = title + " " + Model.UserDetails.FirstName + " " + Model.UserDetails.Surname;
+
+}
+
+
+<div id="dashboardTableWrapper" class="panel-body" width: 500px; height:500px;">
+
+    <div class="inner-border" style="padding-left:10%; padding-right:15%;padding-top:15%; background-color:white;color:black;">
+        <img style="width:100%;height:300px" src="@Url.Content("~/images/ucdp/assets/img/HeadingImage.png")" />
+        <br />
+        <br />
+
+        <p><strong>Date @Model.LastModifiedDate.ToString("dd-MMM-yyyy") ,</strong></p>
+
+        <p>
+
+            @fullName
+            <br>
+            <br>
+
+            @Model?.UserDetails?.Department
+            <br>
+
+            Dear @Model?.UserDetails?.FirstName,
+
+        </p>
+
+        <br>
+        <p>
+            <U><strong> RE: DHET University Capacity Development Grant (UCDP)</strong></U>
+        </p>
+        <br>
+        <p>
+            Congratulations on the award of a grant by DHET UCDP for @Model?.FundingStartDate.ToString("yyyy")
+        </p>
+        <p>
+            <strong>Reference Number: </strong> @Model?.ReferenceNumber
+            <br>
+            <br>
+            <strong>Grant Approved:</strong> @Model.ApprovedAmount
+
+            <br>
+            <br>
+
+            <h8><b> By accepting this grant, you agree to:</b></h8>
+            <br>
+
+        </p>
+
+        <ul style="list-style-type:disc">
+            <li>Use funds strictly in line with UJ Finance and Travel Policies.</li>
+            <li>Accept responsibility for all relevant terms, conditions, policies, and procedures as stipulated.</li>
+            <li>Submit a progress report online by 15 January (or immediately upon completion of the funded activity, whichever is earlier), detailing expenditure, progress against outcomes, and supporting evidence.</li>
+            <li>Acknowledge that you are solely responsible for submitting this progress report by the deadline. This obligation is unconditional and applies irrespective of whether you receive a system-generated notification. Failure to receive such notification does not excuse you from this responsibility.</li>
+            <li>Inform UCP immediately by email to ucdp@uj.ac.za and submit a report online if funds are not used for any reason, indicating this for further guidance. Failure to use funds does not automatically authorise their use in the following year or for other unapproved activities.</li>
+            <li>Acknowledge that the DHET reserves the right to request reimbursement of unused funds.</li>
+            <li>Acknowledge that failure to submit any required report may affect future funding applications.</li>
+        </ul>
+        <br>
+
+        <div class="footer2">
+            <div class="row" style="width:100%">
+                <div class="col-6" style="text-align:left">
+                    <h5 style="text-align:left"> Sincerely</h5>
+                    <h5 style="text-align:left"> UCDP Administration</h5>
+                </div>
+            </div>
+
+            <div class="row" style="width:100%;margin-top:50px">
+                <div class="col-6" style="text-align:left">
+                    <h5 style="text-align:left">Applicant: </h5>
+                    <p id="applicantSigned"> @Model.UserDetails.FirstName @Model.UserDetails.Surname  </p>
+                    <br />
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+ 
+}
+

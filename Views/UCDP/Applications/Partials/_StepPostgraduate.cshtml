@@ -1,0 +1,140 @@
+﻿<div class="panel panel-primary setup-content" id="PromotingPostGraduateTab">
+    <div class="panel-heading" style="background-color: #FF6400">
+        <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Providing integrated student support and development to postgraduate students</h3>
+    </div>
+    <div class="panel-body">
+
+        <div id="btnStep8Next" class="row">
+
+            <div class="col-md-12">
+                <button asp-action="ApplicationPojects" asp-controller="Applications" class="btn btn-primary nextBtnPromote pull-right" type="button" style="background-color: #66CD00; width:190px"><i class="fa fa-save"></i> Save and Continue <i class="fa fa-arrow-right"></i></button>
+                <button id="btnClosePromote" class="btn btn-primary" type="button" style="background-color: #7777; border-color: #7777; width:190px;"><i class="fa fa-close"></i> Close </button>
+                <button class="btn btn-primary backBtnPromote pull-right" type="button" style="background-color: #000000; border-color: #000000; width:190px; margin-right:75px"><i class="fa fa-arrow-left"></i> Back </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script type="text/html" id="PromotingPostGraduate">
+    <form id="PromotingPostGraduateForm" class="row">
+        <div class="form-group">
+            <p class="control-label">Presented by Post Graduate School the project will offer: Research capacity development workshops; online courses and/or resources for postgraduate students; Research writing support - For participation contact <strong><a href="mailto:rcducdp@uj.ac.za">rcducdp@uj.ac.za</a></strong></p>
+        </div>
+    </form>
+</script>
+
+<script type="text/html" id="SupportDocsSection">
+    <form id="SupportDocsSectionForm" class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" role="tablist">
+
+                <li class="nav-item active">
+                    <a class="nav-link active" data-toggle="tab" href="#Accommodation">Accommodation</a>
+                </li>
+
+                @*     <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href="#ImprovingStaffResearchFlights">Flights2</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="font-size:medium" data-toggle="tab" href="#OtherCosts">Other Costs</a>
+                    </li> *@
+            </ul>
+            <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Please Attach Documents as Requested to submit your application</h3>
+            </div>
+            <br />
+        </div>
+        <div class="tab-content">
+
+            <div id="Accommodation" class="container tab-pane active">
+                <br />
+                <p style="width:990px">
+                    Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.A maximum of <strong>Three</strong> documents can be added.
+                    Only PDF uploads are allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+
+                </p>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input required type="file" class="form-control" id="AccommodationDoc" name="AccommodationDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="button" onclick="UploadAccommodation()" id="AccommodationDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div id="progressbar-5">
+                            <div class="progress-label">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-sm-6" style="width:990px">
+                        <table class="table" id="ListofUploadAccommodationDocFiles">
+                            <tr>
+                                <th>
+                                    File Name
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="Flights" class="container tab-pane">
+                <br />
+                <p style="width:990px">
+                    Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.A maximum of <strong>Three</strong> documents can be added.
+                    Only PDF uploads are allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+
+                </p>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input required type="file" class="form-control" id="FlightsDoc" name="FlightsDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="button" onclick="UploadFlightsDoc()" id="FlightsDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div id="progressbar-5">
+                            <div class="progress-label">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-sm-6" style="width:990px">
+                        <table class="table" id="ListofFlightsDocumentsFiles">
+                            <tr>
+                                <th>
+                                    File Name
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+        </div>
+    </form> <br />
+

@@ -1,0 +1,224 @@
+﻿@model IEnumerable<ResearchSuite.Models.UCDP.FundingCallsModel>
+@using ResearchSuite.Helpers
+@using System.Security.Claims
+
+@{
+	ViewData["Title"] = "Funding calls";
+	Layout = null;
+
+	var rawRole = User.Claims
+		.Where(c => c.Type == ClaimTypes.Role && c.Value.StartsWith("ucdg"))
+		.Select(c => c.Value)
+		.FirstOrDefault();
+
+	var normalizedRole = rawRole?.Contains(":") == true
+		? rawRole.Split(':')[1].Trim()
+		: rawRole;
+
+	bool IsAdmin() =>
+		normalizedRole == "Fund Administrator" ||
+		normalizedRole == "SIA Director";
+
+	var roleValue = IsAdmin();
+	var number = 0;
+	var today = DateTime.Today;
+}
+<div class="funding-call-dashboard-content">
+	<div class="row g-4">
+		@if (Model != null)
+		{
+			foreach (var r in Model)
+			{
+				if (r.ClosingDate.Date >= today && r.OpeningDate.Date <= today)
+				{
+					number++;
+
+					<div class="col-12 col-md-6 col-xl-4">
+						<article class="card funding-call-card funding-call-card--interactive h-100">
+							<div class="funding-call-card__glow"></div>
+
+							<div class="card-body funding-call-card__body">
+								<div class="funding-call-card__top">
+									<div class="funding-call-card__topbar">
+										<span class="funding-call-card__badge">@number</span>
+
+									</div>
+
+									<h5 class="funding-call-card__title" title="@r.FundingCallName">
+										@r.FundingCallName
+									</h5>
+
+									<div class="funding-call-card__dates">
+										<div class="funding-call-card__date-item">
+											<i class="fa fa-calendar"></i>
+											<span><strong>Opens:</strong> @r.OpeningDate.ToString("dd MMM yyyy")</span>
+										</div>
+
+										<div class="funding-call-card__date-item">
+											<i class="fa fa-calendar"></i>
+											<span><strong>Closes:</strong> @r.ClosingDate.ToString("dd MMM yyyy")</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="funding-call-card__section">
+									<div class="funding-call-card__section-title">Projects</div>
+
+									@if (r.FundingCallProjects != null && r.FundingCallProjects.Any())
+									{
+										<div class="funding-call-card__project-list-wrap">
+											<ul class="funding-call-card__project-list">
+												@foreach (var item in r.FundingCallProjects)
+												{
+													<li>@item.ProjectName</li>
+												}
+											</ul>
+										</div>
+									}
+									else
+									{
+										<div class="text-muted small-text">No linked projects</div>
+									}
+								</div>
+
+								@if (r.HasPreviousFunding && r.LastPreviousFunding?.ApplicationDetails != null)
+								{
+									var lastApp = r.LastPreviousFunding.ApplicationDetails;
+
+									<div class="funding-call-card__info-panel">
+										<div class="funding-call-card__panel-title">Previous UCDP funding</div>
+
+										<div class="funding-call-card__meta">
+											<div>
+												<span class="funding-call-card__meta-label">Last award year</span>
+												<span class="funding-call-card__meta-value">@lastApp.FundingStartDate.Year</span>
+											</div>
+
+											<div>
+												<span class="funding-call-card__meta-label">Awarded amount</span>
+												<span class="funding-call-card__meta-value">
+													@(string.IsNullOrWhiteSpace(lastApp.ApprovedAmount) ? "N/A" : "R"+TextFormatHelper.FormatCurrency(lastApp.ApprovedAmount))
+												</span>
+											</div>
+										</div>
+									</div>
+								}
+								@if (!roleValue && r.HasOutstandingProgressReport)
+								{
+									<div class="funding-call-card__warning-panel">
+										<div class="funding-call-card__panel-title">
+											<i class="bi bi-exclamation-triangle me-1"></i>
+											Outstanding progress report
+										</div>
+
+										<p class="small-text mb-2">
+											You cannot apply for new funding until your outstanding progress report has been submitted and finalised.
+										</p>
+
+										@if (r.OutstandingPreviousFunding != null && r.OutstandingPreviousFunding.Any())
+										{
+											<ul class="funding-call-card__outstanding-list">
+												@foreach (var item in r.OutstandingPreviousFunding)
+												{
+													var app = item.ApplicationDetails;
+													if (app == null)
+													{
+														continue;
+													}
+
+													<li>
+														<div class="fw-semibold">@app.ReferenceNumber</div>
+														<div class="small-text text-muted">
+															@app.FundingStartDate.Year
+															@if (!string.IsNullOrWhiteSpace(app.ApprovedAmount))
+															{
+																<span> • @app.ApprovedAmount</span>
+															}
+														</div>
+													</li>
+												}
+											</ul>
+										}
+
+										@if (r.OutstandingPreviousFunding != null && r.OutstandingPreviousFunding.Any())
+										{
+											var app = r.OutstandingPreviousFunding.FirstOrDefault()?.ApplicationDetails;
+
+											if (app != null)
+											{
+												<div class="mt-3">
+													<a class="btn btn-primary btn-sm"
+													   href="@Url.Action("CreateReport", "Administration", new { fundingCallId = r.OutstandingPreviousReportFundingCallId })">
+														<i class="bi bi-file-earmark-text me-1"></i>
+														Open Report
+													</a>
+												</div>
+											}
+										}
+									</div>
+								}
+
+								@if (!roleValue && r.LimitReached && !r.CanViewDetails)
+								{
+									<div class="funding-call-card__warning-panel funding-call-card__warning-panel--soft">
+										<div class="funding-call-card__panel-title">Application limit reached</div>
+										<p class="small-text mb-0">
+											Due to funding constraints, only one UCDP application per person, per year will be funded.
+										</p>
+									</div>
+								}
+
+								<div class="funding-call-card__footer">
+									@if (!roleValue)
+									{
+										@if (!r.LimitReached && !r.HasOutstandingProgressReport && r.CanApply == true && r.IsFundAdministrator != true)
+										{
+											<button type="button"
+													class="btn btn-primary apply-btn funding-call-card__action-main"
+													data-id="@r.Id">
+												<i class="fa fa-pencil-square-o me-1"></i>
+												Apply now
+											</button>
+										}
+
+										@if (!r.LimitReached && !r.HasOutstandingProgressReport && r.CanContinue == true)
+										{
+											<button type="button"
+													class="btn btn-outline-primary btn-continue-application"
+													data-id="@r.Id">
+												<i class="fa fa-pencil me-1"></i>
+												Continue application
+											</button>
+										}
+
+										@if (r.CanViewDetails == true)
+										{
+											<button type="button"
+													class="btn btn-primary btn-view-application-details"
+													data-application-id="@r.ApplicationId">
+												<i class="fa fa-eye me-1"></i>
+												View application details
+											</button>
+										}
+									}
+									else
+									{
+										@if (!r.HasOutstandingProgressReport && r.CanViewDetails == true)
+										{
+											<button type="button"
+													class="btn btn-primary btn-view-application-details"
+													data-application-id="@r.ApplicationId">
+												<i class="fa fa-eye me-1"></i>
+												View application details
+											</button>
+										}
+									}
+								</div>
+							</div>
+						</article>
+					</div>
+				}
+			}
+		}
+	</div>
+</div>

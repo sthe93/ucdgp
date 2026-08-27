@@ -1,0 +1,114 @@
+﻿@model ResearchSuite.Models.UCDP.Shared.DocumentUploadSectionViewModel
+
+<div class="mb-4 @(Model.IsHidden ? "d-none" : "")" id="@Model.SectionId">
+	<label class="form-label">
+		@Model.LabelText
+
+		@if (Model.IsRequired)
+		{
+			<span class="text-danger">*</span>
+		}
+
+		@if (!string.IsNullOrWhiteSpace(Model.Tooltip))
+		{
+			<button type="button"
+					class="btn btn-link p-0 m-0 border-0 shadow-none"
+					data-bs-toggle="tooltip"
+					data-bs-placement="top"
+					title="@Model.Tooltip">
+				<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+			</button>
+		}
+	</label>
+
+	<div class="alert alert-info small-text" role="alert">
+		<i class="bi bi-info-circle-fill"></i>
+		@if (Model.MaxFiles == 1)
+		{
+			<text>One document must be uploaded. Only PDF files up to 5MB are allowed.</text>
+		}
+		else
+		{
+			<text>A maximum of @Model.MaxFiles documents can be uploaded. Only PDF files up to 5MB each are allowed.</text>
+		}
+	</div>
+
+	<div class="row g-2 align-items-end">
+		<div class="col-md-6">
+			<input type="file"
+				   accept="@Model.AcceptedFileTypes"
+				   id="@Model.InputId"
+				   name="@Model.InputName"
+				   class="form-control"
+				   @(Model.IsMultiple ? "multiple" : null) />
+		</div>
+
+		<div class="col-md-2">
+			<button type="button"
+					id="@Model.UploadButtonId"
+					class="btn btn-outline-primary ucdp-upload-btn"
+					data-upload-url="@Model.UploadUrl"
+					data-table-id="@Model.TableId"
+					data-input-id="@Model.InputId"
+					data-max-files="@Model.MaxFiles"
+					data-upload-type="@Model.UploadType">
+				Add document
+			</button>
+		</div>
+	</div>
+
+	<div class="table-responsive mt-3">
+		<table class="table table-hover" id="@Model.TableId">
+			<thead>
+				<tr>
+					<th>File Name</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.ExistingDocuments != null && Model.ExistingDocuments.Any())
+				{
+					foreach (var doc in Model.ExistingDocuments)
+					{
+						<tr data-existing="true">
+							<td>@doc.Filename</td>
+							<td>
+								@if (Model.UploadType == "Motivation Letter")
+								{
+									<button type="button"
+											class="btn btn-outline-primary btn-sm btnViewMotivationLetter"
+											data-id="@doc.Id">
+										<i class="bi bi-eye"></i> View
+									</button>
+
+									<button type="button"
+											class="btn btn-outline-danger btn-sm btnDeleteMotivationLetter"
+											data-id="@doc.Id"
+											data-table-id="@Model.TableId">
+										<i class="bi bi-trash"></i> Delete
+									</button>
+								}
+								else
+								{
+									<button type="button"
+											class="btn btn-outline-primary btn-sm btnViewDocument"
+											data-id="@doc.Id">
+										<i class="bi bi-eye"></i> View
+									</button>
+
+									<button type="button"
+											class="btn btn-outline-danger btn-sm btnDeleteDocument"
+											data-document-id="@doc.Id"
+											data-table-id="@Model.TableId"
+											data-upload-type="@Model.UploadType">
+										<i class="bi bi-trash"></i> Delete
+									</button>
+								}
+							</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+</div>

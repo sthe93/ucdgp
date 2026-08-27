@@ -1,0 +1,42 @@
+﻿<div class="modal fade" id="myTermsAndCondition" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-danger" role="document" style="width:790px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" style="text-align:center">Terms and Conditions</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top:-40px">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:25px">
+                <form class="form-horizontal">
+                    <div class="form-group">
+
+                        <p>
+                            I confirm that the information supplied in this application is correct and that, if my application is successful, I understand that I will be subject to,
+                            and will abide by the policies (UJ financial and other administrative processes and policies (eg. UJ’s Travel Policy; UJ rates for temporary staff, etc.),
+                            requirements and rules of the Department of Higher Education and Training (DHET) University Capacity Development Programme/Grant (UCDP/G).
+                        </p>
+
+                        <p style="font-weight: bold; padding-left: 30px">
+                            I understand that my application will only be considered if:
+                        </p>
+
+
+                        <ul style="padding-left:50px">
+                            <li>Application is completed in full.</li>
+                            <li>There is an indication of the previous UCDG-supported project's outcome (if previously funded).</li>
+                            <li>All required supporting documents stipulated in the guidelines are attached.</li>
+                            <li>Read the terms and condition of the grant <a asp-area="" asp-controller="Home" asp-action="GetTCManual" style="text-decoration:underline" class="text-orange" target="_blank"><strong>HERE</strong></a>.</li>
+                            <li>Applications with co-funding will be given priority.</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" style="background-color: #FF6400; float:left" data-dismiss="modal">Reject</button>
+                <button type="submit" class="btn btn-primary" id="btnAccept" style="background-color: #FF6400">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>

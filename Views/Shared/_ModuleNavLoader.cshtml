@@ -1,0 +1,35 @@
+﻿@{
+    Dictionary<string, string> controllerModuleDict = new Dictionary<string, string>();
+    //controller = key; module = value
+    controllerModuleDict.Add("oross", "oross");
+    controllerModuleDict.Add("ucdp", "ucdp");
+    controllerModuleDict.Add("project", "ucdp");
+    controllerModuleDict.Add("fundingcalls", "ucdp");
+    controllerModuleDict.Add("administration", "ucdp");
+    controllerModuleDict.Add("urc", "urc");
+    controllerModuleDict.Add("myapplications", "ucdp");
+    controllerModuleDict.Add("applicationsdashboard", "ucdp");
+    controllerModuleDict.Add("applications", "ucdp");
+
+
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+
+    string module;
+    controllerModuleDict.TryGetValue(controller.ToLowerInvariant(), out module);
+}
+
+@switch (module?.ToLowerInvariant())
+{
+    case "oross":
+        @await Html.PartialAsync("_OrossNav")
+        break;
+    case "ucdp":
+        @await Html.PartialAsync("_UcdpNav", "ucdg")
+        break;
+    case "urc":
+        @await Html.PartialAsync("_UrcNav")
+        break;
+    default:
+        <!-- Optionally render nothing or a fallback -->
+        break;
+}

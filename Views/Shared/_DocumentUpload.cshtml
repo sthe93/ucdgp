@@ -1,0 +1,44 @@
+﻿@model DocumentUploadViewModel
+
+<div class="mb-3 @(Model.IsHidden ? "d-none" : "")" id="@Model.InputId + " Upload"">
+	<label class="form-label">
+		@Model.LabelText
+		@if (Model.IsRequired)
+		{
+			<span class="text-danger">*</span>
+		}
+		@if (!string.IsNullOrEmpty(Model.Tooltip))
+		{
+			<button type="button"
+					id="@(Model.InputId + "TooltipBtn")"
+					class="btn btn-link p-0 m-0 border-0 shadow-none"
+					data-bs-toggle="tooltip"
+					data-bs-html="true"
+					data-bs-placement="top"
+					title="@Html.Raw(Model.Tooltip)">
+				<i class="bi bi-info-circle-fill text-orange icon-sm"></i>
+			</button>
+		}
+	</label>
+	<input type="file" accept=".pdf" id="@Model.InputId" name="@Model.InputName" class="form-control @(Model.IsRequired ? "required" : "")" @(Model.IsRequired ? "data-required='true'" : "") />
+	<div class="mt-2">
+		<button type="button"
+				class="btn btn-outline-primary btn-sm"
+				data-bs-toggle="modal"
+				data-bs-target="#viewVerifyModal"
+				data-docname="@Model.LabelText"
+				data-docurl="@Model.DocUrl"
+				data-docid="@Model.InputId">
+			<i class="bi bi-eye"></i> View and verify
+		</button>
+		@if (Model.IsEditMode && !string.IsNullOrEmpty(Model.DocUrl))
+		{
+			<button type="button" class="btn btn-primary btn-sm btnOpen" value="@Model.DocUrl">
+				<i class="bi bi-eye"></i> View uploaded document
+			</button>
+		}
+	</div>
+	<input type="hidden" name="verify@(Model.InputId)" id="verify@(Model.InputId)" value="false" />
+	@Html.ValidationMessage(@Model.InputName, "", new { @class = "text-danger" })
+	@Html.ValidationMessage("verify" + @Model.InputId, "", new { @class = "text-danger" })
+</div>

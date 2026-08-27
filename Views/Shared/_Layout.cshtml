@@ -1,0 +1,305 @@
+﻿@using ResearchSuite.Helpers
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	var basePath = HttpContextAccessor?.HttpContext?.Items["BasePath"]?.ToString() ?? "";
+
+	Dictionary<string, string> controllerModuleDict = new Dictionary<string, string>();
+	//controller = key; module = value
+	controllerModuleDict.Add("oross", "oross");
+	controllerModuleDict.Add("ucdp", "ucdp");
+	controllerModuleDict.Add("project", "ucdp");
+	controllerModuleDict.Add("fundingcalls", "ucdp");
+	controllerModuleDict.Add("administration", "ucdp");
+	controllerModuleDict.Add("urc", "urc");
+	controllerModuleDict.Add("myapplications", "ucdp");
+	controllerModuleDict.Add("applicationsdashboard", "ucdp");
+	controllerModuleDict.Add("applications", "ucdp");
+
+	var controller = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLowerInvariant() ?? "";
+
+
+	string module;
+	controllerModuleDict.TryGetValue(controller, out module);
+
+	var isModule = new[] { "oross", "ucdp", "urc" }.Contains(module);
+	var user = Context.User;
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<title>@ViewData["Title"] - ResearchSuite</title>
+
+	<link rel="icon" type="image/x-icon" href="~/images/favicon.ico" />
+
+	<link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+
+	<link href="~/lib/datatables/datatables.bootstrap5.min.css" rel="stylesheet" />
+
+	<link href="~/lib/datatables/responsive/responsive.bootstrap5.min.css" rel="stylesheet" />
+
+	<link href="~/lib/datatables/buttons/buttons.bootstrap5.min.css" rel="stylesheet" />
+
+
+	<link href="~/lib/fonts/ubuntu/300.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/300-italic.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/400.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/400-italic.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/500.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/500-italic.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/700.css" rel="stylesheet" />
+	<link href="~/lib/fonts/ubuntu/700-italic.css" rel="stylesheet" />
+
+	<link href="~/lib/fontawesome/css/all.min.css" rel="stylesheet" />
+
+	<link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+	<link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+
+	<link href="~/lib/flatpickr/flatpickr.min.css" rel="stylesheet" />
+
+	<link href="~/lib/flatpickr/themes/dark.css" rel="stylesheet" />
+
+
+	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+
+	<link href="~/lib/yaireo/tagify/dist/tagify.css" rel="stylesheet" />
+
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link href="~/lib/bootstrap/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+	@*    <link href="~/bootstrap-multiselect/css/bootstrap-multiselect.css" rel="stylesheet" /> *@
+
+	<link href="~/lib/jqueryui/themes/base/jquery-ui.css" rel="stylesheet" />
+	<link href="~/lib/jqueryui/themes/base/jquery-ui.min.css" rel="stylesheet" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+	<header class="position-fixed top-0 w-100 z-3">
+		@if (ViewData["Title"]?.ToString() != "Login")
+		{
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+				<a class="navbar-brand d-flex align-items-center" href="javascript:void(0);">
+					<img src="~/images/uj-logo.png" alt="UJ Logo" height="40" class="me-2" />
+					<span class="text-orange">Research Suite</span>
+				</a>
+				@if (isModule)
+				{
+					<button class="btn bubble-toggle ms-3" id="sidebarToggle" title="Toggle menu">
+						<span class="bubble-icon text-white d-flex align-items-center justify-content-center hamburger-menu">
+							☰
+						</span>
+					</button>
+				}
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+						aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarMain">
+					<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+						<li class="nav-item">
+							<a class="nav-link" href="@($"{basePath}/Home/Index")"><span class="bubble-icon me-1"></span>Home</a>
+						</li>
+						@if (UserHelper.HasAccessToApp(user, "oross"))
+						{
+							<li class="nav-item">
+								<a class="nav-link" href="@Url.Action("SetCurrentApp", "Home", new { appName = "oross" })">
+									<span class="bubble-icon me-1"></span>OROST
+								</a>
+							</li>
+						}
+
+						@if (UserHelper.HasAccessToApp(user, "ucdg"))
+						{
+							<li class="nav-item">
+								<a class="nav-link" href="@($"{basePath}/Home/SetCurrentApp?appName=ucdg")">
+									<span class="bubble-icon me-1"></span>UCDP
+								</a>
+
+							</li>
+						}
+
+						@* 	@if (UserHelper.HasAccessToApp(user, "urc"))
+						{
+							<li class="nav-item">
+								<a class="nav-link" href="@($"{basePath}/Urc/Index")">
+									<span class="bubble-icon me-1"></span>URC
+								</a>
+							</li>
+						} *@
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+								@* <span class="bubble-icon me-1"></span> *@
+								<i class="fa-regular fa-user me-1"></i>@UserHelper.GetFullName(User)
+							</a>
+							<ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
+								@* <li><a class="dropdown-item" href="@($"{basePath}/Account/Profile")"><i class="fa fa-id-badge me-1"></i> My profile</a></li>
+								<li><hr class="dropdown-divider"></li> *@
+								<li><a class="dropdown-item logout-item" href="@($"{basePath}/Account/Logout")"><i class="fa fa-sign-out-alt me-1"></i> Logout</a></li>
+							</ul>
+						</li>
+						<li class="nav-item">
+							<button id="themeToggle" class="btn nav-link text-white bg-transparent border-0 ms-2 night-toggle" title="Toggle between light and dark mode">
+								🌙
+							</button>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		}
+	</header>
+
+
+
+
+
+	<div class="research-wrapper d-flex">
+
+		@if (isModule)
+		{
+			<div class="module-layout d-flex" id="moduleLayout">
+				<aside id="sidebar" class="">
+					@await Html.PartialAsync("_ModuleNavLoader")
+				</aside>
+
+				<div class="research-wrapper content-wrapper flex-grow-1">
+					@if (module == "ucdp" && User.Identity.IsAuthenticated)
+					{
+						<div id="ucdpSystemClosureBanner" class="alert alert-warning mx-3 mt-3 mb-2 d-none" role="alert">
+							Please note the system is closed for new fund applications and/or updates to previously submitted applications. You will only be able to view your applications.
+						</div>
+					}
+					<main role="main" class="pb-3 container-fluid">
+						@RenderBody()
+					</main>
+				</div>
+			</div>
+
+			@* 	<div id="sidebarOverlay" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none"></div> *@
+		}
+
+
+		else
+		{
+			<main role="main" class="px-3 py-4 container-fluid flex-grow-1">
+
+				@RenderBody()
+
+
+
+			</main>
+		}
+	</div>
+
+
+
+	<footer class="site-footer text-center">
+		<p class="small mb-0">Developed by the University of Johannesburg ICS</p>
+	</footer>
+
+	<!-- Loading Modal -->
+	<div class="modal fade loading-modal" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content loading-modal__content border-0 shadow-none">
+				<div class="modal-body loading-modal__body d-flex justify-content-center align-items-center">
+					<div class="spinner-border text-orange loading-modal__spinner" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- DEBUG TempData ErrorMessage: @TempData["ErrorMessage"] -->
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+	<!-- DataTables with Bootstrap 5 -->
+	<script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
+	<script src="~/lib/jqueryui/jquery-ui.js"></script>
+	<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+
+	<script src="~/lib/datatables/datatables.bootstrap5.min.js"></script>
+	<script src="~/lib/datatables/responsive/js/datatables.responsive.min.js"></script>
+	<script src="~/lib/datatables/responsive/responsive.bootstrap5.min.js"></script>
+
+	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/lib/toastr/toastr.min.js"></script>
+	<script src="~/lib/select2/js/select2.min.js"></script>
+	<script src="~/lib/yaireo/tagify/dist/tagify.min.js"></script>
+	<script src="~/lib/yaireo/tagify/dist/tagify.js"></script>
+	<!-- Buttons -->
+	<script src="~/lib/datatables/buttons/js/datatables.buttons.min.js"></script>
+	<script src="~/lib/datatables/buttons/buttons.bootstrap5.min.js"></script>
+	<script src="~/lib/datatables/buttons/js/buttons.html5.min.js"></script>
+
+	<!-- Excel Export -->
+	<script src="~/lib/jszip/jszip.min.js"></script>
+	<!-- Flatpickr JS -->
+	<script src="~/lib/flatpickr/flatpickr.min.js"></script>
+	@* 	<script src="~/js/oross/common/IdleSession.js"></script> *@
+
+	<script src="~/js/oross/common/config.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	@if (module == "ucdp" && User.Identity.IsAuthenticated)
+	{
+		<script nonce="@Context.Items["CSPNonce"]">
+			(function () {
+				var banner = document.getElementById('ucdpSystemClosureBanner');
+				if (!banner) {
+					return;
+				}
+
+				fetch('/FundingCalls/GetSystemClosure', {
+					method: 'GET',
+					credentials: 'same-origin'
+				})
+					.then(function (response) {
+						if (!response.ok) {
+							return null;
+						}
+						return response.json();
+					})
+					.then(function (data) {
+						if (data && data.isClosureActive === true) {
+							banner.classList.remove('d-none');
+						}
+					})
+					.catch(function () {
+						// no-op
+					});
+			})();
+		</script>
+	}
+	<script src="~/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+	<script src="~/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+	<script src="https://rum-agent.na-01.cloud.solarwinds.com/ra-e-1886388064082452480.js" async></script>
+	<script nonce="@Context.Items["CSPNonce"]">
+		@if (TempData["ErrorMessage"] is string err && !string.IsNullOrWhiteSpace(err))
+		{
+					<text>
+						toastr.error(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(err)));
+					</text>
+		}
+	</script>
+
+
+	@await RenderSectionAsync("Scripts", required: false)
+
+	@if (User.Identity.IsAuthenticated)
+	{
+		<div id="sessionTimeoutModal">
+			<div>
+				<h4 class="bold-countdown">Session Expiring</h4>
+				<p>
+					You will be logged out in <b><span id="countdown" class="bold-countdown">60</span></b> seconds.
+				</p>
+				<button id="stayLoggedInBtn" class="btn btn-primary">Stay logged in</button>
+				<button id="logoutNowBtn" class="btn btn-secondary">Logout</button>
+			</div>
+		</div>
+		<script src="~/js/oross/common/IdleSession.js" asp-append-version="true"></script>
+	}
+</body>
+</html>

@@ -1,0 +1,861 @@
+﻿
+
+<div class="panel panel-primary setup-content" id="ImprovementStaffTab">
+    <div class="panel-heading" style="background-color: #FF6400;">
+        <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Improvement of staff qualifications</h3>
+    </div>
+    <div class="panel-body">
+        <div id="btnStep3Next" class="row">
+
+            <div class="col-md-12">
+                <button class="btn btn-primary nextBtnImproveStaff pull-right" type="button" style="background-color: #66CD00; width:190px"><i class="fa fa-save"></i> Save and Continue <i class="fa fa-arrow-right"></i></button>
+                <button id="btnCloseImproveStaff" class="btn btn-primary" type="button" style="background-color: #7777; border-color: #7777; width:190px; "><i class="fa fa-close"></i> Close </button>
+                <button class="btn btn-primary backBtnImproveStaff pull-right" type="button" style="background-color: #000000; border-color: #000000;width:190px; margin-right:75px"><i class="fa fa-arrow-left"></i> Back </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@{
+    int paymentcount = 0;
+
+    int paymentcountstep4 = 0;
+
+    // Example: adapt to your actual model property
+    var count = 0 ; // Model?.ImprovementStaffQualifications?.Count() ?? 0;
+
+
+    DateTime dtDay = DateTime.Now;
+    string dtToday = dtDay.ToString("yyyy-MM-dd");
+    DateTime lastDayOfTheYear = new DateTime(dtDay.Year, 12, 31);
+    string dtLastDay = lastDayOfTheYear.ToString("yyyy-MM-dd");
+}
+
+
+<script type="text/html" id="ImprovementStaffQualificationsSection">
+
+
+                            <form id="ImprovementStaffForm" class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Studying Towards &nbsp;</label><span style="color:red">*</span>
+                                        <select required name="StudyingTowards"
+                                                id="StudyingTowards"
+                                                class="form-control">
+                                            <option selected value="">--Select Studying Towards--</option>
+                                            <option value="Doctoral degree">Doctoral degree</option>
+                                            <option value="Master degree">Master’s degree</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="FirstYearRegistration">Year of 1st registration&nbsp;</label><span style="color:red">*</span>
+                                        <input required id="FirstYearRegistration"
+                                               name="FirstYearRegistration"
+                                               type="text"
+                                               maxlength="4"
+                                               minlength="4"
+                    @*onKeyPress="if(this.value.length==4) return false;"*@
+                                               placeholder="Year of 1st registration"
+                                               class="form-control"
+                                               value="@Model.FirstYearRegistration" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
+
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="PlannedGraduationYear">Planned graduation year&nbsp;</label><span style="color:red">*</span>
+                                        <input required id="PlannedGraduationYear"
+                                               name="PlannedGraduationYear"
+                                               type="text"
+                                               maxlength="4"
+                                               minlength="4"
+                    @*onKeyPress="if(this.value.length==4) return false;"*@
+                                               placeholder="Planned graduation year"
+                                               class="form-control"
+                                               value="@Model.PlannedGraduationYear" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
+
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label style="font-weight:bold">Nature of Support Required&nbsp;</label><span style="color:red">*</span>
+
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input type="checkbox" onclick="TeachingRelief()" value="Teaching Relief" id="TeachingReliefCheckBox" name="TeachingReliefCheckBox" class="form-check-input">
+                                            <label style="font-weight:100">Teaching Relief</label>
+                                        </div>
+
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input type="checkbox" onclick="ResearchAssistance()" value="Research Assistance" class="form-check-input" id="ResearchAssistanceCheckBox" name="ResearchAssistanceCheckBox">
+                                            <label style="font-weight:100" for="ResearchAssistanceCheck">Research Assistance</label>
+                                        </div>
+
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input tooltip="e.g. University study fees/ travelling-interviews / focus groups/ language editing/ binding/ statistical analysis" onclick="FinancialSupportFun()" value="Financial Support" type="checkbox" class="form-check-input" id="FinancialSupportCheckBox" name="FinancialSupportCheckBox">
+                                            <label style="font-weight:100" for="FinancialSupportCheck">Financial support</label>
+                                        </div>
+
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="Describe">Describe &nbsp;</label><span style="color:red">*</span>
+                                        <textarea placeholder="Example Article in an accredited Journal" required class="form-control" id="Describe" rows="4"></textarea>
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item active" id="ProofOfRegistrationLink">
+                                            <a class="nav-link active" style="font-size:medium" data-toggle="tab" href=#ProofOfRegistration>Proof Of Registration</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#SupervisorLetter>Supervisor Letter</a>
+                                        </li>
+                                        <li class="nav-item" id="ReliefDocumentsLink" style="display:none">
+                                            <a class="nav-link" style="font-size:medium;" data-toggle="tab" href=#ReliefDocuments>Teaching Relief</a>
+                                        </li>
+                                        <li class="nav-item" id="ResearchAssistanceLink" style="display:none">
+                                            <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#ResearchAssistance>Research Assistance</a>
+                                        </li>
+                                        <li class="nav-item" id="FinancialSupportLink" style="display:none">
+                                            <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#FinancialSupportDoc>Financial Support</a>
+                                        </li>
+                    @*<li class="nav-item">
+                                            <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#Analysis>Statistical Analysis</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" style="font-size:medium" data-toggle="tab" href=#Interview>Focus Groups</a>
+                                        </li>*@
+                                    </ul>
+                                    <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                                        <h3 style="font-size:22px; font-weight:bold" class="panel-title">Please Attach Documents as Requested to submit your application</h3>
+                                    </div>
+                                    <br />
+                                    <div class="tab-content">
+                                        <div id="ProofOfRegistration" class="container tab-pane active">
+                                            <br />
+                                            <p style="width:990px">
+                                                Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.<strong>One</strong> document must be added.
+                                                Only PDF  upload is allowed (Max 5 MB).
+                                                <span style="color:red">*</span>
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <input disabled required type="file" class="form-control" id="ProofOfRegistrationDoc" name="ProofOfRegistrationDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input disabled type="button" onclick="UploadDoc()" id="UploadProofOfRegDocumentBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div id="progressbar-5">
+                                                        <div class="progress-label">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-sm-6" style="width:990px">
+                                                    <table class="table" id="ListofProofOfRegFiles">
+                                                        <tr>
+                                                            <th>
+                                                                File Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="SupervisorLetter" class="container tab-pane">
+                                            <br />
+
+                                            <p style="width:990px">
+                                                Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.<strong>One</strong> document must be added.
+                                                Only PDF upload is allowed (Max 5 MB).
+                                                <span style="color:red">*</span>
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <input disabled required type="file" class="form-control" id="SupervisorLetterDoc" name="SupervisorLetterDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input disabled type="button" onclick="UploadSupervisorLetterDoc()" id="SupervisorLetterDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div id="progressbar-5">
+                                                        <div class="progress-label">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-sm-6" style="width:990px">
+                                                    <table class="table" id="ListofSupervisorLetterFiles">
+                                                        <tr>
+                                                            <th>
+                                                                File Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="ReliefDocuments" class="container tab-pane">
+                                            <br />
+                                            <p style="width:990px">
+                                                Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.A maximum of <strong>Ten</strong> documents can be added.
+                                                Only PDF uploads is allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+                                                <span style="color:red">*</span>
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <input disabled required type="file" class="form-control" id="ReliefDoc" name="ReliefDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input disabled type="button" onclick="UploadReliefDoc()" id="ReliefDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div id="progressbar-5">
+                                                        <div class="progress-label">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-sm-6" style="width:990px">
+                                                    <table class="table" id="ListofReliefDocumentsFiles">
+                                                        <tr>
+                                                            <th>
+                                                                File Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                    @*<div id="ResearchAssistance1" class="container tab-pane">
+                                        <br />
+                                        <p style="width:990px">
+                                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document.<strong>One</strong> document must be added.
+                                            Only PDF uploads is allowed (Max 5 MB).
+                                            <span style="color:red">*</span>
+                                        </p>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <input  required type="file" class="form-control" id="UniversityInvoiceDoc" name="UniversityInvoiceDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <input  type="button" onclick="UploadResearchAssistanceDoc()" id="UniversityInvoiceDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div id="progressbar-5">
+                                                    <div class="progress-label">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="row">
+                                            <div class="col-sm-6" style="width:990px">
+                                                <table class="table" id="ListofUniversityInvoiceFiles">
+                                                    <tr>
+                                                        <th>
+                                                            File Name
+                                                        </th>
+                                                        <th>
+                                                            Action
+                                                        </th>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </div>*@
+
+                                        <div id="FinancialSupportDoc" class="container tab-pane">
+                                            <br />
+                                            <p style="width:990px">
+                                                Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. A maximum of <strong>Ten</strong> documents can be added.
+                                                Only PDF uploads is allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+                                                <span style="color:red">*</span>
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <input disabled  required type="file" class="form-control" id="LanguageDoc" name="LanguageDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input disabled  type="button" onclick="UploadFinancialSupportDoc()" id="LanguageDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div id="progressbar-5">
+                                                        <div class="progress-label">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-sm-6" style="width:990px">
+                                                    <table class="table" id="ListofLanguageFiles">
+                                                        <tr>
+                                                            <th>
+                                                                File Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="ResearchAssistance" class="container tab-pane">
+                                            <br />
+                                            <p style="width:990px">
+                                                Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. A maximum of <strong>Five</strong> documents can be added.
+                                                Only PDF uploads is allowed (Max 5 MB). Please add <strong>SEPARATE</strong> documents.
+                                                <span style="color:red">*</span>
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <input disabled required type="file" class="form-control" id="AnalysisDoc" name="AnalysisDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input disabled type="button" onclick="UploadResearchAssistanceDoc()" id="AnalysisDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div id="progressbar-5">
+                                                        <div class="progress-label">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-sm-6" style="width:990px">
+                                                    <table class="table" id="ListofAnalysisFiles">
+                                                        <tr>
+                                                            <th>
+                                                                File Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                    @*<div id="Interview" class="container tab-pane">
+                                        <br />
+                                        <p style="width:990px">
+                                            Click on "Choose File" button select document to upload then click on "Add Document(s)" to upload to your selected document. <strong>One</strong> document must be added.
+                                            Only PDF uploads is allowed (Max 5 MB).
+                                            <span style="color:red">*</span>
+                                        </p>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <input disabled required type="file" class="form-control" id="InterviewDoc" name="InterviewDoc" title="Only PDF uploads is allowed (Max 5 MB)." />
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <input disabled type="button" onclick="UploadInterviewDoc()" id="InterviewDocBtn" class="btn btn-primary hidden-xs" style="width:200px" value="Add Document(s)" />
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div id="progressbar-5">
+                                                    <div class="progress-label">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="row">
+                                            <div class="col-sm-6" style="width:990px">
+                                                <table class="table" id="ListofInterviewFiles">
+                                                    <tr>
+                                                        <th>
+                                                            File Name
+                                                        </th>
+                                                        <th>
+                                                            Action
+                                                        </th>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                                    <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Details of Proposed Temporary Staff Appointment For</h3>
+                                </div>
+                                <div class="col-md-6">
+                                    <br />
+                                    <div class="form-group">
+
+                                        <label style="font-weight:bold">Select one option from each category by clicking on a box &nbsp;</label><span style="color:red">*</span>
+
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentStudies()" value="Master and doctoral studies" id="StaffAppointmentStudiesCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentStudiesCheck">Master’s and doctoral studies</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentCollaboration()" value="Research associates collaboration" id="StaffAppointmentCollaborationCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentCollaborationCheck">Research associates collaboration</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentEmerging()" value="Emerging researchers" id="StaffAppointmentEmergingCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentEmergingCheck">Emerging researchers</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentActive()" value="Active researchers" id="StaffAppointmentActiveCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentActiveCheck">Active researchers</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentSupervision()" value="Supervision, mentoring and coaching" id="StaffAppointmentSupervisionCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentSupervisionCheck">Supervision, mentoring and coaching</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentResearch()" value="Research development workshops – consultants/facilitators" id="StaffAppointmentResearchCheckBox" type="checkbox" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentResearchCheck">Research development workshops – consultants/facilitators</label>
+                                        </div>
+                                        <div style="padding-left:40px" class="form-check">
+                                            <input onclick="StaffAppointmentOther()" value="Staff Appointment Other" id="StaffAppointmentOtherCheckBox" type="checkbox" onchange="showAppointmentDescribe()" class="form-check-input">
+                                            <label style="font-weight:100" for="StaffAppointmentOtherCheck">Other</label>
+                                        </div>
+
+                                        <div id="AppointmentDescriptionDiv" style="display:none" class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="AppointmentDescribe">Describe &nbsp;</label><span style="color:red">*</span>
+                                                <textarea class="form-control" name="AppointmentDescribe" id="AppointmentDescribe" rows="4"></textarea>
+                                            </div>
+                                            <br />
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+
+                                <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                                    <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Temporary Appointees</h3>
+                                    <label style="color:white; font-size:small">(Provide the following information of the person/s that will be appointed on a temporary basis)</label>
+                                </div>
+
+                                <div style="overflow: auto; overflow-y: hidden;" class="col-md-12">
+                                    <br />
+                                    <label>Temporary Appointees</label>
+                                    <br />
+                                    <table id="tblAppointees">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid #e2e2e2;display: none;">
+                                                   <th style="width:10px">Id</th>
+                                                <th style="width:150px">Surname</th>
+
+                                                <th style="width:150px">Name</th>
+
+                                                <th style="width:150px">Email Address</th>
+
+                                                <th style="width:150px">Contact Number</th>
+
+                                                <th style="width:150px">Start Date&nbsp;<i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Temporary appointment Start Date" style="font-weight:bold; font-size:large"></i></th>
+
+                                                <th style="width:150px">End Date&nbsp;<i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Temporary appointment End Date" style="font-weight:bold; font-size:large"></i></th>
+
+                                                <th style="width:150px">ID Number/Passport number</th>
+
+                                                <th style="width:150px">Staff status</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        @if (count > 0)
+                        {
+                                                                        <tr>
+                                                                             <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtId" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;display: none;" />
+
+                                                                            </td>
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtSurname" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtName" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtEmailAddress" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtNumber" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtStartDate" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtEndDate" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtIDNumber" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtStatus" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+                                                                                <input type="button" value="Remove" onclick="RemoveAppointment(this)" />
+                                                                            </td>
+                                                                        </tr>
+                        }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="text" id="txtSurname" placeholder="Surname" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="text" id="txtName" placeholder="Name" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="email" id="txtEmailAddress" placeholder="Email Address" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="tel" maxlength="10" id="txtNumber" placeholder="Contact Number" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="date" defaultValue="@dtToday"  max="@dtLastDay" min="@dtToday" id="txtStartDate" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="date" defaultValue="@dtToday"  max="@dtLastDay" min="@dtToday" id="txtEndDate" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="text" id="txtValidateIDNumber" placeholder="ID Number/Passport number" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="text" id="txtValidateStatus" disabled="disabled" placeholder="Sfaff Status" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+                                                    <input type="button" style="height:30px; width:68px" onclick="Verify()" id="btnVerify" value="Verify" />
+                                                </td>
+
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+                                                    <input type="button" style="height:30px; width:68px" onclick="AddRow()" id="btnAdd" value="Add" />
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    <br />
+                                </div>
+
+                                <br />
+
+                                <div class="col-md-12" style="background-color: #FF6400; padding: 10px 15px; border-top-left-radius: 3px; border-bottom-left-radius: 3px">
+                                    <h3 style="font-size:22px; font-weight:bold" class="panel-title"> Teaching relief for study & research purposes</h3>
+                                    <label style="color:white; font-size:small">(Payments will be monthly)</label>
+                                </div>
+
+                                <br />
+
+
+
+                                <div style="overflow: auto; overflow-y: hidden;" class="col-md-12">
+                                    <br />
+                                    <p style="width:990px">
+                                        Once the replacement lecturer has been appointed, please send the following documents to <strong><a href="mailto:ucdp@uj.ac.za">ucdp@uj.ac.za</a></strong> as proof of appointment:
+                                        <ul>
+                                            <li>HR appointment letter.</li>
+                                            <li>A certified copy of the Highest Qualification.</li>
+                                            <li>A certified copy of ID or passport.</li>
+                                        </ul>
+                                    </p>
+                                    <hr />
+                                    <label>Schedule for the academic calendar</label>
+                                    <br />
+                                    <table id="tblPayments">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid #e2e2e2;">
+                                                  <th style="width:10px; display:none;">Type of study & research purpose</th>
+                                                <th style="width:150px">Type of study & research purpose</th>
+
+                                                <th style="width:150px">From &nbsp;<i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Temporary staff appointment FROM date" style="font-weight:bold; font-size:large"></i></th>
+
+                                                <th style="width:150px">To&nbsp;<i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Temporary staff appointment TO date" style="font-weight:bold; font-size:large"></i></th>
+
+                                                <th style="width:150px">Number of Weeks</th>
+
+                                                <th style="width:150px">Hours Per Week</th>
+
+                                                <th style="width:150px">Total Number of Hours</th>
+
+                                                <th style="width:150px">UJ Rate Per Hour <a asp-area="" title="Click link to Refer to the UJ Tariff Plan" asp-controller="Home" asp-action="GetTraffifPlan" style="color: blue; text-decoration:underline" target="_blank"><sup>UJ Tariff</sup></a></th>
+
+                                                <th style="width:150px">Total For The Month</th>
+
+                                                <th></th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+                        @if (paymentcount > 0)
+                        {
+
+                                                                        <tr>
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px;display:none">
+                                                                                      <input type="text" id="txtStudyType" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+                                                                            </td>
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtStudyType" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" min="" id="txtFrom" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtTo" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="number" id="txtNumberOfWeeks" pattern="[0-9]{10}" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="number" id="txtHrsPerWeek" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtNumberOfHours" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtUJRatePerHr" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                                                <input type="text" id="txtMonthTotal" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                                            </td>
+
+                                                                            <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+                                                                                <input type="button" value="Remove" onclick="RemovePayment(this)" />
+                                                                            </td>
+                                                                        </tr>
+                        }
+                                        </tbody>
+                                        <tfoot>
+
+                                            <tr>
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+
+                                                    <select style="height:42px" name="txtStudyType"
+                                                            id="txtStudyType">
+                                                        <option value="Lecturer">Lecturer</option>
+                                                        <option value="Tutor">Tutor</option>
+                                                        <option value="Marking">Marking</option>
+                                                        <option value="Research Assistant">Research Assistant</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="date" defaultValue="@dtToday" max="@dtLastDay" min="@dtToday" id="txtFrom" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="date" defaultValue="@dtToday" max="@dtLastDay" min="@dtToday" id="txtTo" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="number" placeholder="Number of weeks" id="txtNumberOfWeeks" onkeyup="CalTotalHours()" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="number" placeholder="Hours per week" id="txtHrsPerWeek" onkeyup="CalTotalHours()" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="number" readonly id="txtNumberOfHours" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none; background-color: lightgray" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="number" placeholder="UJ Rate Per Hour" step="1" id="txtUJRatePerHr" onkeyup="CalTotalForMonth()" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none;" />
+
+                                                </td>
+
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+
+                                                    <input type="number" readonly id="txtMonthTotal" style="border-radius: 6px; border: 1px solid #E5E7E9;height: 42px; outline: none; background-color: lightgray" />
+
+                                                </td>
+                                                <td style="padding-right: 10px; padding-top:10px; padding-bottom:10px">
+                                                    <input type="button" style="height:30px; width:68px" onclick="AddPaymentsRow()" id="btnAdd" value="Add" />
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                    <br />
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="PaymentTotal">Total</label>
+                                            <input readonly id="PaymentTotal"
+                                                   name="PaymentTotal"
+                                                   type="number"
+                                                   class="form-control" />
+
+                                        </div>
+                                        <br />
+                                    </div>
+
+                                </div>
+
+                                <br />
+                            </form>
+
+                            <br />
+
+                            <style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    </style>
+
+</script>
+
