@@ -716,11 +716,23 @@
         const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || '');
         if (!match) return null;
 
-        const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-        if (isNaN(date.getTime())) return null;
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+
+        if (isNaN(date.getTime()) ||
+            date.getFullYear() !== year ||
+            date.getMonth() !== month - 1 ||
+            date.getDate() !== day) {
+            return null;
+        }
 
         return {
-            date: formatDate(date),
+            // Flatpickr expects the configured `d M Y` format. Build it directly
+            // from the API value so no UTC conversion can shift the closure date.
+            date: ('0' + day).slice(-2) + ' ' +
+                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month - 1] + ' ' + year,
             time: match[4] + ':' + match[5]
         };
     }
