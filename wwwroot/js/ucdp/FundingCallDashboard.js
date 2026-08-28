@@ -35,7 +35,6 @@
             .attr("aria-disabled", isSystemClosureActive ? "true" : "false")
             .toggleClass("disabled", isSystemClosureActive);
 
-        $("#fundingCallSystemClosureMessage").toggleClass("d-none", !isSystemClosureActive);
     }
 
     function loadSystemClosureStatus() {

@@ -648,7 +648,12 @@
             type: 'GET',
             dataType: 'json',
             timeout: 30000,
-            beforeSend: showLoading,
+            // Do not open the shared loading modal here. This request starts while the
+            // system-closure modal is opening; stacking Bootstrap modals leaves the
+            // shared spinner/backdrop visible even after the request completes.
+            beforeSend: function () {
+                setSystemClosureLoading(true);
+            },
             success: function (response) {
                 console.log('GetSystemClosure response:', response);
 
@@ -687,16 +692,24 @@
                 toastr.error('Could not load the system closure settings.');
             },
             complete: function () {
-                hideLoading();
+                setSystemClosureLoading(false);
             }
         });
     }
 
+    function setSystemClosureLoading(isLoading) {
+        $('#ClosureDate, #ClosureTime').prop('disabled', isLoading);
+        $('#btnSaveSystemClosure').prop('disabled', isLoading);
+        $('#systemClosureSubtitle').text(isLoading
+            ? 'Loading system closure settings...'
+            : 'Set or update the date and time the system enters closure mode.');
+    }
+
     function clearSystemClosureFields() {
-                    $('#hdSystemClosureId').val('');
-                    $('#ClosureDate').val('');
-                    $('#ClosureTime').val('00:00');
-                    $('#systemClosureActiveAlert').addClass('d-none');
+        $('#hdSystemClosureId').val('');
+        $('#ClosureDate').val('');
+        $('#ClosureTime').val('00:00');
+        $('#systemClosureActiveAlert').addClass('d-none');
     }
 
     function splitClosureDateTime(value) {
