@@ -26,6 +26,43 @@
     if (target && typeof target.focus === "function") {
         target.focus();
     }
+
+    let isSystemClosureActive = false;
+
+    function applySystemClosureState() {
+        const $buttons = $(".apply-btn");
+        $buttons.prop("disabled", isSystemClosureActive)
+            .attr("aria-disabled", isSystemClosureActive ? "true" : "false")
+            .toggleClass("disabled", isSystemClosureActive);
+
+    }
+
+    function loadSystemClosureStatus() {
+        $.ajax({
+            url: "/FundingCalls/GetSystemClosure",
+            type: "GET",
+            dataType: "json",
+            timeout: 30000
+        }).done(function (response) {
+            console.log("GetSystemClosure response:", response);
+            const data = response && response.data;
+            console.log("System closure data:", data);
+            console.log("System closure active:", data && data.isClosureActive);
+
+            isSystemClosureActive = response && response.status === "success" && data && data.isClosureActive === true;
+            applySystemClosureState();
+        }).fail(function (xhr, status, error) {
+            isSystemClosureActive = false;
+            applySystemClosureState();
+            console.error("Could not load system closure status for the funding call dashboard:", {
+                status: status,
+                error: error,
+                response: xhr && xhr.responseJSON
+            });
+        });
+    }
+
+    loadSystemClosureStatus();
     function loadFundingCallsList(url) {
         const requestUrl = url || "/UCDP/FilterFundingCalls";
         const selectedProjectValue = $("#ProjectName").val();
@@ -52,6 +89,7 @@
         }).done(function (html) {
                 console.log("ajax done");
                 $container.html(html);
+                applySystemClosureState();
             })
             .fail(function (xhr, status, error) {
                 console.log("ajax fail", status, error, xhr?.responseText);
@@ -183,6 +221,12 @@
 
     $(document).on("click", ".apply-btn", function (e) {
         e.preventDefault();
+
+        if (isSystemClosureActive) {
+            toastr.warning("System closure is currently active. New applications cannot be submitted at this time.");
+            return;
+        }
+
         openDisclaimerModal($(this).data("id"), "apply");
     });
 
@@ -204,6 +248,11 @@
         const actionType = $("#disclaimerActionType").val();
 
         if (!id || !actionType) return;
+
+        if (actionType === "apply" && isSystemClosureActive) {
+            toastr.warning("System closure is currently active. New applications cannot be submitted at this time.");
+            return;
+        }
 
         if (actionType === "apply" || actionType === "continue") {
             window.location.href = buildApplyUrl(id);
