@@ -646,31 +646,95 @@
         $.ajax({
             url: '/FundingCalls/GetSystemClosure',
             type: 'GET',
-            beforeSend: showLoading,
-            success: function (data) {
-                if (!data || !data.closureDateTime) {
-                    $('#hdSystemClosureId').val('');
-                    $('#ClosureDate').val('');
-                    $('#ClosureTime').val('00:00');
-                    $('#systemClosureActiveAlert').addClass('d-none');
+            dataType: 'json',
+            timeout: 30000,
+            // Do not open the shared loading modal here. This request starts while the
+            // system-closure modal is opening; stacking Bootstrap modals leaves the
+            // shared spinner/backdrop visible even after the request completes.
+            beforeSend: function () {
+                setSystemClosureLoading(true);
+            },
+            success: function (response) {
+                console.log('GetSystemClosure response:', response);
+
+                if (!response || response.status !== 'success') {
+                    console.error('GetSystemClosure returned an unsuccessful response:', response);
+                    clearSystemClosureFields();
+                    toastr.error((response && response.message) || 'Could not load the system closure settings.');
                     return;
                 }
 
-                const closure = new Date(data.closureDateTime);
+                const data = response.data;
+                console.log('System closure data:', data);
+                console.log('System closure active:', data && data.isClosureActive);
+
+                if (!data || !data.closureDateTime) {
+                    clearSystemClosureFields();
+                    return;
+                }
+
+                const closure = splitClosureDateTime(data.closureDateTime);
+                if (!closure) {
+                    console.error('GetSystemClosure returned an invalid closureDateTime:', data.closureDateTime);
+                    clearSystemClosureFields();
+                    toastr.error('The system closure date could not be read.');
+                    return;
+                }
 
                 $('#hdSystemClosureId').val(data.id || '');
-                $('#ClosureDate').val(formatDate(closure));
-                $('#ClosureTime').val(
-                    ('0' + closure.getHours()).slice(-2) + ':' + ('0' + closure.getMinutes()).slice(-2)
-                );
-
-                $('#systemClosureActiveAlert').toggleClass('d-none', !data.isClosureActive);
+                $('#ClosureDate').val(closure.date);
+                $('#ClosureTime').val(closure.time);
+                $('#systemClosureActiveAlert').toggleClass('d-none', data.isClosureActive !== true);
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error('GetSystemClosure request failed:', { status: status, error: error, response: xhr && xhr.responseJSON });
+                clearSystemClosureFields();
                 toastr.error('Could not load the system closure settings.');
             },
-            complete: hideLoading
+            complete: function () {
+                setSystemClosureLoading(false);
+            }
         });
+    }
+
+    function setSystemClosureLoading(isLoading) {
+        $('#ClosureDate, #ClosureTime').prop('disabled', isLoading);
+        $('#btnSaveSystemClosure').prop('disabled', isLoading);
+        $('#systemClosureSubtitle').text(isLoading
+            ? 'Loading system closure settings...'
+            : 'Set or update the date and time the system enters closure mode.');
+    }
+
+    function clearSystemClosureFields() {
+        $('#hdSystemClosureId').val('');
+        $('#ClosureDate').val('');
+        $('#ClosureTime').val('00:00');
+        $('#systemClosureActiveAlert').addClass('d-none');
+    }
+
+    function splitClosureDateTime(value) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || '');
+        if (!match) return null;
+
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+
+        if (isNaN(date.getTime()) ||
+            date.getFullYear() !== year ||
+            date.getMonth() !== month - 1 ||
+            date.getDate() !== day) {
+            return null;
+        }
+
+        return {
+            // Flatpickr expects the configured `d M Y` format. Build it directly
+            // from the API value so no UTC conversion can shift the closure date.
+            date: ('0' + day).slice(-2) + ' ' +
+                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month - 1] + ' ' + year,
+            time: match[4] + ':' + match[5]
+        };
     }
 
     function saveSystemClosure() {
@@ -699,7 +763,8 @@
             type: 'POST',
             data: {
                 Id: $('#hdSystemClosureId').val() || null,
-                ClosureDateTime: parsedDate.toISOString()
+                // Send a local DateTime value so the displayed date and time are preserved.
+                ClosureDateTime: formatClosureDateTime(parsedDate)
             },
             beforeSend: showLoading,
             success: function (data) {
@@ -720,5 +785,13 @@
             },
             complete: hideLoading
         });
+    }
+
+    function formatClosureDateTime(date) {
+        return date.getFullYear() + '-' +
+            ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+            ('0' + date.getDate()).slice(-2) + 'T' +
+            ('0' + date.getHours()).slice(-2) + ':' +
+            ('0' + date.getMinutes()).slice(-2) + ':00';
     }
 });

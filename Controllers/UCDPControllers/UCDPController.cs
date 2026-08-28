@@ -75,6 +75,18 @@ namespace ResearchSuite.Controllers.UCDPControllers
 
             await PopulateFundingCallFlags(fundingCalls, context.CurrentUser.UserId, context.IsFundAdmin);
 
+            // The closure endpoint is the source of truth for whether applicants may start
+            // a new application. Do not apply date-based or processed-status rules here.
+            var systemClosure = await _ucdpService.GetSystemClosure();
+            if (systemClosure?.IsClosureActive == true)
+            {
+                foreach (var fundingCall in fundingCalls)
+                {
+                    fundingCall.IsSystemClosureActive = true;
+                    fundingCall.CanApply = false;
+                }
+            }
+
             return fundingCalls;
         }
 
@@ -379,4 +391,3 @@ namespace ResearchSuite.Controllers.UCDPControllers
         }
     }
 }
-
